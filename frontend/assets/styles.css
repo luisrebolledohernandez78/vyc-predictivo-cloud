@@ -1,0 +1,23 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 32px;
+  background: #f8f9fb;
+  color: #1f2a44;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(31, 42, 68, 0.08);
+}
+
+pre {
+  background: #eef2ff;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
