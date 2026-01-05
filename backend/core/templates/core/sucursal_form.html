@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-item {
+            display: block;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-left-color: #fff;
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-left-color: #fff;
+        }
+
+        .sidebar-logout {
+            display: block;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .sidebar-logout:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-left-color: #fff;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            color: #333;
+            margin: 0;
+        }
+
+        .breadcrumb {
+            color: #999;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            max-width: 900px;
+        }
+
+        .content h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .form-section h3 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .form-check label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .error-list {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 0.9em;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .error-list li {
+            list-style: none;
+            margin: 3px 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        button[type="submit"],
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:hover,
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background: #7f8c8d;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            button[type="submit"],
+            .btn-back {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">VYC Predictivo</div>
+            <div class="sidebar-subtitle">Cloud Analytics</div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="sidebar-item">
+                {% if modulo == 'vibraciones' %}
+                    📊 Análisis de Vibraciones
+                {% else %}
+                    🌡️ Termografías
+                {% endif %}
+            </a>
+            <a href="/dashboard/" class="sidebar-item">
+                📈 Dashboard
+            </a>
+            <a href="#configuracion" class="sidebar-item">
+                ⚙️ Configuración
+            </a>
+        </nav>
+
+        <a href="/logout/" class="sidebar-logout">🚪 Salir</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header>
+            <div>
+                <div class="breadcrumb">
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}">
+                        {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
+                    </a> / 
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}">
+                        {{ cliente.nombre }}
+                    </a> / <strong>{{ titulo }}</strong>
+                </div>
+                <h1>{{ titulo }}</h1>
+            </div>
+        </header>
+
+        <section class="content">
+            <h2>{{ titulo }}</h2>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Información General -->
+                <div class="form-section">
+                    <h3>Información General</h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.nombre.id_for_label }}">Nombre de la sucursal</label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div class="error-list">
+                                {% for error in form.nombre.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div class="error-list">
+                                {% for error in form.descripcion.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="form-section">
+                    <h3>Información de Contacto</h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="error-list">
+                                {% for error in form.email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                            <div class="error-list">
+                                {% for error in form.telefono.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                        {{ form.direccion }}
+                        {% if form.direccion.errors %}
+                            <div class="error-list">
+                                {% for error in form.direccion.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.ciudad.id_for_label }}">Ciudad</label>
+                        {{ form.ciudad }}
+                        {% if form.ciudad.errors %}
+                            <div class="error-list">
+                                {% for error in form.ciudad.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.pais.id_for_label }}">País</label>
+                        {{ form.pais }}
+                        {% if form.pais.errors %}
+                            <div class="error-list">
+                                {% for error in form.pais.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Contacto Principal -->
+                <div class="form-section">
+                    <h3>Contacto Principal</h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.contacto_nombre.id_for_label }}">Nombre</label>
+                        {{ form.contacto_nombre }}
+                        {% if form.contacto_nombre.errors %}
+                            <div class="error-list">
+                                {% for error in form.contacto_nombre.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.contacto_puesto.id_for_label }}">Puesto</label>
+                        {{ form.contacto_puesto }}
+                        {% if form.contacto_puesto.errors %}
+                            <div class="error-list">
+                                {% for error in form.contacto_puesto.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.contacto_email.id_for_label }}">Email de contacto</label>
+                        {{ form.contacto_email }}
+                        {% if form.contacto_email.errors %}
+                            <div class="error-list">
+                                {% for error in form.contacto_email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.contacto_telefono.id_for_label }}">Teléfono de contacto</label>
+                        {{ form.contacto_telefono }}
+                        {% if form.contacto_telefono.errors %}
+                            <div class="error-list">
+                                {% for error in form.contacto_telefono.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-section">
+                    <h3>Estado</h3>
+                    
+                    <div class="form-check">
+                        {{ form.activo }}
+                        <label for="{{ form.activo.id_for_label }}">Sucursal activa</label>
+                    </div>
+                    {% if form.activo.errors %}
+                        <div class="error-list">
+                            {% for error in form.activo.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        {% if sucursal %}
+                            ✏️ Actualizar Sucursal
+                        {% else %}
+                            ➕ Crear Sucursal
+                        {% endif %}
+                    </button>
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" class="btn-back">
+                        ← Cancelar
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        form > .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input,
+        textarea {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .error-list {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 5px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .error-list li {
+            padding: 3px 0;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error textarea {
+            border-color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ titulo }}</h1>
+            <p>
+                {% if cliente %}
+                    Actualiza la información del cliente
+                {% else %}
+                    Crea un nuevo cliente para el módulo de {{ modulo|title }}
+                {% endif %}
+            </p>
+        </header>
+
+        <div class="card">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- INFORMACIÓN GENERAL -->
+                <div class="section-title">Información General</div>
+
+                <div class="form-group {% if form.nombre.errors %}has-error{% endif %}">
+                    <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                        <ul class="error-list">
+                            {% for error in form.nombre.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group {% if form.email.errors %}has-error{% endif %}">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <ul class="error-list">
+                            {% for error in form.email.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group full-width {% if form.descripcion.errors %}has-error{% endif %}">
+                    <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <ul class="error-list">
+                            {% for error in form.descripcion.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <!-- INFORMACIÓN DE CONTACTO -->
+                <div class="section-title">Información de Contacto</div>
+
+                <div class="form-group {% if form.telefono.errors %}has-error{% endif %}">
+                    <label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+                    {{ form.telefono }}
+                </div>
+
+                <div class="form-group {% if form.direccion.errors %}has-error{% endif %}">
+                    <label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
+                    {{ form.direccion }}
+                </div>
+
+                <div class="form-group {% if form.ciudad.errors %}has-error{% endif %}">
+                    <label for="{{ form.ciudad.id_for_label }}">{{ form.ciudad.label }}</label>
+                    {{ form.ciudad }}
+                </div>
+
+                <div class="form-group {% if form.pais.errors %}has-error{% endif %}">
+                    <label for="{{ form.pais.id_for_label }}">{{ form.pais.label }}</label>
+                    {{ form.pais }}
+                </div>
+
+                <!-- CONTACTO PRINCIPAL -->
+                <div class="section-title">Contacto Principal</div>
+
+                <div class="form-group {% if form.contacto_nombre.errors %}has-error{% endif %}">
+                    <label for="{{ form.contacto_nombre.id_for_label }}">{{ form.contacto_nombre.label }}</label>
+                    {{ form.contacto_nombre }}
+                </div>
+
+                <div class="form-group {% if form.contacto_puesto.errors %}has-error{% endif %}">
+                    <label for="{{ form.contacto_puesto.id_for_label }}">{{ form.contacto_puesto.label }}</label>
+                    {{ form.contacto_puesto }}
+                </div>
+
+                <div class="form-group {% if form.contacto_email.errors %}has-error{% endif %}">
+                    <label for="{{ form.contacto_email.id_for_label }}">{{ form.contacto_email.label }}</label>
+                    {{ form.contacto_email }}
+                </div>
+
+                <div class="form-group {% if form.contacto_telefono.errors %}has-error{% endif %}">
+                    <label for="{{ form.contacto_telefono.id_for_label }}">{{ form.contacto_telefono.label }}</label>
+                    {{ form.contacto_telefono }}
+                </div>
+
+                <!-- INFORMACIÓN DE LA EMPRESA -->
+                <div class="section-title">Información de la Empresa</div>
+
+                <div class="form-group {% if form.ruc_nit.errors %}has-error{% endif %}">
+                    <label for="{{ form.ruc_nit.id_for_label }}">{{ form.ruc_nit.label }}</label>
+                    {{ form.ruc_nit }}
+                </div>
+
+                <div class="form-group {% if form.industria.errors %}has-error{% endif %}">
+                    <label for="{{ form.industria.id_for_label }}">{{ form.industria.label }}</label>
+                    {{ form.industria }}
+                </div>
+
+                <div class="form-group {% if form.empleados.errors %}has-error{% endif %}">
+                    <label for="{{ form.empleados.id_for_label }}">{{ form.empleados.label }}</label>
+                    {{ form.empleados }}
+                </div>
+
+                <!-- ESTADO -->
+                <div class="section-title">Estado</div>
+
+                <div class="form-group">
+                    <label for="{{ form.activo.id_for_label }}">{{ form.activo.label }}</label>
+                    <div class="checkbox-group">
+                        {{ form.activo }}
+                        <span>Cliente activo</span>
+                    </div>
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        {% if cliente %}✅ Actualizar{% else %}➕ Crear{% endif %} Cliente
+                    </button>
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="btn btn-secondary">
+                        ← Volver
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

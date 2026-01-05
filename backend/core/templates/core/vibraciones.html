@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-item {
+            display: block;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-left-color: #fff;
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-left-color: #fff;
+        }
+
+        .sidebar-logout {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: auto;
+        }
+
+        .sidebar-logout:hover {
+            background: rgba(231, 76, 60, 0.8);
+            border-color: #e74c3c;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.05em;
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            margin-top: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #5568d3;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">VYC Predictivo</div>
+            <div class="sidebar-subtitle">Cloud Analytics</div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a href="/vibraciones/" class="sidebar-item active">
+                📊 Análisis de Vibraciones
+            </a>
+            <a href="/termografias/" class="sidebar-item">
+                🌡️ Termografías
+            </a>
+            <a href="#configuracion" class="sidebar-item">
+                ⚙️ Configuración
+            </a>
+        </nav>
+
+        <a href="/logout/" class="sidebar-logout">🚪 Salir</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>{{ titulo }}</h1>
+            </div>
+            <div class="header-actions">
+                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/crear/{% else %}/termografias/cliente/crear/{% endif %}" class="btn-primary">
+                    ➕ Nuevo Cliente
+                </a>
+            </div>
+        </header>
+
+        <section class="content">
+            <h2>{{ titulo }}</h2>
+            
+            <p class="description">
+                {{ descripcion }}
+            </p>
+
+            <p class="description">
+                {% if modulo == 'vibraciones' %}
+                    El análisis de vibraciones es una técnica no destructiva que permite monitorear el estado de la maquinaria mediante la medición 
+                    de las oscilaciones mecánicas. Detecta desgaste, desalineamiento, desequilibrio y otros problemas antes de que causen fallos. 
+                    Nuestro sistema utiliza sensores avanzados y algoritmos de IA para predecir cuándo será necesario mantenimiento.
+                {% else %}
+                    La termografía infrarroja es una técnica de diagnóstico que detecta el calor emitido por los objetos. Permite identificar 
+                    sobrecalentamientos, pérdidas de energía, conexiones defectuosas y problemas eléctricos. Con monitoreo continuo, puede prevenir 
+                    fallos catastróficos y mejorar la eficiencia energética de su instalación.
+                {% endif %}
+            </p>
+
+            <div class="table-container">
+                <h3 style="color: #667eea; margin-bottom: 15px;">Clientes Activos</h3>
+                
+                {% if clientes %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Contacto</th>
+                                <th>Teléfono</th>
+                                <th>Ciudad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes %}
+                                <tr>
+                                    <td>
+                                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" style="color: #667eea; text-decoration: none; font-weight: bold; cursor: pointer;">
+                                            {{ cliente.nombre }}
+                                        </a>
+                                    </td>
+                                    <td>{{ cliente.email }}</td>
+                                    <td>{{ cliente.contacto_nombre|default:"—" }}</td>
+                                    <td>{{ cliente.telefono|default:"—" }}</td>
+                                    <td>{{ cliente.ciudad|default:"—" }}</td>
+                                    <td>
+                                        {% if cliente.activo %}
+                                            <span class="status-badge status-active">Activo</span>
+                                        {% else %}
+                                            <span class="status-badge status-inactive">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/editar/{% endif %}" class="btn-sm btn-edit">
+                                                ✏️ Editar
+                                            </a>
+                                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/eliminar/{% else %}/termografias/cliente/{{ cliente.id }}/eliminar/{% endif %}" class="btn-sm btn-delete" onclick="return confirm('¿Estás seguro?')">
+                                                🗑️ Eliminar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No hay clientes</h3>
+                        <p>Comienza creando tu primer cliente para comenzar el monitoreo</p>
+                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/crear/{% else %}/termografias/cliente/crear/{% endif %}" class="btn-primary">
+                            ➕ Crear primer cliente
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>

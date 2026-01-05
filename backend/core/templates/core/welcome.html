@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VYC Predictivo Cloud - Bienvenida</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            padding: 60px 40px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: #764ba2;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1em;
+            margin-bottom: 40px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-docs {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-docs:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .features {
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 2px solid #eee;
+            text-align: left;
+        }
+
+        .feature-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .feature-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .feature-item span {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VYC Predictivo Cloud</h1>
+        <p class="subtitle">Sistema de Análisis Predictivo de Activos</p>
+        
+        <p class="description">
+            Bienvenido a la plataforma de gestión centralizada de datos de vibraciones y termografías para maquinaria industrial. 
+            Nuestro sistema te permite monitorear el estado de tus activos en tiempo real y realizar análisis predictivos avanzados.
+        </p>
+
+        <div class="buttons">
+            <a href="/login/" class="btn-login">Iniciar Sesión</a>
+            <a href="/admin/" class="btn-docs">Panel de Admin</a>
+        </div>
+
+        <div class="features">
+            <div class="feature-title">Características Principales</div>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <strong>📊 Análisis de Vibraciones</strong>
+                    <span>Monitoreo continuo de vibración en maquinaria</span>
+                </div>
+                <div class="feature-item">
+                    <strong>🌡️ Termografía</strong>
+                    <span>Detección térmica de anomalías</span>
+                </div>
+                <div class="feature-item">
+                    <strong>☁️ Cloud-Based</strong>
+                    <span>Acceso desde cualquier lugar</span>
+                </div>
+                <div class="feature-item">
+                    <strong>🔐 Seguro</strong>
+                    <span>Datos encriptados y respaldados</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 VYC Predictivo Cloud. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+</body>
+</html>
