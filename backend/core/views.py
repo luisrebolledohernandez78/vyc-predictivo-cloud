@@ -55,6 +55,7 @@ def vibraciones(request):
     context = {
         'user': request.user,
         'clientes': clientes,
+        'modulo': 'vibraciones',
         'titulo': 'Análisis de Vibraciones',
         'descripcion': 'Monitorea y analiza las vibraciones de tu maquinaria en tiempo real'
     }
@@ -118,6 +119,7 @@ def termografias(request):
     context = {
         'user': request.user,
         'clientes': clientes,
+        'modulo': 'termografias',
         'titulo': 'Termografía Infrarroja',
         'descripcion': 'Detecta anomalías térmicas en tu equipamiento industrial'
     }
