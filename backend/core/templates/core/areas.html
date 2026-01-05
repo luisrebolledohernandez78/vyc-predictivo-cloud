@@ -464,6 +464,9 @@
                             <span class="status-badge status-active">Activa</span>
                             
                             <div class="area-actions">
+                                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% endif %}" class="btn-sm btn-edit" style="background: #667eea;">
+                                    👁️ Ver Equipos
+                                </a>
                                 <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% endif %}" class="btn-sm btn-edit">
                                     ✏️ Editar
                                 </a>

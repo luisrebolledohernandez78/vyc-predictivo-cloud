@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
+                {% else %}
+                    <a href="{% url 'termografias' %}">Termografías</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
+                {% else %}
+                    <a href="{% url 'equipos_termografias' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h1 class="h3">{{ titulo }}</h1>
+            <p class="text-muted">{{ descripcion }}</p>
+        </div>
+        <div class="col-auto">
+            {% if modulo == 'vibraciones' %}
+                <a href="{% url 'crear_activo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Nuevo Activo
+                </a>
+            {% else %}
+                <a href="{% url 'crear_activo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Nuevo Activo
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tabla de Activos -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if activos %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Observaciones</th>
+                                <th>Estado</th>
+                                <th class="text-center" style="width: 120px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activo in activos %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ activo.nombre }}</strong>
+                                    </td>
+                                    <td class="text-muted small">{{ activo.descripcion|truncatewords:8 }}</td>
+                                    <td class="text-muted small">{{ activo.observaciones|truncatewords:8 }}</td>
+                                    <td>
+                                        {% if activo.activo %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if modulo == 'vibraciones' %}
+                                            <a href="{% url 'editar_activo_vibraciones' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'eliminar_activo_vibraciones' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'eliminar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i> No hay activos registrados en este equipo.
+                    {% if modulo == 'vibraciones' %}
+                        <a href="{% url 'crear_activo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="alert-link">Crear el primero</a>
+                    {% else %}
+                        <a href="{% url 'crear_activo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="alert-link">Crear el primero</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

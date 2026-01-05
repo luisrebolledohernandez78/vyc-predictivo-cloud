@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
+                {% else %}
+                    <a href="{% url 'termografias' %}">Termografías</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h4 class="card-title mb-0">{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Errores -->
+                    {% if errores %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5>Errores encontrados:</h5>
+                            <ul class="mb-0">
+                                {% for error in errores %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <!-- Información -->
+                    <div class="alert alert-info mb-4">
+                        <h5>Formato esperado del Excel:</h5>
+                        <table class="table table-sm table-bordered mb-0 mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Columna A</th>
+                                    <th>Columna B</th>
+                                    <th>Columna C</th>
+                                    <th>Columna D</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Área</strong></td>
+                                    <td><strong>Equipo</strong></td>
+                                    <td><strong>Activo</strong></td>
+                                    <td><strong>Observaciones</strong></td>
+                                </tr>
+                                <tr class="text-muted">
+                                    <td>Aserradero</td>
+                                    <td>Cabezales M1</td>
+                                    <td>Motor</td>
+                                    <td>5.5 kW, 1800 RPM</td>
+                                </tr>
+                                <tr class="text-muted">
+                                    <td></td>
+                                    <td></td>
+                                    <td>Válvula Métrica</td>
+                                    <td>Presión 2.5 bar</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Archivo -->
+                        <div class="mb-3">
+                            <label for="{{ form.archivo.id_for_label }}" class="form-label">
+                                <i class="fas fa-file-upload"></i> {{ form.archivo.label }}
+                            </label>
+                            {{ form.archivo }}
+                            <small class="form-text text-muted d-block mt-2">
+                                Cargue un archivo .xlsx o .xls con el listado de equipos y activos
+                            </small>
+                            {% if form.archivo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.archivo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Acción -->
+                        <div class="mb-4">
+                            <label class="form-label">¿Qué desea hacer con los datos?</label>
+                            <div class="card border-light">
+                                <div class="card-body">
+                                    {% for value, label in form.accion.field.choices %}
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="radio" name="accion" id="accion_{{ value }}" value="{{ value }}" {% if form.accion.value == value %}checked{% endif %}>
+                                            <label class="form-check-label" for="accion_{{ value }}">
+                                                <strong>{{ label }}</strong>
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            {% if modulo == 'vibraciones' %}
+                                <a href="{% url 'sucursales_vibraciones' cliente.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'sucursales_termografias' cliente.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-eye"></i> Ver Preview
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

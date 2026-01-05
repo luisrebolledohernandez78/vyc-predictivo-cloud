@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente, Sucursal, Area
+from .models import Cliente, Sucursal, Area, Equipo, Activo
 
 
 class ClienteForm(forms.ModelForm):
@@ -64,3 +64,49 @@ class AreaForm(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+
+class EquipoForm(forms.ModelForm):
+    class Meta:
+        model = Equipo
+        fields = ['nombre', 'descripcion', 'observaciones', 'activo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del equipo'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Potencia, RPM, Voltaje, etc.'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class ActivoForm(forms.ModelForm):
+    class Meta:
+        model = Activo
+        fields = ['nombre', 'descripcion', 'observaciones', 'activo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del activo'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Potencia, RPM, Voltaje, Fases, etc.'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class ExcelUploadForm(forms.Form):
+    """Formulario para subir archivo Excel con equipos y activos"""
+    archivo = forms.FileField(
+        label='Archivo Excel',
+        help_text='Formato: Área | Equipo | Activo | Observaciones',
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.xlsx,.xls'})
+    )
+    
+    ACCION_CHOICES = [
+        ('reemplazar', 'Reemplazar todo (elimina equipos y activos existentes)'),
+        ('merge', 'Merge (agrega nuevos, mantiene existentes)'),
+        ('upsert', 'Upsert (actualiza existentes, agrega nuevos)'),
+    ]
+    
+    accion = forms.ChoiceField(
+        choices=ACCION_CHOICES,
+        label='Acción',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='merge'
+    )

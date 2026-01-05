@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cliente, Sucursal, Area
+from .models import Cliente, Sucursal, Area, Equipo, Activo
 
 
 @admin.register(Cliente)
@@ -70,3 +70,46 @@ class AreaAdmin(admin.ModelAdmin):
         }),
     )
 
+
+@admin.register(Equipo)
+class EquipoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'area', 'activo', 'creado')
+    list_filter = ('activo', 'creado', 'area__nombre', 'area__sucursal__cliente')
+    search_fields = ('nombre', 'area__sucursal__nombre', 'area__sucursal__cliente__nombre')
+    readonly_fields = ('creado', 'actualizado')
+    
+    fieldsets = (
+        ('Información General', {
+            'fields': ('area', 'nombre', 'descripcion', 'activo')
+        }),
+        ('Observaciones', {
+            'fields': ('observaciones',),
+            'classes': ('collapse',)
+        }),
+        ('Auditoría', {
+            'fields': ('creado', 'actualizado'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Activo)
+class ActivoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'equipo', 'activo', 'creado')
+    list_filter = ('activo', 'creado', 'equipo__area__nombre', 'equipo__area__sucursal__cliente')
+    search_fields = ('nombre', 'equipo__nombre', 'equipo__area__sucursal__nombre')
+    readonly_fields = ('creado', 'actualizado')
+    
+    fieldsets = (
+        ('Información General', {
+            'fields': ('equipo', 'nombre', 'descripcion', 'activo')
+        }),
+        ('Observaciones', {
+            'fields': ('observaciones',),
+            'classes': ('collapse',)
+        }),
+        ('Auditoría', {
+            'fields': ('creado', 'actualizado'),
+            'classes': ('collapse',)
+        }),
+    )

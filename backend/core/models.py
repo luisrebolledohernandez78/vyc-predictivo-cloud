@@ -123,3 +123,50 @@ def crear_areas_sucursal(sender, instance, created, **kwargs):
                 defaults={'descripcion': f'Área de {area_label}'}
             )
 
+
+class Equipo(models.Model):
+    """Modelo para equipos/máquinas dentro de un área"""
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name='equipos')
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True, help_text='Potencia, RPM, Voltaje, etc.')
+    
+    # Timestamps
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    # Estado
+    activo = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['nombre']
+        verbose_name = 'Equipo'
+        verbose_name_plural = 'Equipos'
+        unique_together = ('area', 'nombre')
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.area.get_nombre_display()}"
+
+
+class Activo(models.Model):
+    """Modelo para activos/componentes dentro de un equipo"""
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='activos')
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True, help_text='Potencia, RPM, Voltaje, Fases, etc.')
+    
+    # Timestamps
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    # Estado
+    activo = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['nombre']
+        verbose_name = 'Activo'
+        verbose_name_plural = 'Activos'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.equipo.nombre}"
+

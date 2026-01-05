@@ -404,6 +404,9 @@
                 <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
                     ➕ Nueva Sucursal
                 </a>
+                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/upload-equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/upload-equipos/{% endif %}" class="btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    📁 Subir Planilla
+                </a>
             </div>
         </header>
 

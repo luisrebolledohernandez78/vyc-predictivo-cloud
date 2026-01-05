@@ -1,0 +1,138 @@
+{% extends 'core/base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
+                {% else %}
+                    <a href="{% url 'termografias' %}">Termografías</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h4 class="card-title mb-0">{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Preview de Datos -->
+                    <div class="alert alert-success mb-4">
+                        <h5><i class="fas fa-check-circle"></i> Archivo procesado exitosamente</h5>
+                        <p class="mb-0">Se encontraron <strong>{{ preview.total_filas }} registros</strong> para importar</p>
+                    </div>
+
+                    <!-- Resumen por Área -->
+                    <h5 class="mb-3">Resumen de datos:</h5>
+                    <div class="row mb-4">
+                        {% for area_nombre, area_data in preview.por_area.items %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-{% if area_nombre == 'aserradero' %}danger{% elif area_nombre == 'caldera' %}warning{% else %}success{% endif %}">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-capitalize">
+                                            {% if area_nombre == 'aserradero' %}
+                                                <span class="badge bg-danger">Aserradero</span>
+                                            {% elif area_nombre == 'caldera' %}
+                                                <span class="badge bg-warning text-dark">Caldera</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Elaborado</span>
+                                            {% endif %}
+                                        </h6>
+                                        <p class="mb-2">
+                                            <strong>Equipos:</strong> {{ area_data.equipos|length }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Activos:</strong> {{ area_data.total_activos }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Tabla Detallada -->
+                    <h5 class="mb-3">Detalle de equipos y activos:</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Área</th>
+                                    <th>Equipo</th>
+                                    <th>Cantidad de Activos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for area_nombre, area_data in preview.por_area.items %}
+                                    {% for equipo_nombre, cantidad in area_data.equipos.items %}
+                                        <tr>
+                                            <td>
+                                                {% if area_nombre == 'aserradero' %}
+                                                    <span class="badge bg-danger">Aserradero</span>
+                                                {% elif area_nombre == 'caldera' %}
+                                                    <span class="badge bg-warning text-dark">Caldera</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">Elaborado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ equipo_nombre }}</td>
+                                            <td><span class="badge bg-info">{{ cantidad }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Acción Seleccionada -->
+                    <div class="alert alert-info mb-4">
+                        <h5>Acción a ejecutar:</h5>
+                        {% if accion == 'reemplazar' %}
+                            <p class="mb-0"><i class="fas fa-trash"></i> <strong>Reemplazar todo:</strong> Se eliminarán todos los equipos y activos existentes en la sucursal antes de importar estos datos.</p>
+                        {% elif accion == 'merge' %}
+                            <p class="mb-0"><i class="fas fa-plus"></i> <strong>Merge:</strong> Se agregarán solo los nuevos equipos y activos, manteniendo los existentes. Se evitarán duplicados.</p>
+                        {% elif accion == 'upsert' %}
+                            <p class="mb-0"><i class="fas fa-sync"></i> <strong>Upsert:</strong> Se actualizarán los equipos/activos existentes y se agregarán los nuevos.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        {% if modulo == 'vibraciones' %}
+                            <a href="{% url 'upload_equipos_vibraciones' cliente.id sucursal.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Atrás
+                            </a>
+                        {% else %}
+                            <a href="{% url 'upload_equipos_termografias' cliente.id sucursal.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Atrás
+                            </a>
+                        {% endif %}
+                        <form method="post" {% if modulo == 'vibraciones' %}action="{% url 'confirmar_upload_equipos_vibraciones' cliente.id sucursal.id %}"{% else %}action="{% url 'confirmar_upload_equipos_termografias' cliente.id sucursal.id %}"{% endif %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="{{ accion }}">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Confirmar Importación
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

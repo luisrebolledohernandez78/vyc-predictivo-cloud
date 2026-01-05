@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
+                {% else %}
+                    <a href="{% url 'termografias' %}">Termografías</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
+                {% else %}
+                    <a href="{% url 'equipos_termografias' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}">{{ equipo.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}">{{ equipo.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <!-- Card del Formulario -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h4 class="card-title mb-0">{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>Error:</strong>
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.descripcion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">{{ form.observaciones.label }}</label>
+                            {{ form.observaciones }}
+                            <small class="form-text text-muted">Ej: Potencia (kW), RPM, Voltaje, Fases, Marca, Modelo, etc.</small>
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.observaciones.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Activo -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.activo }}
+                                <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                    {{ form.activo.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            {% if modulo == 'vibraciones' %}
+                                <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

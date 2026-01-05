@@ -4,8 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Cliente, Sucursal, Area
-from .forms import ClienteForm, SucursalForm, AreaForm
+from .models import Cliente, Sucursal, Area, Equipo, Activo
+from .forms import ClienteForm, SucursalForm, AreaForm, EquipoForm, ActivoForm, ExcelUploadForm
+from .excel_parser import ExcelEquiposParser
+import tempfile
 
 
 def welcome(request):
@@ -176,7 +178,7 @@ def eliminar_cliente_termografias(request, cliente_id):
 def sucursales_vibraciones(request, cliente_id):
     """Página de sucursales para vibraciones"""
     cliente = get_object_or_404(Cliente, id=cliente_id)
-    sucursales = cliente.sucursales.filter(activo=True)
+    sucursales = cliente.sucursales.filter(activo=True).order_by('nombre')
     context = {
         'user': request.user,
         'cliente': cliente,
@@ -250,7 +252,7 @@ def eliminar_sucursal_vibraciones(request, cliente_id, sucursal_id):
 def sucursales_termografias(request, cliente_id):
     """Página de sucursales para termografías"""
     cliente = get_object_or_404(Cliente, id=cliente_id)
-    sucursales = cliente.sucursales.filter(activo=True)
+    sucursales = cliente.sucursales.filter(activo=True).order_by('nombre')
     context = {
         'user': request.user,
         'cliente': cliente,
@@ -427,6 +429,541 @@ def eliminar_area_termografias(request, cliente_id, sucursal_id, area_id):
     area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
     area.delete()
     return redirect('areas_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id)
+
+
+@api_view(["GET"])
+def health(request):
+    return Response({"status": "ok", "service": "vyc-predictivo-cloud"})
+
+
+# EQUIPOS - VIBRACIONES
+@login_required(login_url='login')
+def equipos_vibraciones(request, cliente_id, sucursal_id, area_id):
+    """Página de equipos para una área en vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipos = area.equipos.filter(activo=True).order_by('nombre')
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipos': equipos,
+        'modulo': 'vibraciones',
+        'titulo': f'Equipos - {area.get_nombre_display()}',
+        'descripcion': 'Gestiona los equipos y máquinas del área'
+    }
+    return render(request, 'core/equipos.html', context)
+
+
+@login_required(login_url='login')
+def crear_equipo_vibraciones(request, cliente_id, sucursal_id, area_id):
+    """Crear equipo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    
+    if request.method == 'POST':
+        form = EquipoForm(request.POST)
+        if form.is_valid():
+            equipo = form.save(commit=False)
+            equipo.area = area
+            equipo.save()
+            return redirect('equipos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+    else:
+        form = EquipoForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'modulo': 'vibraciones',
+        'titulo': f'Nuevo Equipo - {area.get_nombre_display()}'
+    }
+    return render(request, 'core/equipo_form.html', context)
+
+
+@login_required(login_url='login')
+def editar_equipo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Editar equipo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    
+    if request.method == 'POST':
+        form = EquipoForm(request.POST, instance=equipo)
+        if form.is_valid():
+            form.save()
+            return redirect('equipos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+    else:
+        form = EquipoForm(instance=equipo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'modulo': 'vibraciones',
+        'titulo': f'Editar {equipo.nombre}'
+    }
+    return render(request, 'core/equipo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_equipo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Eliminar equipo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    equipo.delete()
+    return redirect('equipos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+
+
+# ACTIVOS - VIBRACIONES
+@login_required(login_url='login')
+def activos_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Página de activos para un equipo en vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activos = equipo.activos.filter(activo=True).order_by('nombre')
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'activos': activos,
+        'modulo': 'vibraciones',
+        'titulo': f'Activos - {equipo.nombre}',
+        'descripcion': 'Gestiona los componentes y motores del equipo'
+    }
+    return render(request, 'core/activos.html', context)
+
+
+@login_required(login_url='login')
+def crear_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Crear activo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST)
+        if form.is_valid():
+            activo = form.save(commit=False)
+            activo.equipo = equipo
+            activo.save()
+            return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+    else:
+        form = ActivoForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'modulo': 'vibraciones',
+        'titulo': f'Nuevo Activo - {equipo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def editar_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id, activo_id):
+    """Editar activo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST, instance=activo)
+        if form.is_valid():
+            form.save()
+            return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+    else:
+        form = ActivoForm(instance=activo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'activo': activo,
+        'modulo': 'vibraciones',
+        'titulo': f'Editar {activo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id, activo_id):
+    """Eliminar activo desde módulo de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
+    activo.delete()
+    return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+
+
+# UPLOAD EXCEL - VIBRACIONES
+@login_required(login_url='login')
+def upload_equipos_vibraciones(request, cliente_id, sucursal_id):
+    """Subir archivo Excel con equipos y activos - vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    if request.method == 'POST':
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid() and request.FILES['archivo']:
+            archivo = request.FILES['archivo']
+            accion = form.cleaned_data['accion']
+            
+            # Parsear archivo
+            parser = ExcelEquiposParser(archivo, sucursal)
+            datos = parser.parsear()
+            
+            if parser.errores:
+                context = {
+                    'form': form,
+                    'cliente': cliente,
+                    'sucursal': sucursal,
+                    'modulo': 'vibraciones',
+                    'errores': parser.errores,
+                    'titulo': 'Subir Planilla de Activos'
+                }
+                return render(request, 'core/upload_equipos.html', context)
+            
+            # Mostrar preview si es GET desde preview button
+            preview = parser.obtener_preview()
+            context = {
+                'form': form,
+                'cliente': cliente,
+                'sucursal': sucursal,
+                'modulo': 'vibraciones',
+                'preview': preview,
+                'accion': accion,
+                'titulo': 'Vista Previa - Subir Planilla de Activos'
+            }
+            return render(request, 'core/upload_equipos_preview.html', context)
+    else:
+        form = ExcelUploadForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'modulo': 'vibraciones',
+        'titulo': 'Subir Planilla de Activos'
+    }
+    return render(request, 'core/upload_equipos.html', context)
+
+
+@login_required(login_url='login')
+def confirmar_upload_equipos_vibraciones(request, cliente_id, sucursal_id):
+    """Confirmar e importar equipos desde Excel - vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    if request.method == 'POST' and request.FILES['archivo']:
+        archivo = request.FILES['archivo']
+        accion = request.POST.get('accion', 'merge')
+        
+        # Parsear e importar
+        parser = ExcelEquiposParser(archivo, sucursal)
+        parser.parsear()
+        resultado = parser.importar(accion)
+        
+        context = {
+            'cliente': cliente,
+            'sucursal': sucursal,
+            'modulo': 'vibraciones',
+            'resultado': resultado,
+            'titulo': 'Resultado de Importación'
+        }
+        return render(request, 'core/upload_equipos_resultado.html', context)
+    
+    return redirect('sucursales_vibraciones', cliente_id=cliente_id)
+
+
+# EQUIPOS - TERMOGRAFÍAS
+@login_required(login_url='login')
+def equipos_termografias(request, cliente_id, sucursal_id, area_id):
+    """Página de equipos para una área en termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipos = area.equipos.filter(activo=True).order_by('nombre')
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipos': equipos,
+        'modulo': 'termografias',
+        'titulo': f'Equipos - {area.get_nombre_display()}',
+        'descripcion': 'Gestiona los equipos y máquinas del área'
+    }
+    return render(request, 'core/equipos.html', context)
+
+
+@login_required(login_url='login')
+def crear_equipo_termografias(request, cliente_id, sucursal_id, area_id):
+    """Crear equipo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    
+    if request.method == 'POST':
+        form = EquipoForm(request.POST)
+        if form.is_valid():
+            equipo = form.save(commit=False)
+            equipo.area = area
+            equipo.save()
+            return redirect('equipos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+    else:
+        form = EquipoForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'modulo': 'termografias',
+        'titulo': f'Nuevo Equipo - {area.get_nombre_display()}'
+    }
+    return render(request, 'core/equipo_form.html', context)
+
+
+@login_required(login_url='login')
+def editar_equipo_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Editar equipo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    
+    if request.method == 'POST':
+        form = EquipoForm(request.POST, instance=equipo)
+        if form.is_valid():
+            form.save()
+            return redirect('equipos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+    else:
+        form = EquipoForm(instance=equipo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'modulo': 'termografias',
+        'titulo': f'Editar {equipo.nombre}'
+    }
+    return render(request, 'core/equipo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_equipo_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Eliminar equipo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    equipo.delete()
+    return redirect('equipos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id)
+
+
+# ACTIVOS - TERMOGRAFÍAS
+@login_required(login_url='login')
+def activos_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Página de activos para un equipo en termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activos = equipo.activos.filter(activo=True).order_by('nombre')
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'activos': activos,
+        'modulo': 'termografias',
+        'titulo': f'Activos - {equipo.nombre}',
+        'descripcion': 'Gestiona los componentes y motores del equipo'
+    }
+    return render(request, 'core/activos.html', context)
+
+
+@login_required(login_url='login')
+def crear_activo_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
+    """Crear activo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST)
+        if form.is_valid():
+            activo = form.save(commit=False)
+            activo.equipo = equipo
+            activo.save()
+            return redirect('activos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+    else:
+        form = ActivoForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'modulo': 'termografias',
+        'titulo': f'Nuevo Activo - {equipo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def editar_activo_termografias(request, cliente_id, sucursal_id, area_id, equipo_id, activo_id):
+    """Editar activo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST, instance=activo)
+        if form.is_valid():
+            form.save()
+            return redirect('activos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+    else:
+        form = ActivoForm(instance=activo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'area': area,
+        'equipo': equipo,
+        'activo': activo,
+        'modulo': 'termografias',
+        'titulo': f'Editar {activo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_activo_termografias(request, cliente_id, sucursal_id, area_id, equipo_id, activo_id):
+    """Eliminar activo desde módulo de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
+    equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
+    activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
+    activo.delete()
+    return redirect('activos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+
+
+# UPLOAD EXCEL - TERMOGRAFÍAS
+@login_required(login_url='login')
+def upload_equipos_termografias(request, cliente_id, sucursal_id):
+    """Subir archivo Excel con equipos y activos - termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    if request.method == 'POST':
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid() and request.FILES['archivo']:
+            archivo = request.FILES['archivo']
+            accion = form.cleaned_data['accion']
+            
+            # Parsear archivo
+            parser = ExcelEquiposParser(archivo, sucursal)
+            datos = parser.parsear()
+            
+            if parser.errores:
+                context = {
+                    'form': form,
+                    'cliente': cliente,
+                    'sucursal': sucursal,
+                    'modulo': 'termografias',
+                    'errores': parser.errores,
+                    'titulo': 'Subir Planilla de Activos'
+                }
+                return render(request, 'core/upload_equipos.html', context)
+            
+            # Mostrar preview
+            preview = parser.obtener_preview()
+            context = {
+                'form': form,
+                'cliente': cliente,
+                'sucursal': sucursal,
+                'modulo': 'termografias',
+                'preview': preview,
+                'accion': accion,
+                'titulo': 'Vista Previa - Subir Planilla de Activos'
+            }
+            return render(request, 'core/upload_equipos_preview.html', context)
+    else:
+        form = ExcelUploadForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'modulo': 'termografias',
+        'titulo': 'Subir Planilla de Activos'
+    }
+    return render(request, 'core/upload_equipos.html', context)
+
+
+@login_required(login_url='login')
+def confirmar_upload_equipos_termografias(request, cliente_id, sucursal_id):
+    """Confirmar e importar equipos desde Excel - termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    if request.method == 'POST' and request.FILES['archivo']:
+        archivo = request.FILES['archivo']
+        accion = request.POST.get('accion', 'merge')
+        
+        # Parsear e importar
+        parser = ExcelEquiposParser(archivo, sucursal)
+        parser.parsear()
+        resultado = parser.importar(accion)
+        
+        context = {
+            'cliente': cliente,
+            'sucursal': sucursal,
+            'modulo': 'termografias',
+            'resultado': resultado,
+            'titulo': 'Resultado de Importación'
+        }
+        return render(request, 'core/upload_equipos_resultado.html', context)
+    
+    return redirect('sucursales_termografias', cliente_id=cliente_id)
 
 
 @api_view(["GET"])
