@@ -68,35 +68,59 @@
 
                     <!-- Tabla Detallada -->
                     <h5 class="mb-3">Detalle de equipos y activos:</h5>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Área</th>
-                                    <th>Equipo</th>
-                                    <th>Cantidad de Activos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for area_nombre, area_data in preview.por_area.items %}
-                                    {% for equipo_nombre, cantidad in area_data.equipos.items %}
-                                        <tr>
-                                            <td>
-                                                {% if area_nombre == 'aserradero' %}
-                                                    <span class="badge bg-danger">Aserradero</span>
-                                                {% elif area_nombre == 'caldera' %}
-                                                    <span class="badge bg-warning text-dark">Caldera</span>
-                                                {% else %}
-                                                    <span class="badge bg-success">Elaborado</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ equipo_nombre }}</td>
-                                            <td><span class="badge bg-info">{{ cantidad }}</span></td>
-                                        </tr>
-                                    {% endfor %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="accordion mb-4" id="previewAccordion">
+                        {% for area_nombre, area_data in preview.por_area.items %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button {% if forloop.first %}{% else %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
+                                        {% if area_nombre == 'aserradero' %}
+                                            <span class="badge bg-danger me-2">Aserradero</span>
+                                        {% elif area_nombre == 'caldera' %}
+                                            <span class="badge bg-warning text-dark me-2">Caldera</span>
+                                        {% else %}
+                                            <span class="badge bg-success me-2">Elaborado</span>
+                                        {% endif %}
+                                        <strong>{{ area_data.equipos|length }} equipo(s) - {{ area_data.total_activos }} activo(s)</strong>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#previewAccordion">
+                                    <div class="accordion-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 30%;">Equipo</th>
+                                                        <th style="width: 35%;">Activo</th>
+                                                        <th style="width: 35%;">Observaciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for equipo_nombre, equipo_data in area_data.equipos.items %}
+                                                        {% for activo in equipo_data.activos %}
+                                                            <tr>
+                                                                {% if forloop.first %}
+                                                                    <td rowspan="{{ equipo_data.cantidad }}">
+                                                                        <strong>{{ equipo_nombre }}</strong>
+                                                                    </td>
+                                                                {% endif %}
+                                                                <td>{{ activo.nombre }}</td>
+                                                                <td>
+                                                                    {% if activo.observaciones %}
+                                                                        <small class="text-muted">{{ activo.observaciones|truncatewords:10 }}</small>
+                                                                    {% else %}
+                                                                        <span class="text-muted">—</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
 
                     <!-- Acción Seleccionada -->

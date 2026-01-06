@@ -82,7 +82,7 @@ class ExcelEquiposParser:
         return mapeo.get(area_lower)
     
     def obtener_preview(self):
-        """Retorna un preview de los datos que serán importados"""
+        """Retorna un preview de los datos que serán importados con detalle de activos"""
         if not self.datos_parseados:
             return {
                 'total_filas': 0,
@@ -107,9 +107,17 @@ class ExcelEquiposParser:
             
             equipo = dato['equipo']
             if equipo not in preview['por_area'][area]['equipos']:
-                preview['por_area'][area]['equipos'][equipo] = 0
+                preview['por_area'][area]['equipos'][equipo] = {
+                    'activos': [],
+                    'cantidad': 0
+                }
             
-            preview['por_area'][area]['equipos'][equipo] += 1
+            # Agregar detalle del activo
+            preview['por_area'][area]['equipos'][equipo]['activos'].append({
+                'nombre': dato['activo'],
+                'observaciones': dato['observaciones']
+            })
+            preview['por_area'][area]['equipos'][equipo]['cantidad'] += 1
             preview['por_area'][area]['total_activos'] += 1
         
         return preview
