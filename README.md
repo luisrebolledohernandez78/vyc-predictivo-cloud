@@ -110,12 +110,45 @@ POST /termografias/cliente/<id>/sucursal/crear/     - Crear sucursal
 GET  /termografias/cliente/<id>/sucursal/<id>/areas/- Listar áreas
 ```
 
-### Paleta de Colores
-- Primario: `#667eea` (Azul)
-- Secundario: `#764ba2` (Púrpura)
-- Éxito: `#27ae60` (Verde)
-- Error: `#e74c3c` (Rojo)
-- Advertencia: `#f39c12` (Naranja)
+### Paleta de Colores Institucionales
+
+**INSTRUCCIÓN CLAVE**: Los usuarios deben identificar elementos a simple vista (sin leer) guiándose únicamente por el color.
+
+#### Áreas de Monitoreo
+
+| Área | Color Primario | Descripción | Uso |
+|------|---|---|---|
+| **Aserradero** | `#27ae60` (Verde) | Área de aserrado - Madera verde 🌳 | Cards, badges, bordes de área |
+| **Elaborado** | `#d4af37` (Dorado) | Área de elaboración - Madera procesada 🌲 | Cards, badges, bordes de área |
+| **Caldera** | `#e67e22` (Naranjo) | Área de caldera - Calor/temperatura 🔥 | Cards, badges, bordes de área |
+
+#### Variantes de Color Recomendadas
+```css
+/* ASERRADERO - Verde */
+--area-aserradero-primary: #27ae60;
+--area-aserradero-light: #d5f4e6;
+--area-aserradero-lighter: #f0fdf4;
+--area-aserradero-dark: #1e8449;
+
+/* ELABORADO - Dorado */
+--area-elaborado-primary: #d4af37;
+--area-elaborado-light: #fef9e7;
+--area-elaborado-lighter: #fff8dc;
+--area-elaborado-dark: #b8860b;
+
+/* CALDERA - Naranjo */
+--area-caldera-primary: #e67e22;
+--area-caldera-light: #fdebd0;
+--area-caldera-lighter: #fff5ee;
+--area-caldera-dark: #ca6f1e;
+```
+
+#### Colores Corporativos Generales
+- **Primario**: `#667eea` (Azul - UI general)
+- **Secundario**: `#764ba2` (Púrpura - Acentos)
+- **Éxito**: `#27ae60` (Verde - Operaciones exitosas)
+- **Error**: `#e74c3c` (Rojo - Errores)
+- **Advertencia**: `#f39c12` (Naranja - Advertencias)
 
 ### Modelos de Datos
 ```
@@ -216,12 +249,15 @@ python manage.py crear_areas_faltantes
 python manage.py runserver
 ```
 
-### Acceso
-- **Aplicación**: http://127.0.0.1:8000/
-- **Admin**: http://127.0.0.1:8000/admin/
-- **Credenciales**: admin / VyCingenieria
+## Cambios Recientes (Enero 2026)
 
-## Instrucciones para la IA
+### UI/UX Refinement & Sidebar Unification
+- **Sidebar centralizada**: Creada única template `sidebar.html` incluida en todos los templates
+- **Estilos consolidados**: CSS de sidebar con estilos inline en la propia template para funcionar en desarrollo
+- **Características centradas**: Texto e iconos alineados al centro en welcome.html
+- **Consistencia visual**: Botón "Salir" y navegación uniforme en todos los módulos
+
+### Instrucciones para la IA
 
 1. **No comitear sin confirmación**: SIEMPRE pedir confirmación antes de realizar cualquier commit a la rama.
 

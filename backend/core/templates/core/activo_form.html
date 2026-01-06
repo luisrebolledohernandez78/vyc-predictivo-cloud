@@ -3,6 +3,25 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block contenido %}
+<style>
+    /* Colores por Área */
+    .card-header.area-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .card-header.area-aserradero {
+        background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%) !important;
+    }
+    
+    .card-header.area-elaborado {
+        background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
+    }
+    
+    .card-header.area-caldera {
+        background: linear-gradient(135deg, #e67e22 0%, #ca6f1e 100%) !important;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -50,7 +69,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-gradient">
+                <div class="card-header bg-gradient area-header area-{{ area.nombre }}">
                     <h4 class="card-title mb-0">{{ titulo }}</h4>
                 </div>
                 <div class="card-body">

@@ -3,6 +3,29 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block contenido %}
+<style>
+    /* Colores por Área */
+    .area-header {
+        padding: 20px 30px;
+        border-radius: 8px 8px 0 0;
+        color: white;
+        margin-bottom: 20px;
+    }
+    
+    .area-header.aserradero {
+        background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    }
+    
+    .area-header.elaborado {
+        background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+        color: #333;
+    }
+    
+    .area-header.caldera {
+        background: linear-gradient(135deg, #e67e22 0%, #ca6f1e 100%);
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -39,13 +62,15 @@
         </ol>
     </nav>
 
-    <!-- Header -->
-    <div class="row mb-4 align-items-center">
-        <div class="col">
-            <h1 class="h3">{{ titulo }}</h1>
-            <p class="text-muted">{{ descripcion }}</p>
-        </div>
-        <div class="col-auto">
+    <!-- Header con Color de Área -->
+    <div class="area-header {{ area.nombre }}">
+        <h1 class="h3 mb-2">{{ titulo }}</h1>
+        <p class="mb-0">{{ descripcion }}</p>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row mb-4">
+        <div class="col-auto ms-auto">
             {% if modulo == 'vibraciones' %}
                 <a href="{% url 'crear_activo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-success">
                     <i class="fas fa-plus"></i> Nuevo Activo

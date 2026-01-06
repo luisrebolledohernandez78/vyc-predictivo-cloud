@@ -43,15 +43,15 @@
                     <div class="row mb-4">
                         {% for area_nombre, area_data in preview.por_area.items %}
                             <div class="col-md-4 mb-3">
-                                <div class="card border-{% if area_nombre == 'aserradero' %}danger{% elif area_nombre == 'caldera' %}warning{% else %}success{% endif %}">
+                                <div class="card border-{% if area_nombre == 'aserradero' %}success{% elif area_nombre == 'caldera' %}warning{% else %}info{% endif %}">
                                     <div class="card-body">
                                         <h6 class="card-title text-capitalize">
                                             {% if area_nombre == 'aserradero' %}
-                                                <span class="badge bg-danger">Aserradero</span>
+                                                <span class="badge bg-success">Aserradero</span>
                                             {% elif area_nombre == 'caldera' %}
                                                 <span class="badge bg-warning text-dark">Caldera</span>
                                             {% else %}
-                                                <span class="badge bg-success">Elaborado</span>
+                                                <span class="badge" style="background-color: #d4af37; color: #333;">Elaborado</span>
                                             {% endif %}
                                         </h6>
                                         <p class="mb-2">
@@ -74,11 +74,11 @@
                                 <h2 class="accordion-header">
                                     <button class="accordion-button {% if forloop.first %}{% else %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
                                         {% if area_nombre == 'aserradero' %}
-                                            <span class="badge bg-danger me-2">Aserradero</span>
+                                            <span class="badge bg-success me-2">Aserradero</span>
                                         {% elif area_nombre == 'caldera' %}
                                             <span class="badge bg-warning text-dark me-2">Caldera</span>
                                         {% else %}
-                                            <span class="badge bg-success me-2">Elaborado</span>
+                                            <span class="badge me-2" style="background-color: #d4af37; color: #333;">Elaborado</span>
                                         {% endif %}
                                         <strong>{{ area_data.equipos|length }} equipo(s) - {{ area_data.total_activos }} activo(s)</strong>
                                     </button>

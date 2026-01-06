@@ -4,100 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
-            color: #333;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .sidebar-subtitle {
-            font-size: 0.85em;
-            opacity: 0.8;
-        }
-
-        .sidebar-menu {
+        .main-content {
+            margin-left: 280px;
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sidebar-item {
-            display: block;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-left-color: #fff;
-            transform: translateX(5px);
-        }
-
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-left-color: #fff;
-        }
-
-        .sidebar-logout {
-            display: block;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .sidebar-logout:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-left-color: #fff;
-            transform: translateX(5px);
+            padding: 40px;
         }
 
         .main-content {
@@ -199,19 +114,21 @@
         }
 
         .area-card:hover {
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 15px rgba(102, 126, 234, 0.15);
         }
 
         .area-card.aserradero {
-            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-left-color: #27ae60;
         }
 
         .area-card.elaborado {
-            border-left-color: #f39c12;
+            background: linear-gradient(135deg, #fef9e7 0%, #fff8dc 100%);
+            border-left-color: #d4af37;
         }
 
         .area-card.caldera {
+            background: linear-gradient(135deg, #fff5ee 0%, #ffe4c4 100%);
             border-left-color: #e67e22;
         }
 
@@ -231,13 +148,13 @@
         }
 
         .area-card.aserradero .area-name {
-            background: #fadbd8;
-            color: #c0392b;
+            background: #d5f4e6;
+            color: #1e8449;
         }
 
         .area-card.elaborado .area-name {
-            background: #fde7ce;
-            color: #d68910;
+            background: #fef5e7;
+            color: #b8860b;
         }
 
         .area-card.caldera .area-name {
@@ -340,7 +257,7 @@
 
         .btn-back:hover {
             background: #7f8c8d;
-            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(127, 140, 141, 0.3), 0 0 10px rgba(127, 140, 141, 0.15);
         }
 
         @media (max-width: 768px) {
@@ -388,30 +305,7 @@
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">VYC Predictivo</div>
-            <div class="sidebar-subtitle">Cloud Analytics</div>
-        </div>
-
-        <nav class="sidebar-menu">
-            <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="sidebar-item">
-                {% if modulo == 'vibraciones' %}
-                    📊 Análisis de Vibraciones
-                {% else %}
-                    🌡️ Termografías
-                {% endif %}
-            </a>
-            <a href="/dashboard/" class="sidebar-item">
-                📈 Dashboard
-            </a>
-            <a href="#configuracion" class="sidebar-item">
-                ⚙️ Configuración
-            </a>
-        </nav>
-
-        <a href="/logout/" class="sidebar-logout">🚪 Salir</a>
-    </aside>
+    {% include 'core/sidebar.html' %}
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
@@ -425,16 +319,15 @@
                         {{ cliente.nombre }}
                     </a> / <strong>{{ sucursal.nombre }}</strong>
                 </div>
-                <h1>{{ titulo }}</h1>
             </div>
         </header>
 
         <section class="content">
-            <h2>Áreas de {{ sucursal.nombre }}</h2>
-
+            <h1 style="color: #667eea; margin-bottom: 30px;">{{ titulo }}</h1>
+            
             <div class="info-grid">
                 <div class="info-card">
-                    <h3>{{ cliente.nombre }}</h3>
+                    <h3>Información de la Sucursal</h3>
                     <p><strong>Sucursal:</strong> {{ sucursal.nombre }}</p>
                     <p><strong>Ciudad:</strong> {{ sucursal.ciudad|default:"—" }}</p>
                 </div>

@@ -3,103 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Termografía - VYC Predictivo Cloud</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
-            color: #333;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .sidebar-subtitle {
-            font-size: 0.85em;
-            opacity: 0.8;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sidebar-item {
-            display: block;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-left-color: #fff;
-            transform: translateX(5px);
-        }
-
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-left-color: #fff;
-        }
-
-        .sidebar-logout {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            text-align: center;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: auto;
-        }
-
-        .sidebar-logout:hover {
-            background: rgba(231, 76, 60, 0.8);
-            border-color: #e74c3c;
-        }
-
+    <title>Termografía - VYC Predictivo Cloud</title>    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">    <style>
         /* MAIN CONTENT */
         .main-content {
             flex: 1;
@@ -162,6 +69,80 @@
             line-height: 1.8;
             font-size: 1.05em;
             margin-bottom: 30px;
+        }
+
+        /* CLIENTE CARDS */
+        .clientes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .cliente-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #a7f3d0;
+            border-radius: 12px;
+            padding: 35px;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .cliente-card:hover {
+            box-shadow: 0 12px 30px rgba(39, 174, 96, 0.25), 0 0 20px rgba(39, 174, 96, 0.15);
+            border-color: #6ee7b7;
+        }
+
+        .cliente-card-header {
+            margin-bottom: 15px;
+        }
+
+        .cliente-card-nombre {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #065f46;
+            text-decoration: none;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .cliente-card-nombre:hover {
+            color: #047857;
+        }
+
+        .cliente-card-nombre {
+            cursor: pointer;
+        }
+
+        .cliente-card [href] {
+            cursor: pointer;
+        }
+
+        .cliente-card-info {
+            font-size: 0.9em;
+            color: #2d6a4f;
+            margin-bottom: 5px;
+            line-height: 1.6;
+        }
+
+        .cliente-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #a7f3d0;
+        }
+
+        .cliente-card-actions .btn-sm {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.85em;
+            text-align: center;
         }
 
         .table-container {
@@ -302,26 +283,7 @@
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">VYC Predictivo</div>
-            <div class="sidebar-subtitle">Cloud Analytics</div>
-        </div>
-
-        <nav class="sidebar-menu">
-            <a href="/vibraciones/" class="sidebar-item">
-                📊 Análisis de Vibraciones
-            </a>
-            <a href="/termografias/" class="sidebar-item active">
-                🌡️ Termografías
-            </a>
-            <a href="#configuracion" class="sidebar-item">
-                ⚙️ Configuración
-            </a>
-        </nav>
-
-        <a href="/logout/" class="sidebar-logout">🚪 Salir</a>
-    </aside>
+    {% include 'core/sidebar.html' %}
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
@@ -353,51 +315,36 @@
                 <h3 style="color: #667eea; margin-bottom: 15px;">Clientes Activos</h3>
                 
                 {% if clientes %}
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Contacto</th>
-                                <th>Teléfono</th>
-                                <th>Ciudad</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cliente in clientes %}
-                                <tr>
-                                    <td>
-                                        <a href="/termografias/cliente/{{ cliente.id }}/sucursales/" style="color: #667eea; text-decoration: none; font-weight: bold; cursor: pointer;">
-                                            {{ cliente.nombre }}
-                                        </a>
-                                    </td>
-                                    <td>{{ cliente.email }}</td>
-                                    <td>{{ cliente.contacto_nombre|default:"—" }}</td>
-                                    <td>{{ cliente.telefono|default:"—" }}</td>
-                                    <td>{{ cliente.ciudad|default:"—" }}</td>
-                                    <td>
+                    <div class="clientes-grid">
+                        {% for cliente in clientes %}
+                            <div class="cliente-card" onclick="window.location='/termografias/cliente/{{ cliente.id }}/sucursales/';" style="cursor: pointer;">
+                                <div class="cliente-card-header">
+                                    <a href="/termografias/cliente/{{ cliente.id }}/sucursales/" class="cliente-card-nombre" onclick="event.stopPropagation();">
+                                        {{ cliente.nombre }}
+                                    </a>
+                                    <div class="cliente-card-info" style="margin-bottom: 10px;">
                                         {% if cliente.activo %}
                                             <span class="status-badge status-active">Activo</span>
                                         {% else %}
                                             <span class="status-badge status-inactive">Inactivo</span>
                                         {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <a href="/termografias/cliente/{{ cliente.id }}/editar/" class="btn-sm btn-edit">
-                                                ✏️ Editar
-                                            </a>
-                                            <a href="/termografias/cliente/{{ cliente.id }}/eliminar/" class="btn-sm btn-delete" onclick="return confirm('¿Estás seguro?')">
-                                                🗑️ Eliminar
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                    </div>
+                                    <div class="cliente-card-info"><strong>📧</strong> {{ cliente.email }}</div>
+                                    <div class="cliente-card-info"><strong>👤</strong> {{ cliente.contacto_nombre|default:"—" }}</div>
+                                    <div class="cliente-card-info"><strong>📞</strong> {{ cliente.telefono|default:"—" }}</div>
+                                    <div class="cliente-card-info"><strong>🏢</strong> {{ cliente.ciudad|default:"—" }}</div>
+                                </div>
+                                <div class="cliente-card-actions">
+                                    <a href="/termografias/cliente/{{ cliente.id }}/editar/" class="btn-sm btn-edit" onclick="event.stopPropagation();">
+                                        ✏️ Editar
+                                    </a>
+                                    <a href="/termografias/cliente/{{ cliente.id }}/eliminar/" class="btn-sm btn-delete" onclick="event.stopPropagation(); return confirm('¿Estás seguro?')">
+                                        🗑️ Eliminar
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>

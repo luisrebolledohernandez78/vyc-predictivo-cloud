@@ -24,39 +24,56 @@ class ExcelEquiposParser:
             wb = openpyxl.load_workbook(self.archivo)
             ws = wb.active
             
+            # Detectar fila de inicio (la primera con "Aserradero", "Elaborado" o "Caldera")
+            inicio_datos = 2  # Default: fila 2
+            for idx, row in enumerate(ws.iter_rows(min_row=1, max_row=15, values_only=True), start=1):
+                if row[0] and str(row[0]).strip().lower() in ['aserradero', 'elaborado', 'caldera']:
+                    inicio_datos = idx
+                    break
+            
             datos = []
             area_actual = None
             equipo_actual = None
             
-            # Saltar encabezados (filas 1-8, datos comienzan en fila 9)
-            for row in ws.iter_rows(min_row=9, values_only=True):
-                if all(cell is None for cell in row[:4]):
+            # Parsear desde la fila detectada
+            for row_idx, row in enumerate(ws.iter_rows(min_row=inicio_datos, values_only=True), start=inicio_datos):
+                # Saltar filas completamente vacías
+                if all(cell is None or str(cell).strip() == '' for cell in row[:3]):
                     continue
                 
-                area_nombre = row[0]
-                equipo_nombre = row[1]
-                activo_nombre = row[2]
-                observaciones = row[3] if len(row) > 3 else None
+                # Procesar celdas y limpiar espacios
+                area_nombre = str(row[0]).strip() if row[0] else None
+                equipo_nombre = str(row[1]).strip() if row[1] else None
+                activo_nombre = str(row[2]).strip() if row[2] else None
+                observaciones = str(row[3]).strip() if len(row) > 3 and row[3] else None
+                
+                # Remover valores que son solo espacios o "None"
+                if area_nombre == '' or area_nombre == 'None':
+                    area_nombre = None
+                if equipo_nombre == '' or equipo_nombre == 'None':
+                    equipo_nombre = None
+                if activo_nombre == '' or activo_nombre == 'None':
+                    activo_nombre = None
                 
                 # Nueva área detectada
                 if area_nombre:
                     area_actual = self._normalizar_area(area_nombre)
                     if not area_actual:
-                        self.errores.append(f"Área no válida: {area_nombre}")
+                        self.errores.append(f"Fila {row_idx}: Área no válida: {area_nombre}")
                         continue
                     equipo_actual = None  # Reset equipo cuando cambia área
                 
                 # Nuevo equipo detectado
                 if equipo_nombre and area_actual:
-                    equipo_actual = equipo_nombre.strip()
+                    equipo_actual = equipo_nombre
                 
                 # Nuevo activo detectado
                 if activo_nombre and equipo_actual and area_actual:
                     datos.append({
                         'area': area_actual,
                         'equipo': equipo_actual,
-                        'activo': activo_nombre.strip(),
-                        'observaciones': observaciones.strip() if observaciones else None
+                        'activo': activo_nombre,
+                        'observaciones': observaciones if observaciones else None
                     })
             
             self.datos_parseados = datos
@@ -90,6 +107,13 @@ class ExcelEquiposParser:
                 'errores': self.errores
             }
         
+        # Orden estándar de áreas
+        AREA_ORDER = {
+            'aserradero': 1,
+            'elaborado': 2,
+            'caldera': 3,
+        }
+        
         preview = {
             'total_filas': len(self.datos_parseados),
             'por_area': {},
@@ -119,6 +143,12 @@ class ExcelEquiposParser:
             })
             preview['por_area'][area]['equipos'][equipo]['cantidad'] += 1
             preview['por_area'][area]['total_activos'] += 1
+        
+        # Ordenar áreas según orden estándar
+        preview['por_area'] = dict(sorted(
+            preview['por_area'].items(),
+            key=lambda x: AREA_ORDER.get(x[0], 999)
+        ))
         
         return preview
     

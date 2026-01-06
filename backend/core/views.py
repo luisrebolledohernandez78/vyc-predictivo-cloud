@@ -10,6 +10,18 @@ from .excel_parser import ExcelEquiposParser
 import tempfile
 
 
+# Orden estándar de áreas
+AREA_ORDER = {
+    'aserradero': 1,
+    'elaborado': 2,
+    'caldera': 3,
+}
+
+def ordenar_areas(areas):
+    """Ordena las áreas según el orden estándar: Aserradero, Elaborado, Caldera"""
+    return sorted(areas, key=lambda a: AREA_ORDER.get(a.nombre, 999))
+
+
 def welcome(request):
     """Página de bienvenida del portal"""
     return render(request, 'core/welcome.html')
@@ -330,6 +342,7 @@ def areas_vibraciones(request, cliente_id, sucursal_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     areas = sucursal.areas.filter(activo=True)
+    areas = ordenar_areas(areas)
     context = {
         'user': request.user,
         'cliente': cliente,
@@ -385,6 +398,7 @@ def areas_termografias(request, cliente_id, sucursal_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     areas = sucursal.areas.filter(activo=True)
+    areas = ordenar_areas(areas)
     context = {
         'user': request.user,
         'cliente': cliente,
@@ -653,6 +667,11 @@ def upload_equipos_vibraciones(request, cliente_id, sucursal_id):
             
             # Mostrar preview si es GET desde preview button
             preview = parser.obtener_preview()
+            # Guardar archivo y acción en sesión para la confirmación
+            request.session['archivo_temporal'] = archivo.read()
+            archivo.seek(0)  # Reset para que pueda releer si es necesario
+            request.session['archivo_nombre'] = archivo.name
+            request.session['accion_importacion'] = accion
             context = {
                 'form': form,
                 'cliente': cliente,
@@ -682,14 +701,37 @@ def confirmar_upload_equipos_vibraciones(request, cliente_id, sucursal_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     
-    if request.method == 'POST' and request.FILES['archivo']:
-        archivo = request.FILES['archivo']
-        accion = request.POST.get('accion', 'merge')
+    if request.method == 'POST':
+        # Recuperar archivo de sesión
+        if 'archivo_temporal' not in request.session:
+            return redirect('upload_equipos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
+        
+        # Recrear archivo desde sesión
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+        import io
+        
+        archivo_contenido = request.session['archivo_temporal']
+        archivo_nombre = request.session.get('archivo_nombre', 'archivo.xlsx')
+        archivo = InMemoryUploadedFile(
+            io.BytesIO(archivo_contenido),
+            'archivo',
+            archivo_nombre,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            len(archivo_contenido),
+            None
+        )
+        
+        accion = request.POST.get('accion', request.session.get('accion_importacion', 'merge'))
         
         # Parsear e importar
         parser = ExcelEquiposParser(archivo, sucursal)
         parser.parsear()
         resultado = parser.importar(accion)
+        
+        # Limpiar sesión
+        request.session.pop('archivo_temporal', None)
+        request.session.pop('archivo_nombre', None)
+        request.session.pop('accion_importacion', None)
         
         context = {
             'cliente': cliente,
@@ -918,6 +960,11 @@ def upload_equipos_termografias(request, cliente_id, sucursal_id):
             
             # Mostrar preview
             preview = parser.obtener_preview()
+            # Guardar archivo y acción en sesión para la confirmación
+            request.session['archivo_temporal'] = archivo.read()
+            archivo.seek(0)  # Reset para que pueda releer si es necesario
+            request.session['archivo_nombre'] = archivo.name
+            request.session['accion_importacion'] = accion
             context = {
                 'form': form,
                 'cliente': cliente,
@@ -947,14 +994,37 @@ def confirmar_upload_equipos_termografias(request, cliente_id, sucursal_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     
-    if request.method == 'POST' and request.FILES['archivo']:
-        archivo = request.FILES['archivo']
-        accion = request.POST.get('accion', 'merge')
+    if request.method == 'POST':
+        # Recuperar archivo de sesión
+        if 'archivo_temporal' not in request.session:
+            return redirect('upload_equipos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id)
+        
+        # Recrear archivo desde sesión
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+        import io
+        
+        archivo_contenido = request.session['archivo_temporal']
+        archivo_nombre = request.session.get('archivo_nombre', 'archivo.xlsx')
+        archivo = InMemoryUploadedFile(
+            io.BytesIO(archivo_contenido),
+            'archivo',
+            archivo_nombre,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            len(archivo_contenido),
+            None
+        )
+        
+        accion = request.POST.get('accion', request.session.get('accion_importacion', 'merge'))
         
         # Parsear e importar
         parser = ExcelEquiposParser(archivo, sucursal)
         parser.parsear()
         resultado = parser.importar(accion)
+        
+        # Limpiar sesión
+        request.session.pop('archivo_temporal', None)
+        request.session.pop('archivo_nombre', None)
+        request.session.pop('accion_importacion', None)
         
         context = {
             'cliente': cliente,

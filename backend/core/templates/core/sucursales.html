@@ -4,102 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
-            color: #333;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .sidebar-subtitle {
-            font-size: 0.85em;
-            opacity: 0.8;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sidebar-item {
-            display: block;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-left-color: #fff;
-            transform: translateX(5px);
-        }
-
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-left-color: #fff;
-        }
-
-        .sidebar-logout {
-            display: block;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .sidebar-logout:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-left-color: #fff;
-            transform: translateX(5px);
-        }
-
         .main-content {
             margin-left: 280px;
             flex: 1;
@@ -141,8 +50,7 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.35), 0 0 15px rgba(102, 126, 234, 0.2);
         }
 
         .btn-back {
@@ -161,7 +69,7 @@
 
         .btn-back:hover {
             background: #5568d3;
-            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3), 0 0 12px rgba(102, 126, 234, 0.15);
         }
 
         .content {
@@ -364,30 +272,7 @@
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">VYC Predictivo</div>
-            <div class="sidebar-subtitle">Cloud Analytics</div>
-        </div>
-
-        <nav class="sidebar-menu">
-            <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="sidebar-item">
-                {% if modulo == 'vibraciones' %}
-                    📊 Análisis de Vibraciones
-                {% else %}
-                    🌡️ Termografías
-                {% endif %}
-            </a>
-            <a href="/dashboard/" class="sidebar-item">
-                📈 Dashboard
-            </a>
-            <a href="#configuracion" class="sidebar-item">
-                ⚙️ Configuración
-            </a>
-        </nav>
-
-        <a href="/logout/" class="sidebar-logout">🚪 Salir</a>
-    </aside>
+    {% include 'core/sidebar.html' %}
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
@@ -398,23 +283,19 @@
                         {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
                     </a> / <strong>{{ cliente.nombre }}</strong>
                 </div>
-                <h1>{{ titulo }}</h1>
             </div>
             <div class="header-actions">
                 <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
                     ➕ Nueva Sucursal
                 </a>
-                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/upload-equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/upload-equipos/{% endif %}" class="btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    📁 Subir Planilla
-                </a>
             </div>
         </header>
 
         <section class="content">
-            <h2>Sucursales de {{ cliente.nombre }}</h2>
-
+            <h1 style="color: #667eea; margin-bottom: 30px;">{{ titulo }}</h1>
+            
             <div class="cliente-info">
-                <h3>{{ cliente.nombre }}</h3>
+                <h3>Información del Cliente</h3>
                 <p><strong>Email:</strong> {{ cliente.email }}</p>
                 <p><strong>Contacto:</strong> {{ cliente.contacto_nombre|default:"—" }}</p>
                 <p><strong>Teléfono:</strong> {{ cliente.telefono|default:"—" }}</p>
@@ -463,6 +344,9 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
+                                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/upload-equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/upload-equipos/{% endif %}" class="btn-sm" style="background-color: #17a2b8; color: white;">
+                                                📁 Subir
+                                            </a>
                                             <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/editar/{% endif %}" class="btn-sm btn-edit">
                                                 ✏️ Editar
                                             </a>
