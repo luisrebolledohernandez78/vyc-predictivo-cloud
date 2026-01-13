@@ -4,9 +4,34 @@
 
 {% block contenido %}
 <style>
+    .breadcrumb-container {
+        margin-bottom: 15px;
+        padding: 0;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 1em;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+
     /* Colores por Área */
     .card-header.area-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #002d52 0%, #0066cc 100%);
     }
     
     .card-header.area-aserradero {
@@ -17,14 +42,44 @@
         background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
     }
     
-    .card-header.area-caldera {
-        background: linear-gradient(135deg, #e67e22 0%, #ca6f1e 100%) !important;
+    /* Estado Select Styles */
+    .estado-select {
+        width: 100%;
+    }
+
+    .estado-select option {
+        padding: 8px;
+    }
+
+    .estado-select option[value="bueno"] {
+        background: #27ae60;
+        color: white;
+    }
+
+    .estado-select option[value="observacion"] {
+        background: #f1c40f;
+        color: #333;
+    }
+
+    .estado-select option[value="alarma"] {
+        background: #f39c12;
+        color: white;
+    }
+
+    .estado-select option[value="falla"] {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .estado-select option[value="sin_medicion"] {
+        background: #d3d3d3;
+        color: #333;
     }
 </style>
 
 <div class="container-fluid mt-4">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 {% if modulo == 'vibraciones' %}
@@ -113,12 +168,24 @@
                             {% endif %}
                         </div>
 
+                        <!-- Estado -->
+                        <div class="mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.estado.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Selecciona el estado actual del equipo basado en las mediciones</small>
+                        </div>
+
                         <!-- Activo -->
                         <div class="mb-3">
                             <div class="form-check">
                                 {{ form.activo }}
                                 <label class="form-check-label" for="{{ form.activo.id_for_label }}">
-                                    {{ form.activo.label }}
+                                    {{ form.activo.label }} (disponible para uso)
                                 </label>
                             </div>
                         </div>

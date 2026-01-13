@@ -69,11 +69,12 @@ class AreaForm(forms.ModelForm):
 class EquipoForm(forms.ModelForm):
     class Meta:
         model = Equipo
-        fields = ['nombre', 'descripcion', 'observaciones', 'activo']
+        fields = ['nombre', 'descripcion', 'observaciones', 'estado', 'activo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del equipo'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Potencia, RPM, Voltaje, etc.'}),
+            'estado': forms.Select(attrs={'class': 'form-control estado-select'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -81,11 +82,12 @@ class EquipoForm(forms.ModelForm):
 class ActivoForm(forms.ModelForm):
     class Meta:
         model = Activo
-        fields = ['nombre', 'descripcion', 'observaciones', 'activo']
+        fields = ['nombre', 'descripcion', 'observaciones', 'estado', 'activo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del activo'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Potencia, RPM, Voltaje, Fases, etc.'}),
+            'estado': forms.Select(attrs={'class': 'form-control estado-select'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

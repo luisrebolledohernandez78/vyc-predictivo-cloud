@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VYC Predictivo Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(90deg, #002d52 0%, #003366 50%, #004d99 100%);
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+            z-index: 0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg"><rect width="150" height="150" fill="%23002d52"/><circle cx="25" cy="30" r="0.4" fill="%23ffffff" opacity="0.8"/><circle cx="80" cy="95" r="0.3" fill="%23ffffff" opacity="0.6"/><circle cx="120" cy="50" r="0.25" fill="%23ffffff" opacity="0.3"/><circle cx="45" cy="15" r="0.35" fill="%23ffffff" opacity="0.8"/><circle cx="135" cy="120" r="0.3" fill="%23ffffff" opacity="0.5"/><circle cx="65" cy="135" r="0.25" fill="%23ffffff" opacity="0.2"/><circle cx="15" cy="75" r="0.3" fill="%23ffffff" opacity="0.6"/><circle cx="110" cy="70" r="0.35" fill="%23ffffff" opacity="0.8"/><circle cx="35" cy="125" r="0.25" fill="%23ffffff" opacity="0.25"/><circle cx="145" cy="35" r="0.3" fill="%23ffffff" opacity="0.7"/><circle cx="90" cy="140" r="0.35" fill="%23ffffff" opacity="0.8"/><circle cx="20" cy="60" r="0.25" fill="%23ffffff" opacity="0.2"/><circle cx="130" cy="100" r="0.3" fill="%23ffffff" opacity="0.7"/><circle cx="55" cy="25" r="0.4" fill="%23ffffff" opacity="0.6"/><circle cx="100" cy="110" r="0.25" fill="%23ffffff" opacity="0.3"/><circle cx="40" cy="85" r="0.3" fill="%23ffffff" opacity="0.7"/><circle cx="75" cy="55" r="0.35" fill="%23ffffff" opacity="0.6"/><circle cx="10" cy="120" r="0.25" fill="%23ffffff" opacity="0.25"/><circle cx="140" cy="75" r="0.3" fill="%23ffffff" opacity="0.5"/><circle cx="60" cy="10" r="0.4" fill="%23ffffff" opacity="0.7"/><circle cx="95" cy="25" r="0.25" fill="%23ffffff" opacity="0.2"/><circle cx="30" cy="55" r="0.35" fill="%23ffffff" opacity="0.8"/><circle cx="125" cy="140" r="0.3" fill="%23ffffff" opacity="0.7"/><circle cx="70" cy="80" r="0.25" fill="%23ffffff" opacity="0.3"/><circle cx="50" cy="100" r="0.3" fill="%23ffffff" opacity="0.8"/><circle cx="115" cy="15" r="0.35" fill="%23ffffff" opacity="0.6"/></svg>');
+            background-size: 150px 150px;
+            background-attachment: fixed;
+            background-repeat: repeat;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 160px 20px 30px 20px;
+            background: transparent;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 240px;
+            align-items: center;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-content {
+            max-width: 700px;
+            animation: slideUp 0.8s ease-out;
+            text-align: left;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .hero-features .feature-card {
+            padding: 10px;
+            background: linear-gradient(90deg, #1E88E5 0%, #00BCD4 100%);
+        }
+
+        .hero-features .feature-icon {
+            font-size: 1.1em;
+            margin-bottom: 3px;
+        }
+
+        .hero-features h3 {
+            font-size: 0.8em;
+            margin-bottom: 4px;
+        }
+
+        .hero-features p {
+            font-size: 0.7em;
+            line-height: 1.3;
+        }
+
+        .hero h2 {
+            color: #00897B;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 9px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #003366;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #003366;
+            transform: translateY(-3px);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 60px 20px 35px 20px;
+            background: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #00897B;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #FFEAA7 0%, #D3D3D3 100%);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            border-top: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 1.3em;
+            margin-bottom: 4px;
+        }
+
+        .feature-card h3 {
+            color: #003366;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+
+        .feature-card p {
+            color: #333;
+            line-height: 1.35;
+            font-size: 0.78em;
+        }
+
+        /* Login Section */
+        .login-section {
+            padding: 30px 20px;
+            background: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-container {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-box {
+            background: linear-gradient(135deg, #B3E5FC 0%, #D3D3D3 100%);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease-out;
+            height: fit-content;
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .form-box h3 {
+            color: #00897B;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: #003366;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            padding: 9px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            color: #003366;
+            font-size: 0.9em;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-submit {
+            background: linear-gradient(135deg, #003366 0%, #004d99 100%);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .form-submit:hover {
+            box-shadow: 0 12px 28px rgba(0, 51, 102, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            text-align: center;
+            color: #ccc;
+            margin: 12px 0;
+            font-size: 0.85em;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .back-link a {
+            color: #003366;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #004d99;
+            text-decoration: underline;
+        }
+
+        .error-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            animation: slideDown 0.4s ease-out, fadeOut 0.4s ease-out 3.6s forwards;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 2.2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .logo h1 {
+                font-size: 1.4em;
+            }
+
+            .form-box {
+                padding: 25px;
+            }
+
+            .hero {
+                min-height: auto;
+                padding: 40px 20px;
+            }
+
+            .hero-content {
+                text-align: center;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h2>VYC Predictivo Cloud ☁️</h2>
+                <p>Sistema de Análisis Predictivo de Activos Industriales</p>
+                <p style="font-size: 1.1em; color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
+                    Monitorea vibraciones y termografías en tiempo real. Detecta anomalías antes de que se conviertan en problemas.
+                </p>
+                <div class="hero-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Análisis de Vibraciones</h3>
+                        <p>Monitoreo continuo y análisis avanzado de vibración en maquinaria industrial.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌡️</div>
+                        <h3>Termografía Infrarroja</h3>
+                        <p>Detección térmica de anomalías en equipos. Identifica puntos calientes antes de que causen daños.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h3>Inicia Sesión</h3>
+                <form method="post" action="/login/">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="username">Usuario</label>
+                        <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required>
+                    </div>
+
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember" style="margin-bottom: 0;">Recuérdame</label>
+                    </div>
+
+                    <button type="submit" class="form-submit">Iniciar Sesión</button>
+                </form>
+
+                <div class="divider">O</div>
+
+                <div class="back-link">
+                    <a href="/admin/">Acceder como administrador →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <h2 class="section-title">Características Principales</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">☁️</div>
+                    <h3>Cloud-Based</h3>
+                    <p>Acceso desde cualquier lugar, en cualquier momento. Datos sincronizados en tiempo real.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Seguridad Premium</h3>
+                    <p>Datos encriptados, respaldos automáticos y certificaciones de seguridad industrial.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Reportes Avanzados</h3>
+                    <p>Genera reportes detallados con análisis predictivos y recomendaciones automáticas.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Alertas en Tiempo Real</h3>
+                    <p>Notificaciones instantáneas de anomalías detectadas en tus activos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 VYC Predictivo Cloud. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Smooth scroll to login
+        function scrollToLogin() {
+            const loginSection = document.getElementById('login');
+            loginSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show error toast if needed
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            const errorToast = document.createElement('div');
+            errorToast.className = 'error-toast';
+            errorToast.textContent = 'Usuario o contraseña inválidos';
+            document.body.appendChild(errorToast);
+            
+            setTimeout(() => {
+                errorToast.remove();
+            }, 4000);
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Scroll to login
+            setTimeout(() => scrollToLogin(), 300);
+        }
+    </script>
+</body>
+</html>

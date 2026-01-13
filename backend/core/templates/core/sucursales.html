@@ -12,20 +12,20 @@
         .main-content {
             margin-left: 280px;
             flex: 1;
-            padding: 40px;
+            padding: 25px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #e0e0e0;
         }
 
         header h1 {
-            font-size: 2.2em;
+            font-size: 1.4em;
             color: #333;
             margin: 0;
         }
@@ -75,46 +75,56 @@
         .content {
             background: white;
             border-radius: 12px;
-            padding: 40px;
+            padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         .content h2 {
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        .breadcrumb-container {
+            margin-bottom: 15px;
+            padding: 0;
         }
 
         .breadcrumb {
-            color: #999;
-            font-size: 0.95em;
-            margin-bottom: 20px;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            font-size: 1em;
         }
 
-        .breadcrumb a {
+        .breadcrumb-item a {
             color: #667eea;
             text-decoration: none;
         }
 
-        .breadcrumb a:hover {
+        .breadcrumb-item a:hover {
             text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #999;
         }
 
         .description {
             color: #555;
             line-height: 1.8;
-            font-size: 1.05em;
-            margin-bottom: 30px;
+            font-size: 0.8em;
+            margin-bottom: 15px;
         }
 
         .table-container {
-            margin-top: 40px;
+            margin-top: 25px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         thead {
@@ -123,15 +133,17 @@
         }
 
         th {
-            padding: 15px;
+            padding: 8px;
             text-align: left;
             font-weight: 600;
             color: #667eea;
+            font-size: 0.85em;
         }
 
         td {
-            padding: 15px;
+            padding: 8px;
             border-bottom: 1px solid #e0e0e0;
+            font-size: 0.85em;
         }
 
         tr:hover {
@@ -162,10 +174,10 @@
         }
 
         .btn-sm {
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: none;
             border-radius: 5px;
-            font-size: 0.9em;
+            font-size: 0.8em;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s ease;
@@ -215,32 +227,25 @@
 
         .cliente-info {
             background: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-left: 4px solid #667eea;
         }
 
         .cliente-info h3 {
             color: #667eea;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95em;
         }
 
         .cliente-info p {
             color: #555;
-            margin: 5px 0;
+            margin: 3px 0;
+            font-size: 0.85em;
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                flex-direction: row;
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-
             .main-content {
                 margin-left: 0;
                 padding: 20px;
@@ -276,22 +281,29 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-        <header>
-            <div>
-                <div class="breadcrumb">
-                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}">
-                        {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
-                    </a> / <strong>{{ cliente.nombre }}</strong>
+        <section class="content">
+            <!-- Breadcrumb y Botón -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <nav aria-label="breadcrumb" class="breadcrumb-container">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}">
+                                {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ cliente.nombre }}</li>
+                    </ol>
+                </nav>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="btn-back">
+                        ← Volver a clientes
+                    </a>
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
+                        ➕ Nueva Sucursal
+                    </a>
                 </div>
             </div>
-            <div class="header-actions">
-                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
-                    ➕ Nueva Sucursal
-                </a>
-            </div>
-        </header>
 
-        <section class="content">
             <h1 style="color: #667eea; margin-bottom: 30px;">{{ titulo }}</h1>
             
             <div class="cliente-info">
@@ -345,7 +357,7 @@
                                     <td>
                                         <div class="action-buttons">
                                             <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/upload-equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/upload-equipos/{% endif %}" class="btn-sm" style="background-color: #17a2b8; color: white;">
-                                                📁 Subir
+                                                📁 Subir activos
                                             </a>
                                             <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/editar/{% endif %}" class="btn-sm btn-edit">
                                                 ✏️ Editar
@@ -371,11 +383,6 @@
                 {% endif %}
             </div>
 
-            <div style="margin-top: 40px;">
-                <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="btn-back">
-                    ← Volver a clientes
-                </a>
-            </div>
         </section>
     </main>
 </body>

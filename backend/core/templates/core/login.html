@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #003366 0%, #004d99 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -81,7 +81,7 @@
         }
 
         .logo h1 {
-            color: #667eea;
+            color: #003366;
             font-size: 2em;
             margin-bottom: 5px;
         }
@@ -122,19 +122,39 @@
         input[type="text"]:focus,
         input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
         }
 
         .error-message {
-            color: #e74c3c;
-            font-size: 0.9em;
-            margin-top: 5px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 6px;
+            border: 1px solid #f5c6cb;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
             display: none;
+            z-index: 2000;
+            max-width: 300px;
+            animation: slideInNotif 0.3s ease-out;
         }
 
         .error-message.show {
             display: block;
+        }
+
+        @keyframes slideInNotif {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .remember-me {
@@ -153,7 +173,7 @@
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #003366 0%, #004d99 100%);
             color: white;
             padding: 12px 15px;
             border: none;
@@ -166,7 +186,7 @@
         }
 
         .btn-login:hover {
-            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.35), 0 0 15px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 12px 28px rgba(0, 51, 102, 0.35), 0 0 15px rgba(0, 51, 102, 0.2);
         }
 
         .btn-login:active {
@@ -184,14 +204,14 @@
         }
 
         .back-link a {
-            color: #667eea;
+            color: #003366;
             text-decoration: none;
             font-size: 0.95em;
             transition: color 0.3s ease;
         }
 
         .back-link a:hover {
-            color: #764ba2;
+            color: #004d99;
             text-decoration: underline;
         }
 
@@ -232,21 +252,22 @@
         </div>
     </div>
 
+    <div class="error-message" id="errorMessage"></div>
+
     <script>
-        // Mostrar mensaje de error durante 4 segundos si existe en la URL
+        // Mostrar mensaje de error durante 3 segundos si existe en la URL
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
         
         if (error) {
-            const errorToast = document.createElement('div');
-            errorToast.className = 'error-toast';
-            errorToast.textContent = 'Usuario o contraseña inválidos';
-            document.body.appendChild(errorToast);
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = 'Usuario o contraseña inválidos';
+            errorMessage.classList.add('show');
             
-            // Remover el toast después de 4 segundos
+            // Remover el mensaje después de 3 segundos
             setTimeout(() => {
-                errorToast.remove();
-            }, 4000);
+                errorMessage.classList.remove('show');
+            }, 3000);
             
             // Limpiar la URL
             window.history.replaceState({}, document.title, window.location.pathname);

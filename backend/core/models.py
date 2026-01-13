@@ -1,8 +1,31 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
+
+
+class UserProfile(models.Model):
+    """Modelo para extender el perfil del usuario"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    
+    # Timestamps
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Perfil de {self.user.username}"
+
+
+# Signal para crear automáticamente el perfil cuando se crea un usuario
+@receiver(post_save, sender=User)
+def crear_perfil_usuario(sender, instance, created, **kwargs):
+    """Crea automáticamente el perfil cuando se crea un nuevo usuario"""
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
 
 
 class Cliente(models.Model):
@@ -126,20 +149,38 @@ def crear_areas_sucursal(sender, instance, created, **kwargs):
 
 class Equipo(models.Model):
     """Modelo para equipos/máquinas dentro de un área"""
+    
+    # Estados del equipo
+    ESTADO_CHOICES = [
+        ('bueno', 'Bueno'),
+        ('observacion', 'Observación'),
+        ('alarma', 'Alarma'),
+        ('falla', 'Falla'),
+        ('sin_medicion', 'Sin Medición'),
+    ]
+    
     area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name='equipos')
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True, help_text='Potencia, RPM, Voltaje, etc.')
+    observaciones = models.CharField(max_length=500, default='Sin Observaciones', blank=True, null=True, help_text='Potencia, RPM, Voltaje, etc. (máx 500 caracteres)')
+    
+    # Estado
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='sin_medicion',
+        help_text='Estado actual del equipo basado en mediciones'
+    )
     
     # Timestamps
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
     
-    # Estado
+    # Estado de actividad
     activo = models.BooleanField(default=True)
     
     class Meta:
-        ordering = ['nombre']
+        ordering = ['-creado']
         verbose_name = 'Equipo'
         verbose_name_plural = 'Equipos'
         unique_together = ('area', 'nombre')
@@ -150,23 +191,75 @@ class Equipo(models.Model):
 
 class Activo(models.Model):
     """Modelo para activos/componentes dentro de un equipo"""
+    
+    # Estados del activo
+    ESTADO_CHOICES = [
+        ('bueno', 'Bueno'),
+        ('observacion', 'Observación'),
+        ('alarma', 'Alarma'),
+        ('falla', 'Falla'),
+        ('sin_medicion', 'Sin Medición'),
+    ]
+    
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='activos')
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True, help_text='Potencia, RPM, Voltaje, Fases, etc.')
+    observaciones = models.CharField(max_length=500, default='Sin Observaciones', blank=True, null=True, help_text='Potencia, RPM, Voltaje, Fases, etc. (máx 500 caracteres)')
+    
+    # Foto térmica (solo para activos en termografías)
+    foto_termica = models.ImageField(upload_to='termografias/activos/', blank=True, null=True, help_text='Foto térmica del activo')
+    
+    # Estado
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='sin_medicion',
+        help_text='Estado actual del activo basado en mediciones'
+    )
     
     # Timestamps
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
     
-    # Estado
+    # Estado de actividad
     activo = models.BooleanField(default=True)
     
     class Meta:
-        ordering = ['nombre']
+        ordering = ['-creado']
         verbose_name = 'Activo'
         verbose_name_plural = 'Activos'
     
     def __str__(self):
         return f"{self.nombre} - {self.equipo.nombre}"
 
+
+class AnalisisTermico(models.Model):
+    """Modelo para guardar análisis de imágenes térmicas"""
+    
+    activo = models.OneToOneField(Activo, on_delete=models.CASCADE, related_name='analisis_termico', null=True, blank=True)
+    
+    # Estadísticas térmicas
+    temperatura_promedio = models.FloatField(default=0, help_text='Temperatura promedio estimada (0-100)')
+    porcentaje_zona_critica = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona crítica')
+    porcentaje_zona_alerta = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona de alerta')
+    temperatura_maxima = models.FloatField(default=0, help_text='Temperatura máxima detectada')
+    temperatura_minima = models.FloatField(default=0, help_text='Temperatura mínima detectada')
+    
+    # Estado del análisis
+    ESTADO_CHOICES = [
+        ('normal', 'Normal'),
+        ('alerta', 'Alerta'),
+        ('critico', 'Crítico'),
+    ]
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='normal')
+    
+    # Metadata
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Análisis Térmico'
+        verbose_name_plural = 'Análisis Térmicos'
+    
+    def __str__(self):
+        return f"Análisis - {self.activo.nombre if self.activo else 'N/A'}"

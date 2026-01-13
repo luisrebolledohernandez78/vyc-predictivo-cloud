@@ -13,7 +13,7 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            padding: 40px;
+            padding: 25px;
             overflow-y: auto;
         }
 
@@ -21,14 +21,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #e0e0e0;
         }
 
         header h1 {
             color: #667eea;
-            font-size: 2.5em;
+            font-size: 1.8em;
         }
 
         .header-actions {
@@ -37,7 +37,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #002d52 0%, #0066cc 100%);
             color: white;
             padding: 12px 24px;
             border: none;
@@ -56,21 +56,21 @@
         .content {
             background: white;
             border-radius: 12px;
-            padding: 40px;
+            padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         .content h2 {
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: 15px;
+            font-size: 1.5em;
         }
 
         .description {
             color: #555;
             line-height: 1.8;
-            font-size: 1.05em;
-            margin-bottom: 30px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
         }
 
         /* CLIENTE CARDS */
@@ -85,8 +85,8 @@
             background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
             border: 2px solid #a7f3d0;
             border-radius: 12px;
-            padding: 35px;
-            height: 320px;
+            padding: 20px;
+            height: auto;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -105,11 +105,11 @@
         }
 
         .cliente-card-nombre {
-            font-size: 1.3em;
+            font-size: 1.1em;
             font-weight: bold;
             color: #065f46;
             text-decoration: none;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: block;
         }
 
@@ -126,10 +126,10 @@
         }
 
         .cliente-card-info {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #2d6a4f;
-            margin-bottom: 5px;
-            line-height: 1.6;
+            margin-bottom: 3px;
+            line-height: 1.5;
         }
 
         .cliente-card-actions {
@@ -245,15 +245,6 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                flex-direction: row;
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-
             .main-content {
                 margin-left: 0;
                 padding: 20px;
@@ -289,19 +280,13 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-        <header>
-            <div>
-                <h1>{{ titulo }}</h1>
-            </div>
-            <div class="header-actions">
+        <section class="content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2>{{ titulo }}</h2>
                 <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/crear/{% else %}/termografias/cliente/crear/{% endif %}" class="btn-primary">
                     ➕ Nuevo Cliente
                 </a>
             </div>
-        </header>
-
-        <section class="content">
-            <h2>{{ titulo }}</h2>
             
             <p class="description">
                 {{ descripcion }}

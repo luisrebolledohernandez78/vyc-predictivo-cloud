@@ -3,9 +3,36 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block contenido %}
+<style>
+    .breadcrumb-container {
+        margin-bottom: 15px;
+        padding: 0;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 1em;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 {% if modulo == 'vibraciones' %}
@@ -19,6 +46,13 @@
                     <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
                 {% else %}
                     <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item">
+                {% if modulo == 'vibraciones' %}
+                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+                {% else %}
+                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
                 {% endif %}
             </li>
             <li class="breadcrumb-item active">{{ titulo }}</li>

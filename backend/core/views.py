@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Cliente, Sucursal, Area, Equipo, Activo
@@ -23,8 +24,19 @@ def ordenar_areas(areas):
 
 
 def welcome(request):
-    """Página de bienvenida del portal"""
-    return render(request, 'core/welcome.html')
+    """Página de bienvenida y login del portal"""
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('/dashboard/')
+        else:
+            return redirect('/?error=1')
+    
+    return render(request, 'core/index.html')
 
 
 @require_http_methods(["GET", "POST"])
@@ -69,7 +81,7 @@ def vibraciones(request):
         'clientes': clientes,
         'modulo': 'vibraciones',
         'titulo': 'Análisis de Vibraciones',
-        'descripcion': 'Monitorea y analiza las vibraciones de tu maquinaria en tiempo real'
+        'descripcion': 'Monitorea y analiza las vibraciones de la maquinaria en tiempo real'
     }
     return render(request, 'core/vibraciones.html', context)
 
@@ -133,7 +145,7 @@ def termografias(request):
         'clientes': clientes,
         'modulo': 'termografias',
         'titulo': 'Termografía Infrarroja',
-        'descripcion': 'Detecta anomalías térmicas en tu equipamiento industrial'
+        'descripcion': 'Detecta anomalías térmicas en el equipamiento industrial'
     }
     return render(request, 'core/termografias.html', context)
 
@@ -667,9 +679,16 @@ def upload_equipos_vibraciones(request, cliente_id, sucursal_id):
             
             # Mostrar preview si es GET desde preview button
             preview = parser.obtener_preview()
-            # Guardar archivo y acción en sesión para la confirmación
-            request.session['archivo_temporal'] = archivo.read()
-            archivo.seek(0)  # Reset para que pueda releer si es necesario
+            # Guardar referencia del archivo en sesión (NO guardar bytes directamente)
+            import base64
+            from django.core.files.uploadedfile import InMemoryUploadedFile
+            
+            # Convertir archivo a base64 para guardarlo en sesión (JSON-safe)
+            archivo.seek(0)
+            archivo_contenido = archivo.read()
+            archivo_b64 = base64.b64encode(archivo_contenido).decode('utf-8')
+            
+            request.session['archivo_temporal_b64'] = archivo_b64
             request.session['archivo_nombre'] = archivo.name
             request.session['accion_importacion'] = accion
             context = {
@@ -703,14 +722,16 @@ def confirmar_upload_equipos_vibraciones(request, cliente_id, sucursal_id):
     
     if request.method == 'POST':
         # Recuperar archivo de sesión
-        if 'archivo_temporal' not in request.session:
+        if 'archivo_temporal_b64' not in request.session:
             return redirect('upload_equipos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
         
         # Recrear archivo desde sesión
         from django.core.files.uploadedfile import InMemoryUploadedFile
         import io
+        import base64
         
-        archivo_contenido = request.session['archivo_temporal']
+        archivo_b64 = request.session['archivo_temporal_b64']
+        archivo_contenido = base64.b64decode(archivo_b64.encode('utf-8'))
         archivo_nombre = request.session.get('archivo_nombre', 'archivo.xlsx')
         archivo = InMemoryUploadedFile(
             io.BytesIO(archivo_contenido),
@@ -729,7 +750,7 @@ def confirmar_upload_equipos_vibraciones(request, cliente_id, sucursal_id):
         resultado = parser.importar(accion)
         
         # Limpiar sesión
-        request.session.pop('archivo_temporal', None)
+        request.session.pop('archivo_temporal_b64', None)
         request.session.pop('archivo_nombre', None)
         request.session.pop('accion_importacion', None)
         
@@ -960,9 +981,16 @@ def upload_equipos_termografias(request, cliente_id, sucursal_id):
             
             # Mostrar preview
             preview = parser.obtener_preview()
-            # Guardar archivo y acción en sesión para la confirmación
-            request.session['archivo_temporal'] = archivo.read()
-            archivo.seek(0)  # Reset para que pueda releer si es necesario
+            # Guardar referencia del archivo en sesión (NO guardar bytes directamente)
+            import base64
+            from django.core.files.uploadedfile import InMemoryUploadedFile
+            
+            # Convertir archivo a base64 para guardarlo en sesión (JSON-safe)
+            archivo.seek(0)
+            archivo_contenido = archivo.read()
+            archivo_b64 = base64.b64encode(archivo_contenido).decode('utf-8')
+            
+            request.session['archivo_temporal_b64'] = archivo_b64
             request.session['archivo_nombre'] = archivo.name
             request.session['accion_importacion'] = accion
             context = {
@@ -996,14 +1024,16 @@ def confirmar_upload_equipos_termografias(request, cliente_id, sucursal_id):
     
     if request.method == 'POST':
         # Recuperar archivo de sesión
-        if 'archivo_temporal' not in request.session:
+        if 'archivo_temporal_b64' not in request.session:
             return redirect('upload_equipos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id)
         
         # Recrear archivo desde sesión
         from django.core.files.uploadedfile import InMemoryUploadedFile
         import io
+        import base64
         
-        archivo_contenido = request.session['archivo_temporal']
+        archivo_b64 = request.session['archivo_temporal_b64']
+        archivo_contenido = base64.b64decode(archivo_b64.encode('utf-8'))
         archivo_nombre = request.session.get('archivo_nombre', 'archivo.xlsx')
         archivo = InMemoryUploadedFile(
             io.BytesIO(archivo_contenido),
@@ -1022,7 +1052,7 @@ def confirmar_upload_equipos_termografias(request, cliente_id, sucursal_id):
         resultado = parser.importar(accion)
         
         # Limpiar sesión
-        request.session.pop('archivo_temporal', None)
+        request.session.pop('archivo_temporal_b64', None)
         request.session.pop('archivo_nombre', None)
         request.session.pop('accion_importacion', None)
         
@@ -1038,6 +1068,224 @@ def confirmar_upload_equipos_termografias(request, cliente_id, sucursal_id):
     return redirect('sucursales_termografias', cliente_id=cliente_id)
 
 
+@require_http_methods(["POST"])
+@login_required
+def actualizar_estado_equipo(request, equipo_id):
+    """Actualiza el estado de un equipo via AJAX"""
+    try:
+        equipo = get_object_or_404(Equipo, id=equipo_id)
+        nuevo_estado = request.POST.get('estado')
+        
+        if nuevo_estado in dict(Equipo.ESTADO_CHOICES):
+            equipo.estado = nuevo_estado
+            equipo.save()
+            return JsonResponse({
+                'success': True,
+                'estado': equipo.get_estado_display()
+            })
+        
+        return JsonResponse({'success': False, 'error': 'Estado inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required
+def actualizar_estado_activo(request, activo_id):
+    """Actualiza el estado de un activo via AJAX"""
+    try:
+        activo = get_object_or_404(Activo, id=activo_id)
+        nuevo_estado = request.POST.get('estado')
+        
+        if nuevo_estado in dict(Activo.ESTADO_CHOICES):
+            activo.estado = nuevo_estado
+            activo.save()
+            return JsonResponse({
+                'success': True,
+                'estado': activo.get_estado_display()
+            })
+        
+        return JsonResponse({'success': False, 'error': 'Estado inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required
+def actualizar_observacion_equipo(request, equipo_id):
+    """Actualiza la observación de un equipo via AJAX"""
+    try:
+        equipo = get_object_or_404(Equipo, id=equipo_id)
+        observacion = request.POST.get('observacion', '')
+        
+        equipo.observaciones = observacion
+        equipo.save()
+        return JsonResponse({
+            'success': True,
+            'observacion': equipo.observaciones
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required
+def actualizar_observacion_activo(request, activo_id):
+    """Actualiza la observación de un activo via AJAX"""
+    try:
+        activo = get_object_or_404(Activo, id=activo_id)
+        observacion = request.POST.get('observacion', '')
+        
+        activo.observaciones = observacion
+        activo.save()
+        return JsonResponse({
+            'success': True,
+            'observacion': activo.observaciones
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required
+def subir_foto_termica(request, activo_id):
+    """Sube una foto térmica para un activo y la analiza automáticamente"""
+    try:
+        from .analisis_termico import AnalizadorTermico
+        from .models import AnalisisTermico
+        
+        activo = get_object_or_404(Activo, id=activo_id)
+        
+        if 'foto' not in request.FILES:
+            return JsonResponse({'success': False, 'error': 'No se proporcionó archivo'}, status=400)
+        
+        archivo = request.FILES['foto']
+        
+        # Validar que sea una imagen
+        if not archivo.content_type.startswith('image/'):
+            return JsonResponse({'success': False, 'error': 'El archivo debe ser una imagen'}, status=400)
+        
+        # Eliminar foto anterior si existe
+        if activo.foto_termica:
+            activo.foto_termica.delete()
+        
+        # Guardar nueva foto
+        activo.foto_termica = archivo
+        activo.save()
+        
+        # Analizar la imagen térmica
+        analizador = AnalizadorTermico()
+        resultado_analisis = analizador.analizar_imagen(activo.foto_termica.path)
+        
+        if 'error' in resultado_analisis:
+            return JsonResponse({
+                'success': True,
+                'foto_url': activo.foto_termica.url,
+                'mensaje': 'Foto subida pero análisis no disponible',
+                'error_analisis': resultado_analisis['error']
+            })
+        
+        # Guardar o actualizar análisis
+        analisis, creado = AnalisisTermico.objects.update_or_create(
+            activo=activo,
+            defaults={
+                'temperatura_promedio': resultado_analisis['temperatura_promedio'],
+                'temperatura_maxima': resultado_analisis['temperatura_maxima'],
+                'temperatura_minima': resultado_analisis['temperatura_minima'],
+                'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
+                'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
+                'estado': resultado_analisis['estado'],
+            }
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'foto_url': activo.foto_termica.url,
+            'mensaje': 'Foto subida y analizada correctamente',
+            'analisis': {
+                'temperatura_promedio': resultado_analisis['temperatura_promedio'],
+                'temperatura_maxima': resultado_analisis['temperatura_maxima'],
+                'temperatura_minima': resultado_analisis['temperatura_minima'],
+                'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
+                'porcentaje_zona_caliente': resultado_analisis['porcentaje_zona_caliente'],
+                'estado': resultado_analisis['estado'],
+                'mensaje_analisis': resultado_analisis['mensaje']
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required(login_url='/login/')
+def configuracion(request):
+    """Vista de configuración del usuario"""
+    return render(request, 'core/configuracion.html')
+
+
+@login_required(login_url='/login/')
+def upload_profile_photo(request):
+    """Maneja la carga de foto de perfil"""
+    if request.method == 'POST':
+        try:
+            photo_file = request.FILES.get('photo')
+            
+            if not photo_file:
+                return JsonResponse({'success': False, 'error': 'No se recibió archivo'}, status=400)
+            
+            # Validar tamaño
+            if photo_file.size > 5 * 1024 * 1024:  # 5MB
+                return JsonResponse({'success': False, 'error': 'Archivo muy grande'}, status=400)
+            
+            # Validar tipo
+            if photo_file.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+                return JsonResponse({'success': False, 'error': 'Tipo de archivo no permitido'}, status=400)
+            
+            # Obtener o crear el perfil del usuario
+            from .models import UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=request.user)
+            
+            # Guardar la foto en el perfil
+            profile.photo = photo_file
+            profile.save()
+            
+            return JsonResponse({
+                'success': True, 
+                'message': 'Foto subida exitosamente',
+                'photo_url': profile.photo.url
+            })
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+
+@login_required(login_url='/login/')
+def save_config(request):
+    """Guarda la configuración del usuario"""
+    if request.method == 'POST':
+        try:
+            user = request.user
+            
+            # Actualizar datos del usuario
+            user.first_name = request.POST.get('first_name', user.first_name)
+            user.last_name = request.POST.get('last_name', user.last_name)
+            user.email = request.POST.get('email', user.email)
+            
+            user.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Configuración guardada exitosamente'
+            })
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+
 @api_view(["GET"])
 def health(request):
     return Response({"status": "ok", "service": "vyc-predictivo-cloud"})
+

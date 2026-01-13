@@ -10,7 +10,7 @@ Este documento establece los colores institucionales del sistema VYC Predictivo 
 |------|---|---|---|---|---|
 | **Aserradero** | `#27ae60` | `#d5f4e6` / `#f0fdf4` | `#1e8449` | Verde suave para el área de aserradero (árbol/madera verde) | 🌳 |
 | **Elaborado** | `#d4af37` | `#fef9e7` / `#fff8dc` | `#b8860b` | Dorado para el área de elaboración (madera procesada) | 🌲 |
-| **Caldera** | `#e67e22` | `#fdebd0` / `#fff5ee` | `#ca6f1e` | Naranjo para el área de caldera (calor/temperatura) | 🔥 |
+| **Caldera** | `#e53935` | `#ffebee` / `#ffcdd2` | `#c62828` | Rojo para el área de caldera (calor/temperatura) | 🔥 |
 
 ## Uso en Interfaces
 
@@ -32,7 +32,7 @@ Este documento establece los colores institucionales del sistema VYC Predictivo 
 <!-- Caldera -->
 <div class="area-card caldera">
     <!-- Fondo: #fff5ee - #ffe4c4 (gradiente suave) -->
-    <!-- Borde izquierdo: #e67e22 -->
+    <!-- Borde izquierdo: #e53935 -->
 </div>
 ```
 
@@ -109,10 +109,10 @@ En el accordion y resumen de datos durante carga de Excel:
     --area-elaborado-lighter: #fff8dc;
     --area-elaborado-dark: #b8860b;
     
-    --area-caldera-primary: #e67e22;
+    --area-caldera-primary: #e53935;
     --area-caldera-light: #fdebd0;
     --area-caldera-lighter: #fff5ee;
-    --area-caldera-dark: #ca6f1e;
+    --area-caldera-dark: #c62828;
 }
 ```
 

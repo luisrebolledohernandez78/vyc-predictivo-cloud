@@ -3,139 +3,518 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block contenido %}
-<div class="container-fluid mt-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
-                {% else %}
-                    <a href="{% url 'termografias' %}">Termografías</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item active">{{ titulo }}</li>
-        </ol>
-    </nav>
+<style>
+    /* Override de estilos heredados */
+    .clientes-grid {
+        display: block !important;
+        grid-template-columns: unset !important;
+        gap: unset !important;
+    }
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-gradient">
-                    <h4 class="card-title mb-0">{{ titulo }}</h4>
-                </div>
-                <div class="card-body">
-                    <!-- Errores -->
-                    {% if errores %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <h5>Errores encontrados:</h5>
-                            <ul class="mb-0">
-                                {% for error in errores %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endif %}
+    .breadcrumb-container {
+        margin-bottom: 15px;
+        padding: 0;
+    }
 
-                    <!-- Información -->
-                    <div class="alert alert-info mb-4">
-                        <h5>Formato esperado del Excel:</h5>
-                        <table class="table table-sm table-bordered mb-0 mt-2">
-                            <thead>
-                                <tr>
-                                    <th>Columna A</th>
-                                    <th>Columna B</th>
-                                    <th>Columna C</th>
-                                    <th>Columna D</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Área</strong></td>
-                                    <td><strong>Equipo</strong></td>
-                                    <td><strong>Activo</strong></td>
-                                    <td><strong>Observaciones</strong></td>
-                                </tr>
-                                <tr class="text-muted">
-                                    <td>Aserradero</td>
-                                    <td>Cabezales M1</td>
-                                    <td>Motor</td>
-                                    <td>5.5 kW, 1800 RPM</td>
-                                </tr>
-                                <tr class="text-muted">
-                                    <td></td>
-                                    <td></td>
-                                    <td>Válvula Métrica</td>
-                                    <td>Presión 2.5 bar</td>
-                                </tr>
-                            </tbody>
-                        </table>
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 1em;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+
+    .upload-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        border: none;
+        width: 100% !important;
+    }
+
+    .upload-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-bottom: 4px solid #667eea;
+    }
+
+    .upload-header h1 {
+        margin: 0;
+        font-size: 1.4em;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .upload-header i {
+        font-size: 1.5em;
+    }
+
+    .upload-body {
+        padding: 18px;
+    }
+
+    .error-alert {
+        background: #f8d7da;
+        border-left: 4px solid #f5c6cb;
+        color: #721c24;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+    }
+
+    .error-alert h5 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.95em;
+    }
+
+    .error-alert ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .format-section {
+        background: linear-gradient(135deg, #e0f4ff 0%, #d4e9ff 100%);
+        border-left: 5px solid #17a2b8;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+    }
+
+    .format-section h3 {
+        color: #0c5460;
+        margin: 0 0 10px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1em;
+    }
+
+    .format-table {
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        width: 100%;
+        font-size: 0.85em;
+    }
+
+    .format-table thead {
+        background: #0c5460;
+        color: white;
+    }
+
+    .format-table th {
+        padding: 8px;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .format-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .format-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .format-table tbody tr:nth-child(odd) {
+        background: #f8f9fa;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 18px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+
+    .form-section h3 {
+        color: #333;
+        margin: 0 0 12px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1em;
+    }
+
+    .file-upload-zone {
+        border: 2px dashed #667eea;
+        border-radius: 10px;
+        padding: 25px 15px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-zone:hover {
+        border-color: #764ba2;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .file-upload-zone input[type="file"] {
+        display: none;
+    }
+
+    .file-upload-icon {
+        font-size: 1.8em;
+        color: #667eea;
+        margin-bottom: 8px;
+    }
+
+    .file-upload-text {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95em;
+    }
+
+    .file-upload-subtext {
+        margin: 3px 0 0 0;
+        color: #6c757d;
+        font-size: 0.8em;
+    }
+
+    .section-divider {
+        border-top: 2px solid #e9ecef;
+        margin: 15px 0;
+        padding: 0;
+    }
+
+    .form-label-custom {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95em;
+    }
+
+    .action-options-card {
+        background: #f8f9fa;
+        border-left: 5px solid #667eea;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+    }
+
+    .radio-option {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+
+    .radio-option:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.1);
+    }
+
+    .radio-option input[type="radio"] {
+        margin-right: 6px;
+        cursor: pointer;
+    }
+
+    .radio-option label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 15px;
+    }
+
+    .btn-cancel {
+        background: #e9ecef;
+        color: #495057;
+        padding: 8px 18px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+    }
+
+    .btn-cancel:hover {
+        background: #dee2e6;
+        color: #212529;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+    }
+
+    .btn-submit:hover {
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .error-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px 20px;
+        border-radius: 6px;
+        border: 1px solid #f5c6cb;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        display: none;
+        z-index: 2000;
+        max-width: 300px;
+        animation: slideInNotif 0.3s ease-out;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    .success-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #d4edda;
+        color: #155724;
+        padding: 15px 20px;
+        border-radius: 6px;
+        border: 1px solid #c3e6cb;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        display: none;
+        z-index: 2000;
+        max-width: 300px;
+        animation: slideInNotif 0.3s ease-out;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    @keyframes slideInNotif {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="breadcrumb-container">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            {% if modulo == 'vibraciones' %}
+                <a href="{% url 'vibraciones' %}">Vibraciones</a>
+            {% else %}
+                <a href="{% url 'termografias' %}">Termografías</a>
+            {% endif %}
+        </li>
+        <li class="breadcrumb-item">
+            {% if modulo == 'vibraciones' %}
+                <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
+            {% else %}
+                <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
+            {% endif %}
+        </li>
+        <li class="breadcrumb-item">
+            {% if modulo == 'vibraciones' %}
+                <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+            {% else %}
+                <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
+            {% endif %}
+        </li>
+        <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
+</nav>
+
+<!-- Main Card -->
+<div class="upload-card" style="display: block !important; width: calc(100vw - 420px) !important; max-width: none !important; margin: 0 !important; padding: 0 !important;">
+    <!-- Header -->
+    <div class="upload-header">
+        <h1>
+            <i class="fas fa-file-upload"></i> {{ titulo }}
+        </h1>
+    </div>
+
+    <!-- Body -->
+    <div class="upload-body" style="width: 100% !important; box-sizing: border-box !important;">
+        <!-- Error Alert -->
+        {% if errores %}
+            <div class="error-alert">
+                <h5><i class="fas fa-exclamation-circle"></i> Errores encontrados:</h5>
+                <ul>
+                    {% for error in errores %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Format Section -->
+        <div class="format-section">
+            <h3>
+                <i class="fas fa-table"></i> Formato esperado del Excel
+            </h3>
+            <table class="format-table">
+                <thead>
+                    <tr>
+                        <th>Columna A</th>
+                        <th>Columna B</th>
+                        <th>Columna C</th>
+                        <th>Columna D</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Área</strong></td>
+                        <td><strong>Equipo</strong></td>
+                        <td><strong>Activo</strong></td>
+                        <td><strong>Observaciones</strong></td>
+                    </tr>
+                    <tr>
+                        <td><small>Aserradero</small></td>
+                        <td><small>Cabezales M1</small></td>
+                        <td><small>Motor</small></td>
+                        <td><small>5.5 kW, 1800 RPM</small></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td><small>Válvula Métrica</small></td>
+                        <td><small>Presión 2.5 bar</small></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Form Section -->
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <!-- File Upload -->
+                <h3>
+                    <i class="fas fa-file-excel"></i> Seleccionar Archivo
+                </h3>
+                
+                <div class="file-upload-zone" onclick="document.getElementById('id_archivo').click();">
+                    <div class="file-upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
                     </div>
+                    <p class="file-upload-text">Haz clic para seleccionar archivo</p>
+                    <p class="file-upload-subtext">o arrastra y suelta un archivo .xlsx o .xls</p>
+                </div>
+                
+                {{ form.archivo }}
+                
+                <div class="error-message" id="errorMessage" style="{% if not form.archivo.errors %}display: none;{% endif %}">
+                    {% if form.archivo.errors %}
+                        <strong>Error:</strong> {{ form.archivo.errors.0 }}
+                    {% endif %}
+                </div>
 
-                    <!-- Formulario -->
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        
-                        <!-- Archivo -->
-                        <div class="mb-3">
-                            <label for="{{ form.archivo.id_for_label }}" class="form-label">
-                                <i class="fas fa-file-upload"></i> {{ form.archivo.label }}
-                            </label>
-                            {{ form.archivo }}
-                            <small class="form-text text-muted d-block mt-2">
-                                Cargue un archivo .xlsx o .xls con el listado de equipos y activos
-                            </small>
-                            {% if form.archivo.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.archivo.errors.0 }}
-                                </div>
-                            {% endif %}
+                <!-- Action Selection -->
+                <div class="section-divider"></div>
+                
+                <h3 class="form-label-custom">
+                    <i class="fas fa-cog"></i> ¿Qué desea hacer con los datos?
+                </h3>
+                
+                <div class="action-options-card">
+                    {% for value, label in form.accion.field.choices %}
+                        <div class="radio-option">
+                            <input type="radio" name="accion" id="accion_{{ value }}" value="{{ value }}" {% if form.accion.value == value %}checked{% endif %}>
+                            <label for="accion_{{ value }}">{{ label }}</label>
                         </div>
+                    {% endfor %}
+                </div>
 
-                        <!-- Acción -->
-                        <div class="mb-4">
-                            <label class="form-label">¿Qué desea hacer con los datos?</label>
-                            <div class="card border-light">
-                                <div class="card-body">
-                                    {% for value, label in form.accion.field.choices %}
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input" type="radio" name="accion" id="accion_{{ value }}" value="{{ value }}" {% if form.accion.value == value %}checked{% endif %}>
-                                            <label class="form-check-label" for="accion_{{ value }}">
-                                                <strong>{{ label }}</strong>
-                                            </label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            {% if modulo == 'vibraciones' %}
-                                <a href="{% url 'sucursales_vibraciones' cliente.id %}" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </a>
-                            {% else %}
-                                <a href="{% url 'sucursales_termografias' cliente.id %}" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </a>
-                            {% endif %}
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-eye"></i> Ver Preview
-                            </button>
-                        </div>
-                    </form>
+                <!-- Buttons -->
+                <div class="button-container">
+                    {% if modulo == 'vibraciones' %}
+                        <a href="{% url 'sucursales_vibraciones' cliente.id %}" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'sucursales_termografias' cliente.id %}" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    {% endif %}
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-eye"></i> Ver Preview
+                    </button>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 {% endblock %}
+
+<script>
+    // Auto-hide error message after 3 seconds
+    window.addEventListener('load', function() {
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage && errorMessage.style.display !== 'none') {
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 3000);
+        }
+    });
+</script>

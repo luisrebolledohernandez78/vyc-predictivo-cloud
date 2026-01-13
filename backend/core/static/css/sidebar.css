@@ -12,13 +12,14 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f5f6fa;
     color: #333;
-    display: flex;
     min-height: 100vh;
 }
 
-.sidebar {
+.main-content {
+    margin-left: 280px;
+}
     width: 280px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #002d52 0%, #0066cc 100%);
     position: fixed;
     left: 0;
     top: 0;

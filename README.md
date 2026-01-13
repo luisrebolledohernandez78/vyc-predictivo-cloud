@@ -120,7 +120,7 @@ GET  /termografias/cliente/<id>/sucursal/<id>/areas/- Listar áreas
 |------|---|---|---|
 | **Aserradero** | `#27ae60` (Verde) | Área de aserrado - Madera verde 🌳 | Cards, badges, bordes de área |
 | **Elaborado** | `#d4af37` (Dorado) | Área de elaboración - Madera procesada 🌲 | Cards, badges, bordes de área |
-| **Caldera** | `#e67e22` (Naranjo) | Área de caldera - Calor/temperatura 🔥 | Cards, badges, bordes de área |
+| **Caldera** | `#e53935` (Rojo) | Área de caldera - Calor/temperatura 🔥 | Cards, badges, bordes de área |
 
 #### Variantes de Color Recomendadas
 ```css
@@ -137,10 +137,10 @@ GET  /termografias/cliente/<id>/sucursal/<id>/areas/- Listar áreas
 --area-elaborado-dark: #b8860b;
 
 /* CALDERA - Naranjo */
---area-caldera-primary: #e67e22;
+--area-caldera-primary: #e53935;
 --area-caldera-light: #fdebd0;
 --area-caldera-lighter: #fff5ee;
---area-caldera-dark: #ca6f1e;
+--area-caldera-dark: #c62828;
 ```
 
 #### Colores Corporativos Generales

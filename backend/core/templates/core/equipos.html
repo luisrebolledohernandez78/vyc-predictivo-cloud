@@ -1,9 +1,41 @@
-{% extends 'core/base.html' %}
+{% extends 'core/areas.html' %}
 
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block contenido %}
 <style>
+    .breadcrumb-container {
+        margin-bottom: 15px;
+        padding: 0;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 1em;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+
+    .content {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
     /* Colores por Área */
     .area-header {
         padding: 20px 30px;
@@ -22,13 +54,241 @@
     }
     
     .area-header.caldera {
-        background: linear-gradient(135deg, #e67e22 0%, #ca6f1e 100%);
+        background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 6px;
+        border: none;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+        margin: 0 2px;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-action.btn-view {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .btn-action.btn-view:hover {
+        background-color: #5568d3;
+        color: white;
+    }
+
+    .btn-action.btn-edit {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-action.btn-edit:hover {
+        background-color: #d97706;
+        color: white;
+    }
+
+    .btn-action.btn-delete {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-action.btn-delete:hover {
+        background-color: #dc2626;
+        color: white;
+    }
+
+    .actions-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .btn-back {
+        background: #95a5a6;
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95em;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-back:hover {
+        background: #7f8c8d;
+        color: white;
+        transform: translateX(-2px);
+    }
+
+    .btn-action i {
+        font-size: 1.1em;
+    }
+
+    /* Estado Badges */
+    .badge-estado {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85em;
+    }
+
+    .badge-estado.bueno {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .badge-estado.observacion {
+        background-color: #f1c40f;
+        color: #333;
+    }
+
+    .badge-estado.alarma {
+        background-color: #f39c12;
+        color: white;
+    }
+
+    .badge-estado.falla {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .badge-estado.sin_medicion {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .equipo-nombre {
+        cursor: pointer;
+        transition: color 0.3s ease;
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .equipo-nombre:hover {
+        color: #667eea;
+        text-decoration: underline;
+    }
+
+    .estado-select {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 2px solid #e0e0e0;
+        font-weight: 600;
+        font-size: 0.9em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .estado-select:hover {
+        border-color: #667eea;
+    }
+
+    .estado-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .estado-select.bueno {
+        background-color: #27ae60;
+        color: white;
+        border-color: #1e8449;
+    }
+
+    .estado-select.observacion {
+        background-color: #f1c40f;
+        color: #333;
+        border-color: #e6b800;
+    }
+
+    .estado-select.alarma {
+        background-color: #f39c12;
+        color: white;
+        border-color: #d68910;
+    }
+
+    .estado-select.falla {
+        background-color: #e74c3c;
+        color: white;
+        border-color: #c0392b;
+    }
+
+    .estado-select.sin_medicion {
+        background-color: #d3d3d3;
+        color: #333;
+        border-color: #bfbfbf;
+    }
+
+    .obs-text {
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        display: inline-block;
+        min-width: 100px;
+        max-width: 300px;
+        word-wrap: break-word;
+        white-space: normal;
+    }
+
+    .obs-text:hover {
+        background-color: #f0f0f0;
+        color: #667eea;
+    }
+
+    .obs-input {
+        padding: 8px 10px;
+        border: 2px solid #667eea;
+        border-radius: 4px;
+        font-size: 0.9em;
+        width: 300px;
+        max-width: 100%;
+        min-height: 60px;
+        font-family: inherit;
+        resize: vertical;
+        line-height: 1.4;
+    }
+
+    .obs-counter {
+        font-size: 0.75em;
+        color: #999;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .obs-counter.show {
+        display: block;
+    }
+
+    .obs-counter.warning {
+        color: #f39c12;
+    }
+
+    .obs-counter.danger {
+        color: #e74c3c;
     }
 </style>
 
-<div class="container-fluid mt-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+<!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 {% if modulo == 'vibraciones' %}
@@ -63,38 +323,43 @@
 
     <!-- Acciones -->
     <div class="row mb-4">
+        <div class="col-auto">
+            {% if modulo == 'vibraciones' %}
+                <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            {% else %}
+                <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            {% endif %}
+        </div>
         <div class="col-auto ms-auto">
             {% if modulo == 'vibraciones' %}
                 <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="btn btn-success">
                     <i class="fas fa-plus"></i> Nuevo Equipo
                 </a>
-                <a href="{% url 'upload_equipos_vibraciones' cliente.id sucursal.id %}" class="btn btn-info">
-                    <i class="fas fa-file-upload"></i> Subir Planilla
-                </a>
             {% else %}
                 <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="btn btn-success">
                     <i class="fas fa-plus"></i> Nuevo Equipo
-                </a>
-                <a href="{% url 'upload_equipos_termografias' cliente.id sucursal.id %}" class="btn btn-info">
-                    <i class="fas fa-file-upload"></i> Subir Planilla
                 </a>
             {% endif %}
         </div>
     </div>
 
     <!-- Tabla de Equipos -->
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" style="margin: 0 -25px -25px -25px; border-radius: 0 0 12px 12px;">
         <div class="card-body">
             {% if equipos %}
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Observaciones</th>
-                                <th>Activos</th>
-                                <th>Estado</th>
+                                <th class="text-center">Nombre</th>
+                                <th class="text-center">Descripción</th>
+                                <th class="text-center">Activos</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Observaciones</th>
                                 <th class="text-center" style="width: 150px;">Acciones</th>
                             </tr>
                         </thead>
@@ -102,42 +367,62 @@
                             {% for equipo in equipos %}
                                 <tr>
                                     <td>
-                                        <strong>{{ equipo.nombre }}</strong>
-                                    </td>
-                                    <td class="text-muted small">{{ equipo.descripcion|truncatewords:8 }}</td>
-                                    <td class="text-muted small">{{ equipo.observaciones|truncatewords:8 }}</td>
-                                    <td>
-                                        <span class="badge bg-primary">{{ equipo.activos.count }} activos</span>
-                                    </td>
-                                    <td>
-                                        {% if equipo.activo %}
-                                            <span class="badge bg-success">Activo</span>
+                                        {% if modulo == 'vibraciones' %}
+                                            <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="equipo-nombre">
+                                                {{ equipo.nombre }}
+                                            </a>
                                         {% else %}
-                                            <span class="badge bg-secondary">Inactivo</span>
+                                            <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="equipo-nombre">
+                                                {{ equipo.nombre }}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small text-center">{{ equipo.descripcion|truncatewords:8 }}</td>
+                                    <td class="text-center">
+                                        {% if modulo == 'vibraciones' %}
+                                            <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="badge bg-primary text-decoration-none">
+                                                {{ equipo.activos.count }} activos
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="badge bg-primary text-decoration-none">
+                                                {{ equipo.activos.count }} activos
+                                            </a>
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if modulo == 'vibraciones' %}
-                                            <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-primary" title="Ver Activos">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{% url 'editar_equipo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-warning" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{% url 'eliminar_equipo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-primary" title="Ver Activos">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{% url 'editar_equipo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-warning" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{% url 'eliminar_equipo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        {% endif %}
+                                        <select class="estado-select {{ equipo.estado }}" data-equipo-id="{{ equipo.id }}" onchange="actualizarEstadoEquipo(this)">
+                                            <option value="bueno" {% if equipo.estado == 'bueno' %}selected{% endif %}>Bueno</option>
+                                            <option value="observacion" {% if equipo.estado == 'observacion' %}selected{% endif %}>Observación</option>
+                                            <option value="alarma" {% if equipo.estado == 'alarma' %}selected{% endif %}>Alarma</option>
+                                            <option value="falla" {% if equipo.estado == 'falla' %}selected{% endif %}>Falla</option>
+                                            <option value="sin_medicion" {% if equipo.estado == 'sin_medicion' %}selected{% endif %}>Sin Medición</option>
+                                        </select>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="obs-text" data-equipo-id="{{ equipo.id }}" onclick="editarObservacion(this)">{{ equipo.observaciones|default:"Sin Observaciones" }}</span>
+                                        <div style="display:none;" class="obs-edit-container" data-equipo-id="{{ equipo.id }}">
+                                            <textarea class="obs-input" data-equipo-id="{{ equipo.id }}" maxlength="500" onblur="guardarObservacion(this)" onkeypress="if(event.key==='Enter' && event.ctrlKey) guardarObservacion(this); actualizarContador(this)" oninput="actualizarContador(this)" placeholder="Ingresa observaciones (Ctrl+Enter para guardar)">{{ equipo.observaciones|default:'' }}</textarea>
+                                            <div class="obs-counter" data-equipo-id="{{ equipo.id }}"><span class="current">0</span>/500</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="actions-cell">
+                                            {% if modulo == 'vibraciones' %}
+                                                <a href="{% url 'editar_equipo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'eliminar_equipo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-action btn-delete" title="Eliminar" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'editar_equipo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'eliminar_equipo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-action btn-delete" title="Eliminar" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -154,7 +439,134 @@
                     {% endif %}
                 </div>
             {% endif %}
-        </div>
-    </div>
-</div>
+
+<script>
+function actualizarContador(textarea) {
+    const equipoId = textarea.getAttribute('data-equipo-id');
+    const contador = document.querySelector(`.obs-counter[data-equipo-id="${equipoId}"]`);
+    const current = contador.querySelector('.current');
+    const length = textarea.value.length;
+    
+    current.textContent = length;
+    contador.classList.add('show');
+    
+    if (length > 450) {
+        contador.classList.add('danger');
+        contador.classList.remove('warning');
+    } else if (length > 400) {
+        contador.classList.add('warning');
+        contador.classList.remove('danger');
+    } else {
+        contador.classList.remove('warning', 'danger');
+    }
+}
+
+function editarObservacion(element) {
+    const equipoId = element.getAttribute('data-equipo-id');
+    const container = document.querySelector(`.obs-edit-container[data-equipo-id="${equipoId}"]`);
+    const textarea = container.querySelector(`.obs-input[data-equipo-id="${equipoId}"]`);
+    
+    element.style.display = 'none';
+    container.style.display = 'block';
+    textarea.focus();
+    actualizarContador(textarea);
+}
+
+function guardarObservacion(input) {
+    const equipoId = input.getAttribute('data-equipo-id');
+    const observacion = input.value.trim() || 'Sin Observaciones';
+    const texto = document.querySelector(`.obs-text[data-equipo-id="${equipoId}"]`);
+    const container = document.querySelector(`.obs-edit-container[data-equipo-id="${equipoId}"]`);
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    
+    fetch(`/api/equipo/${equipoId}/actualizar-observacion/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken,
+        },
+        body: `observacion=${encodeURIComponent(observacion)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            texto.textContent = observacion;
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
+        } else {
+            alert('Error al guardar la observación');
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar la observación');
+        container.style.display = 'none';
+        texto.style.display = 'inline-block';
+    });
+}
+
+function actualizarEstadoEquipo(selectElement) {
+    const equipoId = selectElement.getAttribute('data-equipo-id');
+    const nuevoEstado = selectElement.value;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    
+    // Cambiar el color del select mientras se envía
+    selectElement.style.opacity = '0.6';
+    
+    fetch(`/api/equipo/${equipoId}/actualizar-estado/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken,
+        },
+        body: `estado=${nuevoEstado}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            selectElement.style.opacity = '1';
+            
+            // Remover todas las clases de estado
+            selectElement.classList.remove('bueno', 'observacion', 'alarma', 'falla', 'sin_medicion');
+            
+            // Agregar la clase del nuevo estado
+            selectElement.classList.add(nuevoEstado);
+            
+            // Mostrar feedback visual
+            selectElement.style.backgroundColor = '';
+            setTimeout(() => {
+                selectElement.style.filter = 'brightness(1.1)';
+                setTimeout(() => {
+                    selectElement.style.filter = '';
+                }, 300);
+            }, 100);
+        } else {
+            selectElement.style.opacity = '1';
+            alert('Error al actualizar el estado');
+        }
+    })
+    .catch(error => {
+        selectElement.style.opacity = '1';
+        console.error('Error:', error);
+        alert('Error al actualizar el estado');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

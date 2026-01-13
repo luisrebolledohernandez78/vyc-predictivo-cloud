@@ -13,6 +13,8 @@ from .views import (
     equipos_termografias, crear_equipo_termografias, editar_equipo_termografias, eliminar_equipo_termografias,
     activos_termografias, crear_activo_termografias, editar_activo_termografias, eliminar_activo_termografias,
     upload_equipos_termografias, confirmar_upload_equipos_termografias,
+    actualizar_estado_equipo, actualizar_observacion_equipo, actualizar_estado_activo, actualizar_observacion_activo,
+    subir_foto_termica, configuracion, upload_profile_photo, save_config,
 )
 
 urlpatterns = [
@@ -88,5 +90,16 @@ urlpatterns = [
     path("termografias/cliente/<int:cliente_id>/sucursal/<int:sucursal_id>/confirmar-upload/", confirmar_upload_equipos_termografias, name="confirmar_upload_equipos_termografias"),
     
     # API
+    path("api/equipo/<int:equipo_id>/actualizar-estado/", actualizar_estado_equipo, name="actualizar_estado_equipo"),
+    path("api/equipo/<int:equipo_id>/actualizar-observacion/", actualizar_observacion_equipo, name="actualizar_observacion_equipo"),
+    path("api/activo/<int:activo_id>/actualizar-estado/", actualizar_estado_activo, name="actualizar_estado_activo"),
+    path("api/activo/<int:activo_id>/actualizar-observacion/", actualizar_observacion_activo, name="actualizar_observacion_activo"),
+    path("api/activo/<int:activo_id>/subir-foto-termica/", subir_foto_termica, name="subir_foto_termica"),
+    
+    # Configuración
+    path("configuracion/", configuracion, name="configuracion"),
+    path("api/upload-profile-photo/", upload_profile_photo, name="upload_profile_photo"),
+    path("api/save-config/", save_config, name="save_config"),
+    
     path("health/", health),
 ]

@@ -19,7 +19,7 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            padding: 40px;
+            padding: 25px;
             overflow-y: auto;
         }
 
@@ -34,7 +34,7 @@
 
         header h1 {
             color: #667eea;
-            font-size: 2.5em;
+            font-size: 1.8em;
         }
 
         .user-info {
@@ -55,20 +55,20 @@
         .content {
             background: white;
             border-radius: 12px;
-            padding: 40px;
+            padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         .content h2 {
             color: #667eea;
             margin-bottom: 20px;
-            font-size: 2em;
+            font-size: 1.5em;
         }
 
         .description {
             color: #555;
             line-height: 1.8;
-            font-size: 1.05em;
+            font-size: 0.9em;
             margin-bottom: 30px;
         }
 
@@ -85,38 +85,36 @@
             padding: 20px;
             border-radius: 8px;
             transition: all 0.3s ease;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
         }
 
         .feature-card:hover {
             background: #f0f2ff;
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25), 0 0 12px rgba(102, 126, 234, 0.15);
+            border-left: 4px solid #667eea;
         }
 
         .feature-icon {
-            font-size: 2em;
+            font-size: 1.5em;
             margin-bottom: 10px;
         }
 
         .feature-card h3 {
             color: #667eea;
             margin-bottom: 8px;
+            font-size: 0.95em;
         }
 
         .feature-card p {
             color: #666;
-            font-size: 0.95em;
+            font-size: 0.85em;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                flex-direction: row;
-                padding: 20px;
-                margin-bottom: 20px;
-            }
 
             .main-content {
                 margin-left: 0;
@@ -173,28 +171,28 @@
             <h2 style="margin-top: 40px; font-size: 1.5em;">Características Principales</h2>
             
             <div class="features">
-                <div class="feature-card">
+                <a href="/mantenimiento/" class="feature-card">
+                    <div class="feature-icon">🏭</div>
+                    <h3>Mantenimiento de Activos</h3>
+                    <p>Gestiona planes de mantenimiento preventivo y correctivo para optimizar la vida útil de tus equipos.</p>
+                </a>
+
+                <a href="/vibraciones/" class="feature-card">
                     <div class="feature-icon">📊</div>
                     <h3>Análisis de Vibraciones</h3>
                     <p>Monitorea vibraciones en tiempo real con sensores avanzados y detecta anomalías automáticamente.</p>
-                </div>
+                </a>
 
-                <div class="feature-card">
+                <a href="/termografias/" class="feature-card">
                     <div class="feature-icon">🌡️</div>
                     <h3>Termografía Infrarroja</h3>
                     <p>Detecta variaciones térmicas en equipamiento y evita sobrecalentamientos que puedan causar fallos.</p>
-                </div>
+                </a>
 
                 <div class="feature-card">
                     <div class="feature-icon">📈</div>
                     <h3>Análisis Predictivo</h3>
                     <p>Utiliza IA para predecir fallos futuros y optimizar tu estrategia de mantenimiento.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">☁️</div>
-                    <h3>Almacenamiento Cloud</h3>
-                    <p>Accede a tus datos desde cualquier lugar con seguridad y confiabilidad de nivel empresarial.</p>
                 </div>
 
                 <div class="feature-card">
@@ -211,7 +209,7 @@
             </div>
 
             <p class="description" style="margin-top: 40px; text-align: center; color: #667eea; font-weight: 600;">
-                Selecciona una opción en la barra lateral para comenzar →
+                Selecciona una opción en la barra lateral para comenzar
             </p>
         </section>
     </main>
