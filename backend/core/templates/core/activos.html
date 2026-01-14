@@ -981,7 +981,9 @@ function getCSRFToken() {
 function abrirCargadorFoto(activoId, botonElement) {
     const input = document.getElementById('foto-input');
     input.setAttribute('data-activo-id', activoId);
-    input.setAttribute('data-boton', botonElement);  // Guardar referencia al botón
+    // Guardar referencia directa al botón en el input
+    input.botonElement = botonElement;
+    console.log('Botón guardado:', botonElement);
     input.click();
 }
 
@@ -1034,16 +1036,16 @@ function procesarSubidaFoto(input) {
     const csrftoken = getCSRFToken();
     console.log('CSRF Token a enviar:', csrftoken ? 'OK' : 'FALTANTE');
     
-    // Obtener el botón de manera más confiable
-    // Buscar el botón más cercano que fue clickeado
-    const boton = document.querySelector(`button[data-activo-id="${activoId}"]`);
+    // Usar la referencia directa al botón que guardamos
+    const boton = input.botonElement;
     
     if (!boton) {
-        console.error(`No se encontró botón para activo ${activoId}`);
+        console.error('No se encontró referencia al botón');
         alert('Error: No se pudo encontrar el botón de carga');
         return;
     }
     
+    console.log('Botón encontrado:', boton);
     const iconoOriginal = boton.innerHTML;
     boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     boton.disabled = true;
