@@ -711,14 +711,12 @@
                                                 <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
                                                     <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
                                                 </button>
-                                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-info{% else %}btn-secondary opacity-50{% endif %}" title="Ver foto térmica" data-bs-toggle="tooltip" {% if not activo.foto_termica %}disabled{% endif %} onclick="{% if activo.foto_termica %}verFotoTermica('{{ activo.foto_termica.url }}', '{{ activo.nombre }}'){% endif %}">
+                                                <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" {% if not activo.foto_termica %}disabled{% endif %} onclick="{% if activo.foto_termica %}verFotoTermica('{{ activo.foto_termica.url }}', '{{ activo.nombre }}'){% endif %}">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
-                                                {% if activo.analisisTermico %}
                                                 <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
                                                     <i class="fas fa-chart-bar"></i>
                                                 </button>
-                                                {% endif %}
                                                 <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -1265,7 +1263,7 @@ function verAnalisisTermico(activoId) {
             // Mostrar el modal del análisis
             mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
         } else {
-            alert('No hay análisis disponible para este activo');
+            alert('⚠️ Sin análisis disponible\n\nPor favor, sube una foto térmica primero.');
         }
     })
     .catch(error => {
