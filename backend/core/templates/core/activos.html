@@ -1019,8 +1019,15 @@ function procesarSubidaFoto(input) {
         },
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status, response.statusText);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             // Cambiar el icono a verde y mostrar cámara
             boton.className = 'btn btn-action btn-success';
@@ -1040,15 +1047,15 @@ function procesarSubidaFoto(input) {
                 alert('Foto subida correctamente');
             }
         } else {
-            alert('Error al subir la foto: ' + data.error);
+            alert('Error al subir la foto: ' + (data.error || 'Error desconocido'));
             boton.innerHTML = iconoOriginal;
         }
         boton.disabled = false;
         input.value = '';
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Error al subir la foto');
+        console.error('Upload error:', error);
+        alert('Error al subir la foto: ' + error.message);
         boton.innerHTML = iconoOriginal;
         boton.disabled = false;
         input.value = '';
