@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -1150,12 +1151,11 @@ def actualizar_observacion_activo(request, activo_id):
 @login_required
 def subir_foto_termica(request, activo_id):
     """Sube una foto térmica para un activo y la analiza automáticamente"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
-        from .analisis_termico import AnalizadorTermico
         from .models import AnalisisTermico
-        import logging
-        
-        logger = logging.getLogger(__name__)
         
         activo = get_object_or_404(Activo, id=activo_id)
         
@@ -1176,19 +1176,30 @@ def subir_foto_termica(request, activo_id):
         # Guardar nueva foto
         activo.foto_termica = archivo
         activo.save()
-        logger.info(f"Foto guardada en: {activo.foto_termica.path}")
+        logger.info(f"✅ Foto guardada correctamente")
         
-        # Analizar la imagen térmica - pasar el archivo en lugar de la ruta
-        analizador = AnalizadorTermico()
-        resultado_analisis = analizador.analizar_imagen(activo.foto_termica)
+        # Intentar analizar - si falla, devolvemos la foto sin análisis
+        resultado_analisis = None
+        try:
+            from .analisis_termico import AnalizadorTermico
+            analizador = AnalizadorTermico()
+            logger.info(f"🔬 Iniciando análisis OCR...")
+            resultado_analisis = analizador.analizar_imagen(activo.foto_termica)
+            logger.info(f"📊 Resultado análisis: {resultado_analisis}")
+        except Exception as ocr_error:
+            logger.warning(f"⚠️ OCR no disponible: {str(ocr_error)}")
+            # Sin OCR, devolver valores por defecto
+            resultado_analisis = None
         
-        if 'error' in resultado_analisis:
-            logger.warning(f"Error en análisis: {resultado_analisis['error']}")
+        # Si OCR falló, retornar con análisis null pero foto guardada
+        if resultado_analisis is None or 'error' in resultado_analisis:
+            logger.info(f"✅ Foto subida. Ingresa los valores manualmente en el modal.")
             return JsonResponse({
                 'success': True,
                 'foto_url': activo.foto_termica.url,
-                'mensaje': 'Foto subida pero análisis no disponible',
-                'error_analisis': resultado_analisis['error']
+                'mensaje': 'Foto subida correctamente. Por favor ingresa los valores manualmente.',
+                'error_analisis': 'OCR no disponible - Ingresa los valores de temperatura en el modal',
+                'analisis': None
             })
         
         # Guardar o actualizar análisis
@@ -1198,21 +1209,23 @@ def subir_foto_termica(request, activo_id):
                 'temperatura_promedio': resultado_analisis['temperatura_promedio'],
                 'temperatura_maxima': resultado_analisis['temperatura_maxima'],
                 'temperatura_minima': resultado_analisis['temperatura_minima'],
-                'rango_minimo': resultado_analisis['temperatura_minima'],
-                'rango_maximo': resultado_analisis['temperatura_maxima'],
+                'rango_minimo': resultado_analisis['rango_minimo'],
+                'rango_maximo': resultado_analisis['rango_maximo'],
                 'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
                 'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
                 'estado': resultado_analisis['estado'],
             }
         )
-        logger.info(f"Análisis guardado para activo {activo_id}: estado={resultado_analisis['estado']}")
+        logger.info(f"✅ Análisis {'creado' if creado else 'actualizado'} para activo {activo_id}")
+        logger.info(f"   Temperatura máxima: {resultado_analisis['temperatura_maxima']}°C")
+        logger.info(f"   Estado: {resultado_analisis['estado']}")
         
-        # NUEVO: Actualizar el estado del Activo con el estado del análisis
+        # Actualizar el estado del Activo con el estado del análisis
         activo.estado = resultado_analisis['estado']
         activo.save()
-        logger.info(f"Estado del activo {activo_id} actualizado a: {resultado_analisis['estado']}")
+        logger.info(f"✅ Estado del activo {activo_id} actualizado a: {resultado_analisis['estado']}")
         
-        return JsonResponse({
+        response_data = {
             'success': True,
             'foto_url': activo.foto_termica.url,
             'mensaje': 'Foto subida y analizada correctamente',
@@ -1226,7 +1239,9 @@ def subir_foto_termica(request, activo_id):
                 'estado': resultado_analisis['estado'],
                 'mensaje': resultado_analisis['mensaje']
             }
-        })
+        }
+        logger.info(f"📤 Enviando respuesta JSON con análisis: {response_data}")
+        return JsonResponse(response_data)
     except Exception as e:
         logger.error(f"Error subiendo foto térmica: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -1272,11 +1287,119 @@ def obtener_analisis_termico(request, activo_id):
                 'porcentaje_zona_alerta': float(analisis.porcentaje_zona_alerta),
                 'porcentaje_zona_caliente': zona_caliente,
                 'estado': analisis.estado,
-                'mensaje': f"{analisis.estado.upper()}: {zona_caliente:.1f}% de zona caliente detectada"
+                'mensaje': f"{analisis.estado.upper()}: {zona_caliente:.1f}% de zona caliente detectada",
+                'zona_bueno_min': float(analisis.zona_bueno_min),
+                'zona_bueno_max': float(analisis.zona_bueno_max),
+                'zona_alarma_min': float(analisis.zona_alarma_min),
+                'zona_alarma_max': float(analisis.zona_alarma_max),
+                'zona_emergencia_min': float(analisis.zona_emergencia_min),
+                'zona_emergencia_max': float(analisis.zona_emergencia_max)
             }
         })
     except Exception as e:
         logger.error(f"Error obteniendo análisis térmico: {str(e)}", exc_info=True)
+        return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
+
+
+@login_required(login_url='/login/')
+@require_http_methods(["POST"])
+def guardar_temperaturas_activo(request, activo_id):
+    """Guarda los valores de temperatura editados por el usuario"""
+    try:
+        import json
+        import logging
+        from .models import AnalisisTermico, Activo
+        
+        logger = logging.getLogger(__name__)
+        
+        # Obtener el activo
+        activo = get_object_or_404(Activo, id=activo_id)
+        
+        # Parsear JSON
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            logger.error("Error decodificando JSON")
+            return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+        
+        temperatura_promedio = float(data.get('temperatura_promedio', 0))
+        temperatura_minima = float(data.get('temperatura_minima', 0))
+        temperatura_maxima = float(data.get('temperatura_maxima', 0))
+        
+        # Obtener los rangos de cada zona
+        zona_bueno_min = float(data.get('zona_bueno_min', 20))
+        zona_bueno_max = float(data.get('zona_bueno_max', 50))
+        zona_alarma_min = float(data.get('zona_alarma_min', 50))
+        zona_alarma_max = float(data.get('zona_alarma_max', 65))
+        zona_emergencia_min = float(data.get('zona_emergencia_min', 65))
+        zona_emergencia_max = float(data.get('zona_emergencia_max', 100))
+        
+        logger.info(f"Guardando temperaturas para activo {activo_id}: Prom={temperatura_promedio}, Min={temperatura_minima}, Max={temperatura_maxima}")
+        
+        # Obtener o crear el análisis térmico
+        analisis, created = AnalisisTermico.objects.get_or_create(activo=activo)
+        
+        # Actualizar los valores de temperatura detectada
+        analisis.temperatura_promedio = temperatura_promedio
+        analisis.temperatura_minima = temperatura_minima
+        analisis.temperatura_maxima = temperatura_maxima
+        
+        # Actualizar rangos de operación por zona
+        analisis.zona_bueno_min = zona_bueno_min
+        analisis.zona_bueno_max = zona_bueno_max
+        analisis.zona_alarma_min = zona_alarma_min
+        analisis.zona_alarma_max = zona_alarma_max
+        analisis.zona_emergencia_min = zona_emergencia_min
+        analisis.zona_emergencia_max = zona_emergencia_max
+        
+        # Actualizar rangos antiguos también (compatibilidad)
+        analisis.rango_minimo = temperatura_minima
+        analisis.rango_maximo = temperatura_maxima
+        
+        # Determinar estado basado en la T° detectada vs los rangos definidos
+        # Prioridad: EMERGENCIA > ALARMA > BUENO
+        if zona_emergencia_min <= temperatura_promedio <= zona_emergencia_max:
+            analisis.estado = 'emergencia'
+        elif zona_alarma_min <= temperatura_promedio <= zona_alarma_max:
+            analisis.estado = 'alarma'
+        elif zona_bueno_min <= temperatura_promedio <= zona_bueno_max:
+            analisis.estado = 'bueno'
+        else:
+            # Si está fuera de todos los rangos, determinar cuál es el más cercano
+            if temperatura_promedio < zona_bueno_min or temperatura_promedio > zona_emergencia_max:
+                analisis.estado = 'emergencia'
+            else:
+                analisis.estado = 'alarma'
+        
+        analisis.save()
+        
+        # 🔴 IMPORTANTE: Actualizar también el estado del Activo para que se refleje en la tabla
+        activo.estado = analisis.estado
+        activo.save()
+        
+        logger.info(f"✅ Temperaturas guardadas exitosamente para activo {activo_id}, estado={analisis.estado}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Temperaturas guardadas correctamente',
+            'analisis': {
+                'temperatura_promedio': float(analisis.temperatura_promedio),
+                'temperatura_maxima': float(analisis.temperatura_maxima),
+                'temperatura_minima': float(analisis.temperatura_minima),
+                'estado': analisis.estado,
+                'zonas': {
+                    'bueno': {'min': float(analisis.zona_bueno_min), 'max': float(analisis.zona_bueno_max)},
+                    'alarma': {'min': float(analisis.zona_alarma_min), 'max': float(analisis.zona_alarma_max)},
+                    'emergencia': {'min': float(analisis.zona_emergencia_min), 'max': float(analisis.zona_emergencia_max)}
+                }
+            }
+        })
+        
+    except json.JSONDecodeError:
+        logger.error("Error decodificando JSON")
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        logger.error(f"Error guardando temperaturas: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
 
 

@@ -30,10 +30,27 @@
     }
 
     .content {
-        background: white;
         border-radius: 12px;
         padding: 25px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Patrón para Vibraciones */
+    .content.content-vibraciones {
+        background-image: 
+            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Cpath d='M0,50 Q50,30 100,50 T200,50' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,60 Q50,40 100,60 T200,60' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,40 Q50,20 100,40 T200,40' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,70 Q50,50 100,70 T200,70' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Ccircle cx='100' cy='50' r='8' fill='%23667eea' opacity='0.08'/%3E%3C/svg%3E"),
+            linear-gradient(white, white);
+        background-repeat: repeat;
+        background-size: 200px 100px;
+    }
+
+    /* Patrón para Termografías */
+    .content.content-termografias {
+        background-image: 
+            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='%23808080' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='%23808080' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='%23808080' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='%23808080' opacity='0.05'/%3E%3C/svg%3E"),
+            linear-gradient(white, white);
+        background-repeat: repeat;
+        background-size: 150px 150px;
     }
 
     /* Colores por Área */
@@ -653,6 +670,222 @@
     .modal-analisis-footer .btn-success:hover {
         background-color: #1e8449;
     }
+
+    /* Estilos para ajuster de temperatura */
+    .temp-adjuster {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 6px;
+    }
+
+    .btn-temp-adjust {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 2px solid #3498db;
+        background-color: #ecf0f1;
+        color: #2c3e50;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+
+    .btn-temp-adjust:hover {
+        background-color: #3498db;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-temp-adjust:active {
+        transform: scale(0.95);
+    }
+
+    .btn-temp-minus:hover {
+        background-color: #e74c3c;
+        border-color: #c0392b;
+    }
+
+    .btn-temp-plus:hover {
+        background-color: #27ae60;
+        border-color: #1e8449;
+    }
+
+    .temp-value {
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
+        font-weight: bold;
+        color: #e74c3c;
+        font-size: 1.1em;
+    }
+
+    .temp-input {
+        display: inline-block;
+        width: 70px;
+        padding: 6px 8px;
+        margin: 0 4px;
+        border: 2px solid #3498db;
+        border-radius: 4px;
+        font-size: 0.95em;
+        font-weight: bold;
+        text-align: center;
+        color: #2c3e50;
+        transition: all 0.2s ease;
+    }
+
+    .temp-input:focus {
+        outline: none;
+        border-color: #2980b9;
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        background-color: #ecf0f1;
+    }
+
+    .temp-input::placeholder {
+        color: #95a5a6;
+    }
+
+    /* Estilos para inputs de temperatura grandes en modal */
+    .temp-input-large {
+        display: inline-block;
+        width: 85px;
+        padding: 10px 8px;
+        margin: 0 4px;
+        border: 2px solid #3498db;
+        border-radius: 6px;
+        font-size: 1.05em;
+        font-weight: bold;
+        text-align: center;
+        color: #2c3e50;
+        transition: all 0.2s ease;
+    }
+
+    .temp-input-large:focus {
+        outline: none;
+        border-color: #2980b9;
+        box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
+        background-color: #ecf0f1;
+    }
+
+    .temp-input-large::placeholder {
+        color: #95a5a6;
+    }
+
+    .temp-separator {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 1.1em;
+    }
+
+    /* Estilos para mostrar temperaturas en tabla */
+    .temp-info-table {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .temp-info-table small {
+        font-size: 0.85em;
+        line-height: 1.4;
+    }
+
+    .temp-info-table strong {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Estilos para zonas térmicas editables */
+    .thermal-zones {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .zone-box {
+        padding: 12px 14px;
+        border-radius: 8px;
+        border-left: 4px solid;
+        background-color: rgba(255,255,255,0.9);
+        transition: all 0.2s ease;
+    }
+
+    .zone-box.zone-bueno {
+        border-left-color: #27ae60;
+        background-color: rgba(39, 174, 96, 0.05);
+    }
+
+    .zone-box.zone-alarma {
+        border-left-color: #f39c12;
+        background-color: rgba(243, 156, 18, 0.05);
+    }
+
+    .zone-box.zone-emergencia {
+        border-left-color: #e74c3c;
+        background-color: rgba(231, 76, 60, 0.05);
+    }
+
+    .zone-title {
+        font-weight: 600;
+        font-size: 0.95em;
+        margin-bottom: 8px;
+        color: #2c3e50;
+    }
+
+    .zone-box.zone-bueno .zone-title {
+        color: #27ae60;
+    }
+
+    .zone-box.zone-alarma .zone-title {
+        color: #f39c12;
+    }
+
+    .zone-box.zone-emergencia .zone-title {
+        color: #e74c3c;
+    }
+
+    .zone-inputs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .temp-zone-input {
+        width: 75px;
+        padding: 8px 6px;
+        border: 2px solid #bdc3c7;
+        border-radius: 5px;
+        font-size: 0.95em;
+        font-weight: 600;
+        text-align: center;
+        color: #2c3e50;
+        transition: all 0.2s ease;
+    }
+
+    .temp-zone-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        background-color: #ecf0f1;
+    }
+
+    .zone-separator {
+        font-weight: bold;
+        color: #7f8c8d;
+        font-size: 0.95em;
+    }
+
+    .zone-unit {
+        font-size: 0.9em;
+        color: #7f8c8d;
+        font-weight: 500;
+    }
 </style>
 
 <!-- Breadcrumb -->
@@ -732,9 +965,12 @@
                             <tr>
                                 <th class="text-center">Nombre</th>
                                 <th class="text-center">Descripción</th>
-                                <th class="text-center">Estado</th>
                                 {% if modulo == 'termografias' %}
-                                    <th class="text-center">Rango Operación (°C)</th>
+                                    <th class="text-center">Imagen FLIR</th>
+                                    <th class="text-center">Temperaturas (°C)</th>
+                                    <th class="text-center">Estado</th>
+                                {% else %}
+                                    <th class="text-center">Estado</th>
                                 {% endif %}
                                 <th class="text-center">Observaciones</th>
                                 <th class="text-center" style="width: 120px;">Acciones</th>
@@ -745,19 +981,65 @@
                                 <!-- Contenedor dinámico para análisis de este activo -->
                                 <div id="resultado-analisis-{{ activo.id }}" style="display:none;"></div>
                                 <tr>
+                                    <!-- Nombre -->
                                     <td>
                                         <strong>{{ activo.nombre }}</strong>
                                     </td>
+                                    <!-- Descripción -->
                                     <td class="text-muted small">{{ activo.descripcion|truncatewords:8 }}</td>
-                                    <td class="text-center">
-                                        {% if modulo == 'termografias' %}
-                                            <select class="estado-select {{ activo.estado }}" data-activo-id="{{ activo.id }}" onchange="actualizarEstadoActivo(this)">
-                                                <option value="bueno" {% if activo.estado == 'bueno' %}selected{% endif %}>Bueno</option>
-                                                <option value="alarma" {% if activo.estado == 'alarma' %}selected{% endif %}>Alarma</option>
-                                                <option value="emergencia" {% if activo.estado == 'emergencia' %}selected{% endif %}>Emergencia</option>
-                                                <option value="sin_medicion" {% if activo.estado == 'sin_medicion' %}selected{% endif %}>Sin Medición</option>
-                                            </select>
-                                        {% else %}
+                                    
+                                    {% if modulo == 'termografias' %}
+                                        <!-- TERMOGRAFÍAS: Imagen FLIR -->
+                                        <td class="text-center">
+                                            <div class="actions-cell" style="justify-content: center; gap: 6px;">
+                                                <!-- Botón Subir/Cambiar foto -->
+                                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
+                                                    <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
+                                                </button>
+                                                
+                                                <!-- Botón Ver foto -->
+                                                {% if activo.foto_termica %}
+                                                    <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" onclick="verFotoTermica('{{ activo.foto_termica.url|escapejs }}', '{{ activo.nombre|escapejs }}', {{ activo.id }})">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-action btn-secondary" title="Ver foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                {% endif %}
+                                                
+                                                <!-- Botón Ver análisis -->
+                                                {% if activo.foto_termica %}
+                                                    <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-action btn-secondary" title="Ver análisis térmico" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <!-- TERMOGRAFÍAS: Temperaturas -->
+                                        <td class="text-center">
+                                            {% if activo.analisis_termico %}
+                                                <div class="temp-info-table">
+                                                    <small>T° Detectada: <strong>{{ activo.analisis_termico.temperatura_promedio|floatformat:1 }}</strong>°C</small>
+                                                    <small>Rango correcto: <strong>{{ activo.analisis_termico.temperatura_minima|floatformat:1 }}° – {{ activo.analisis_termico.temperatura_maxima|floatformat:1 }}</strong>°C</small>
+                                                </div>
+                                            {% else %}
+                                                <span style="color: #999; font-size: 0.9em;">— Sin análisis</span>
+                                            {% endif %}
+                                        </td>
+                                        <!-- TERMOGRAFÍAS: Estado Badge -->
+                                        <td class="text-center">
+                                            <span class="badge" style="background-color: {% if activo.estado == 'bueno' %}#27ae60{% elif activo.estado == 'alarma' %}#f39c12{% elif activo.estado == 'emergencia' %}#e74c3c{% else %}#95a5a6{% endif %}; padding: 8px 12px; font-size: 0.85em;">
+                                                {{ activo.get_estado_display }}
+                                            </span>
+                                        </td>
+                                    {% else %}
+                                        <!-- VIBRACIONES: Estado Selector -->
+                                        <td class="text-center">
                                             <select class="estado-select {{ activo.estado }}" data-activo-id="{{ activo.id }}" onchange="actualizarEstadoActivo(this)">
                                                 <option value="bueno" {% if activo.estado == 'bueno' %}selected{% endif %}>Bueno</option>
                                                 <option value="observacion" {% if activo.estado == 'observacion' %}selected{% endif %}>Observación</option>
@@ -766,17 +1048,10 @@
                                                 <option value="falla" {% if activo.estado == 'falla' %}selected{% endif %}>Falla</option>
                                                 <option value="sin_medicion" {% if activo.estado == 'sin_medicion' %}selected{% endif %}>Sin Medición</option>
                                             </select>
-                                        {% endif %}
-                                    </td>
-                                    {% if modulo == 'termografias' %}
-                                        <td class="text-center">
-                                            {% if activo.analisis_termico %}
-                                                <span class="rango-temp">{{ activo.analisis_termico.rango_minimo|floatformat:1 }}° - {{ activo.analisis_termico.rango_maximo|floatformat:1 }}°C</span>
-                                            {% else %}
-                                                <span style="color: #999; font-size: 0.9em;">— Sin análisis</span>
-                                            {% endif %}
                                         </td>
                                     {% endif %}
+                                    
+                                    <!-- Observaciones (ambos módulos) -->
                                     <td class="text-center">
                                         <span class="obs-text" data-activo-id="{{ activo.id }}" onclick="editarObservacion(this)">{{ activo.observaciones|default:"Sin Observaciones" }}</span>
                                         <div style="display:none;" class="obs-edit-container" data-activo-id="{{ activo.id }}">
@@ -784,6 +1059,8 @@
                                             <div class="obs-counter" data-activo-id="{{ activo.id }}"><span class="current">0</span>/500</div>
                                         </div>
                                     </td>
+                                    
+                                    <!-- Acciones (ambos módulos) -->
                                     <td class="text-center">
                                         <div class="actions-cell">
                                             {% if modulo == 'vibraciones' %}
@@ -794,15 +1071,6 @@
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             {% else %}
-                                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
-                                                    <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" onclick="verFotoTermica('{{ activo.foto_termica.url }}', '{{ activo.nombre }}', {{ activo.id }})">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
-                                                    <i class="fas fa-chart-bar"></i>
-                                                </button>
                                                 <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -998,11 +1266,11 @@ function getCSRFToken() {
 }
 
 function abrirCargadorFoto(activoId, botonElement) {
+    // Guardar el ID globalmente para que procesarSubidaFoto lo pueda usar
+    window.activoIdActual = activoId;
+    window.botonElementoActual = botonElement;
+    console.log('📸 Abriendo cargador para activo:', activoId);
     const input = document.getElementById('foto-input');
-    input.setAttribute('data-activo-id', activoId);
-    // Guardar referencia directa al botón en el input
-    input.botonElement = botonElement;
-    console.log('Botón guardado:', botonElement);
     input.click();
 }
 
@@ -1049,62 +1317,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function procesarSubidaFoto(input) {
-    const activoId = input.getAttribute('data-activo-id');
+    // Usar la variable global que se guardó en abrirCargadorFoto
+    const activoId = window.activoIdActual;
+    const boton = window.botonElementoActual;
+    
+    if (!activoId) {
+        console.error('❌ No hay activoId guardado');
+        alert('Error: No se pudo identificar el activo');
+        return;
+    }
+    
     const archivo = input.files[0];
     
-    if (!archivo) return;
+    if (!archivo) {
+        console.log('⚠️ No se seleccionó archivo');
+        return;
+    }
     
+    console.log('📤 Subiendo archivo:', archivo.name, 'para activo:', activoId);
+    
+    // Ya tenemos el botón guardado en window.botonElementoActual
     const formData = new FormData();
     formData.append('foto', archivo);
     
     const csrftoken = getCSRFToken();
-    console.log('CSRF Token a enviar:', csrftoken ? 'OK' : 'FALTANTE');
-    console.log('Activo ID:', activoId);
     
-    // Intentar obtener referencia al botón de varias formas
-    let boton = null;
-    
-    // Forma 1: Referencia guardada en el input
-    if (input.botonElement) {
-        boton = input.botonElement;
-        console.log('Botón obtenido de referencia guardada');
-    }
-    
-    // Forma 2: Buscar en el DOM
-    if (!boton) {
-        const botones = document.querySelectorAll(`button[data-activo-id="${activoId}"]`);
-        if (botones.length > 0) {
-            // Tomar el primer botón (el de subir foto, no el de ver foto)
-            boton = botones[0];
-            console.log('Botón obtenido del DOM, encontrados:', botones.length);
-        }
-    }
-    
-    // Forma 3: Buscar el botón más cercano (menos confiable pero es fallback)
-    if (!boton) {
-        // Encontrar cualquier botón en la tabla que esté cerca
-        const allButtons = document.querySelectorAll('button[data-activo-id]');
-        for (let btn of allButtons) {
-            if (btn.getAttribute('data-activo-id') == activoId) {
-                boton = btn;
-                console.log('Botón obtenido buscando todos los botones');
-                break;
-            }
-        }
-    }
-    
-    if (!boton) {
-        console.warn('No se encontró botón, continuando sin cambiar UI del botón');
-    } else {
-        console.log('Botón encontrado, cambiando estado a cargando...');
+    // Cambiar icono del botón a "cargando"
+    if (boton) {
         const iconoOriginal = boton.innerHTML;
         boton.setAttribute('data-icono-original', iconoOriginal);
-        try {
-            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            boton.disabled = true;
-        } catch (e) {
-            console.error('Error al modificar botón:', e);
-        }
+        boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        boton.disabled = true;
+        console.log('✋ Botón deshabilitado, mostrando spinner');
     }
     
     fetch(`/api/activo/${activoId}/subir-foto-termica/`, {
@@ -1134,35 +1378,17 @@ function procesarSubidaFoto(input) {
             // Guardar el ID del activo actual para usar en el modal
             window.activoActualId = activoId;
             
-            // Mostrar análisis si está disponible
-            console.log('¿Tiene análisis?', data.analisis ? 'SÍ' : 'NO');
-            if (data.analisis) {
-                console.log('Análisis recibido:', data.analisis);
-                // Buscar el nombre del activo en la tabla
-                let nombreActivo = 'Activo';
-                const filaBoton = boton ? boton.closest('tr') : null;
-                if (filaBoton) {
-                    nombreActivo = filaBoton.querySelector('td:first-child strong').textContent.trim();
-                    console.log('Nombre del activo encontrado:', nombreActivo);
-                } else {
-                    console.log('No se encontró fila, buscando en tabla completa...');
-                    const filas = document.querySelectorAll('tr');
-                    for (let fila of filas) {
-                        // Verificar si esta fila contiene el activo buscado
-                        const contenedorAnalisis = document.getElementById(`resultado-analisis-${activoId}`);
-                        if (contenedorAnalisis && contenedorAnalisis.closest('tr') === fila) {
-                            nombreActivo = fila.querySelector('td:first-child strong').textContent.trim();
-                            console.log('Nombre encontrado en tabla:', nombreActivo);
-                            break;
-                        }
-                    }
-                }
-                
-                console.log('Llamando mostrarAnalisisTermico con:', {activoId, nombreActivo, foto: data.foto_url});
-                mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
-            } else {
-                alert('Foto subida correctamente');
+            // Buscar el nombre del activo en la tabla
+            let nombreActivo = 'Activo';
+            const filaBoton = boton ? boton.closest('tr') : null;
+            if (filaBoton) {
+                nombreActivo = filaBoton.querySelector('td:first-child strong').textContent.trim();
+                console.log('Nombre del activo encontrado:', nombreActivo);
             }
+            
+            // SIEMPRE mostrar modal (con o sin análisis)
+            console.log('Abriendo modal de análisis...');
+            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, data.mensaje, data.error_analisis);
         } else {
             alert('Error al subir la foto: ' + (data.error || 'Error desconocido'));
             if (boton) {
@@ -1191,70 +1417,168 @@ function procesarSubidaFoto(input) {
     });
 }
 
-function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
-    console.log('mostrarAnalisisTermico() LLAMADA con:', {activoId, nombreActivo: activoNombre, estadoAnalisis: analisis.estado});
+function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre, mensajeGeneral, errorAnalisis) {
+    console.log('mostrarAnalisisTermico() LLAMADA con:', {activoId, nombreActivo: activoNombre, tieneAnalisis: !!analisis});
+    
+    // Generar contenido del modal según si hay análisis o no
+    let contenidoAnalisis = '';
+    
+    if (analisis && analisis.estado) {
+        // CON ANÁLISIS: mostrar datos completos
+        contenidoAnalisis = `
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6>Estado</h6>
+                    <span class="estado-badge ${analisis.estado}">${analisis.estado.toUpperCase()}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Temperaturas (°C)</h6>
+                    <div class="temp-display">
+                        <p>
+                            <strong>T° Detectada:</strong>
+                            <input type="number" class="temp-input-large temp-detectada-input" id="temp-detectada-${activoId}" value="${analisis.temperatura_promedio.toFixed(1)}" min="0" max="100" step="0.1" placeholder="Detectada" data-activo-id="${activoId}">
+                            °C
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Zonas Térmicas - Rangos de Operación</h6>
+                    <div class="thermal-zones">
+                        <!-- ZONA BUENO -->
+                        <div class="zone-box zone-bueno">
+                            <div class="zone-title">✓ BUENO</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-bueno-min-${activoId}" value="${analisis.zona_bueno_min.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="bueno" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-bueno-max-${activoId}" value="${analisis.zona_bueno_max.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="bueno" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ZONA ALARMA -->
+                        <div class="zone-box zone-alarma">
+                            <div class="zone-title">⚠ ALARMA</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-alarma-min-${activoId}" value="${analisis.zona_alarma_min.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="alarma" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-alarma-max-${activoId}" value="${analisis.zona_alarma_max.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="alarma" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ZONA EMERGENCIA -->
+                        <div class="zone-box zone-emergencia">
+                            <div class="zone-title">🔴 EMERGENCIA</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-emergencia-min-${activoId}" value="${analisis.zona_emergencia_min.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="emergencia" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-emergencia-max-${activoId}" value="${analisis.zona_emergencia_max.toFixed(1)}" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="emergencia" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="alert alert-info" role="alert" id="estado-dinamico-${activoId}">
+                        <small id="estado-mensaje-${activoId}">Estado: <strong>${analisis.estado.toUpperCase()}</strong></small>
+                    </div>
+                </div>
+                
+
+            </div>
+        `;
+    } else {
+        // SIN ANÁLISIS OCR: mostrar formulario con valores por defecto
+        // El mensaje de error va debajo de la foto (lado izquierdo)
+        contenidoAnalisis = `
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6>Temperaturas (°C)</h6>
+                    <div class="temp-display">
+                        <p>
+                            <strong>T° Detectada:</strong>
+                            <input type="number" class="temp-input-large temp-detectada-input" id="temp-detectada-${activoId}" value="45.0" min="0" max="100" step="0.1" placeholder="Detectada" data-activo-id="${activoId}">
+                            °C
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Zonas Térmicas - Rangos de Operación</h6>
+                    <div class="thermal-zones">
+                        <!-- ZONA BUENO -->
+                        <div class="zone-box zone-bueno">
+                            <div class="zone-title">✓ BUENO</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-bueno-min-${activoId}" value="20.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="bueno" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-bueno-max-${activoId}" value="50.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="bueno" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ZONA ALARMA -->
+                        <div class="zone-box zone-alarma">
+                            <div class="zone-title">⚠ ALARMA</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-alarma-min-${activoId}" value="50.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="alarma" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-alarma-max-${activoId}" value="65.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="alarma" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ZONA EMERGENCIA -->
+                        <div class="zone-box zone-emergencia">
+                            <div class="zone-title">🔴 EMERGENCIA</div>
+                            <div class="zone-inputs">
+                                <input type="number" class="temp-zone-input" id="zona-emergencia-min-${activoId}" value="65.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="emergencia" data-bound="min">
+                                <span class="zone-separator">–</span>
+                                <input type="number" class="temp-zone-input" id="zona-emergencia-max-${activoId}" value="100.0" min="0" max="100" step="0.1" data-activo-id="${activoId}" data-zone="emergencia" data-bound="max">
+                                <span class="zone-unit">°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="alert alert-info" role="alert" id="estado-dinamico-${activoId}">
+                        <small id="estado-mensaje-${activoId}">Estado: <strong>SIN MEDICIÓN</strong></small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
     
     // Crear HTML del modal
     const htmlAnalisis = `
         <div class="modal-analisis show" id="modal-analisis-${activoId}">
             <div class="modal-analisis-content">
                 <div class="modal-analisis-header">
-                    <h5>${activoNombre || 'Análisis Térmico'}</h5>
-                    <button type="button" class="modal-close-btn" onclick="cerrarModalAnalisis(${activoId})">✕</button>
+                    <h5>${activoNombre || 'Foto Térmica'}</h5>
+                    <button type="button" class="modal-close-btn" onclick="cerrarModalAnalisisYRecargar(${activoId})">✕</button>
                 </div>
                 
                 <div class="modal-analisis-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <img src="${fotoUrl}" alt="Foto térmica" style="width: 100%; border-radius: 8px;">
+                            <img src="${fotoUrl}" alt="Foto térmica" style="width: 100%; border-radius: 8px; margin-bottom: 12px;">
+                            <!-- Mensaje OCR debajo de la foto cuando no hay análisis -->
+                            ${!analisis ? `<div class="alert alert-warning" role="alert">
+                                <h6 style="margin-bottom: 4px;">⚠️ OCR no disponible</h6>
+                                <p class="mb-0 small">${errorAnalisis || mensajeGeneral || 'Ingresa los valores manualmente'}</p>
+                            </div>` : ''}
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <h6>Estado</h6>
-                                <span class="estado-badge ${analisis.estado}">${analisis.estado.toUpperCase()}</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <h6>Temperaturas (°C)</h6>
-                                <div class="temp-display">
-                                    <p><strong>Promedio:</strong> ${analisis.temperatura_promedio.toFixed(1)}°C</p>
-                                    <p><strong>Máxima:</strong> ${analisis.temperatura_maxima.toFixed(1)}°C</p>
-                                    <p><strong>Mínima:</strong> ${analisis.temperatura_minima.toFixed(1)}°C</p>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <h6>Zonas Térmicas</h6>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Crítica</small>
-                                        <small>${analisis.porcentaje_zona_critica.toFixed(1)}%</small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-danger" style="width: ${analisis.porcentaje_zona_critica}%"></div>
-                                    </div>
-                                </div>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Alerta</small>
-                                        <small>${analisis.porcentaje_zona_alerta.toFixed(1)}%</small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-warning" style="width: ${analisis.porcentaje_zona_alerta}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <p class="text-muted small">${analisis.mensaje || ''}</p>
-                            </div>
-                        </div>
+                        ${contenidoAnalisis}
                     </div>
                 </div>
                 
                 <div class="modal-analisis-footer">
-                    <button type="button" class="btn btn-secondary" onclick="cerrarModalAnalisis(${activoId})">Cerrar</button>
-                    <button type="button" class="btn btn-success" onclick="confirmarAnalisis(${activoId})">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalAnalisisYRecargar(${activoId})">Cerrar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmarAnalisisYRecargar(${activoId})">Confirmar</button>
                 </div>
             </div>
         </div>
@@ -1279,14 +1603,14 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
     // Agregar event listener para cerrar al hacer click fuera
     modalElement.addEventListener('click', function(event) {
         if (event.target === this) {
-            cerrarModalAnalisis(activoId);
+            cerrarModalAnalisisYRecargar(activoId);
         }
     });
     
     // Agregar listener para tecla ESC
     const handleEsc = (event) => {
         if (event.key === 'Escape') {
-            cerrarModalAnalisis(activoId);
+            cerrarModalAnalisisYRecargar(activoId);
         }
     };
     document.addEventListener('keydown', handleEsc);
@@ -1297,21 +1621,44 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
     }
     window.modalEscHandlers[`modal-analisis-${activoId}`] = handleEsc;
     contenedorModales.appendChild(modalElement);
-    console.log('✅ ÉXITO: Modal creado e insertado en body con clase show');
+    console.log('✅ Modal de análisis abierto');
     
-    // Guardar estado actual para confirmar después (incluyendo el estado)
+    // Agregar event listeners DESPUÉS de crear el modal
+    setTimeout(() => {
+        const tempInputs = modalElement.querySelectorAll('.temp-detectada-input, .temp-zone-input');
+        console.log(`Agregando ${tempInputs.length} event listeners al modal`);
+        tempInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const activoId = this.getAttribute('data-activo-id');
+                if (activoId) {
+                    recalcularEstadoDinamico(activoId);
+                }
+            });
+            input.addEventListener('input', function() {
+                const activoId = this.getAttribute('data-activo-id');
+                if (activoId) {
+                    recalcularEstadoDinamico(activoId);
+                }
+            });
+        });
+    }, 50);
+    
+    // Guardar estado actual
     window.analisisActual = {
         activo_id: activoId,
-        estado: analisis.estado,
+        estado: analisis ? analisis.estado : null,
         analisis: analisis
     };
 }
 
-function cerrarModalAnalisis(activoId) {
+
+
+
+function cerrarModalAnalisisYRecargar(activoId) {
     const modalId = `modal-analisis-${activoId}`;
     const modal = document.getElementById(modalId);
     if (modal) {
-        // Remover el listener de ESC usando el mapa global
+        // Remover el listener de ESC
         if (window.modalEscHandlers && window.modalEscHandlers[modalId]) {
             document.removeEventListener('keydown', window.modalEscHandlers[modalId]);
             delete window.modalEscHandlers[modalId];
@@ -1321,69 +1668,157 @@ function cerrarModalAnalisis(activoId) {
         // Remover después de animación
         setTimeout(() => {
             modal.remove();
-            console.log('Modal cerrado y removido del DOM');
+            console.log('Modal cerrado');
+            // 🔄 RECARGAR LA PÁGINA
+            location.reload();
         }, 300);
     }
-    window.analisisActual = null;
 }
 
-function confirmarAnalisis(activoId) {
-    if (!window.analisisActual) {
-        console.error('No hay análisis guardado');
-        return;
+
+// Función para recalcular dinámicamente el estado
+function recalcularEstadoDinamico(activoId) {
+    const tempDetectada = parseFloat(document.getElementById(`temp-detectada-${activoId}`)?.value || 0);
+    const zonaBuenoMin = parseFloat(document.getElementById(`zona-bueno-min-${activoId}`)?.value || 20);
+    const zonaBuenoMax = parseFloat(document.getElementById(`zona-bueno-max-${activoId}`)?.value || 50);
+    const zonaAlarmaMin = parseFloat(document.getElementById(`zona-alarma-min-${activoId}`)?.value || 50);
+    const zonaAlarmaMax = parseFloat(document.getElementById(`zona-alarma-max-${activoId}`)?.value || 65);
+    const zonaEmergenciaMin = parseFloat(document.getElementById(`zona-emergencia-min-${activoId}`)?.value || 65);
+    const zonaEmergenciaMax = parseFloat(document.getElementById(`zona-emergencia-max-${activoId}`)?.value || 100);
+    
+    // Determinar estado basado en rangos
+    let estado = 'sin_medicion';
+    if (zonaEmergenciaMin <= tempDetectada && tempDetectada <= zonaEmergenciaMax) {
+        estado = 'emergencia';
+    } else if (zonaAlarmaMin <= tempDetectada && tempDetectada <= zonaAlarmaMax) {
+        estado = 'alarma';
+    } else if (zonaBuenoMin <= tempDetectada && tempDetectada <= zonaBuenoMax) {
+        estado = 'bueno';
+    } else {
+        // Si está fuera de todos los rangos
+        if (tempDetectada < zonaBuenoMin || tempDetectada > zonaEmergenciaMax) {
+            estado = 'emergencia';
+        } else {
+            estado = 'alarma';
+        }
     }
     
-    // Obtener el estado del análisis
-    const estadoAnalisis = window.analisisActual.estado;
-    console.log('Confirmando análisis con estado:', estadoAnalisis);
+    // Actualizar el badge de estado
+    const mensajeElement = document.getElementById(`estado-mensaje-${activoId}`);
+    if (mensajeElement) {
+        let estadoTexto = estado.toUpperCase();
+        let colorClass = '';
+        if (estado === 'bueno') colorClass = 'text-success';
+        else if (estado === 'alarma') colorClass = 'text-warning';
+        else if (estado === 'emergencia') colorClass = 'text-danger';
+        
+        mensajeElement.innerHTML = `Estado: <strong class="${colorClass}">${estadoTexto}</strong>`;
+    }
+}
+
+function confirmarAnalisisYRecargar(activoId) {
+    console.log('Análisis confirmado para activo:', activoId);
     
-    // Actualizar el estado del activo en el servidor
+    // Obtener los valores editados de temperatura detectada
+    const tempDetectada = parseFloat(document.getElementById(`temp-detectada-${activoId}`)?.value || 0);
+    
+    // Obtener los valores de las 3 zonas
+    const zonaBuenoMin = parseFloat(document.getElementById(`zona-bueno-min-${activoId}`)?.value || 20);
+    const zonaBuenoMax = parseFloat(document.getElementById(`zona-bueno-max-${activoId}`)?.value || 50);
+    const zonaAlarmaMin = parseFloat(document.getElementById(`zona-alarma-min-${activoId}`)?.value || 50);
+    const zonaAlarmaMax = parseFloat(document.getElementById(`zona-alarma-max-${activoId}`)?.value || 65);
+    const zonaEmergenciaMin = parseFloat(document.getElementById(`zona-emergencia-min-${activoId}`)?.value || 65);
+    const zonaEmergenciaMax = parseFloat(document.getElementById(`zona-emergencia-max-${activoId}`)?.value || 100);
+    
+    console.log('Temperaturas y zonas a guardar:', { 
+        tempDetectada, 
+        zonaBuenoMin, zonaBuenoMax,
+        zonaAlarmaMin, zonaAlarmaMax,
+        zonaEmergenciaMin, zonaEmergenciaMax
+    });
+    
+    // Obtener CSRF token
     const csrftoken = getCSRFToken();
     
-    fetch(`/api/activo/${activoId}/actualizar-estado/`, {
+    // Enviar al servidor para guardar
+    fetch(`/api/activo/${activoId}/guardar-temperaturas/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
         },
-        body: `estado=${estadoAnalisis}`
+        body: JSON.stringify({
+            temperatura_promedio: tempDetectada,
+            temperatura_minima: tempDetectada - 5,  // Valores compatibles
+            temperatura_maxima: tempDetectada + 5,
+            zona_bueno_min: zonaBuenoMin,
+            zona_bueno_max: zonaBuenoMax,
+            zona_alarma_min: zonaAlarmaMin,
+            zona_alarma_max: zonaAlarmaMax,
+            zona_emergencia_min: zonaEmergenciaMin,
+            zona_emergencia_max: zonaEmergenciaMax
+        })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Respuesta de guardado:', data);
         if (data.success) {
-            console.log('Estado actualizado exitosamente en servidor');
+            console.log('✅ Temperaturas y zonas guardadas exitosamente');
             
-            // Actualizar el select en la tabla
-            const selectElement = document.querySelector(`select[data-activo-id="${activoId}"]`);
-            if (selectElement) {
-                // Remover todas las clases de estado
-                selectElement.classList.remove('bueno', 'observacion', 'alarma', 'falla', 'emergencia', 'sin_medicion');
+            // Actualizar el estado en la tabla ANTES de cerrar
+            if (data.analisis) {
+                const estadoNuevo = data.analisis.estado.toUpperCase();
+                console.log(`🔄 Actualizando estado en tabla a: ${estadoNuevo}`);
                 
-                // Agregar la nueva clase
-                selectElement.classList.add(estadoAnalisis);
-                
-                // Cambiar el valor del select
-                selectElement.value = estadoAnalisis;
-                
-                console.log('Select actualizado con estado:', estadoAnalisis);
-            } else {
-                console.warn('No se encontró select para actualizar');
+                // Buscar el botón con data-activo-id="${activoId}" para encontrar la fila
+                const botonActivo = document.querySelector(`button[data-activo-id="${activoId}"][onclick*="abrirCargadorFoto"]`);
+                if (botonActivo) {
+                    // Navegar hacia arriba para encontrar la fila <tr>
+                    const fila = botonActivo.closest('tr');
+                    if (fila) {
+                        // Dentro de la fila, encontrar el badge de estado (en termografías)
+                        const badgeEstado = fila.querySelector('span[style*="background-color"]');
+                        if (badgeEstado) {
+                            // Determinar color según estado
+                            let color = '#95a5a6'; // gris por defecto
+                            if (estadoNuevo === 'BUENO') color = '#27ae60'; // verde
+                            if (estadoNuevo === 'ALARMA') color = '#f39c12'; // naranja
+                            if (estadoNuevo === 'EMERGENCIA') color = '#e74c3c'; // rojo
+                            
+                            // Actualizar el badge
+                            badgeEstado.style.backgroundColor = color;
+                            badgeEstado.textContent = estadoNuevo;
+                            console.log('✅ Estado actualizado en tabla');
+                        }
+                    }
+                }
             }
             
-            // Cerrar el modal
-            cerrarModalAnalisis(activoId);
-            
-            // Mostrar notificación de éxito
-            alert('Análisis confirmado y estado actualizado correctamente.');
+            // Cerrar y recargar
+            cerrarModalAnalisisYRecargar(activoId);
         } else {
-            console.error('Error al actualizar estado:', data.error);
-            alert('Error al guardar el estado: ' + (data.error || 'Error desconocido'));
+            alert('Error al guardar las temperaturas: ' + (data.error || 'Error desconocido'));
         }
     })
     .catch(error => {
-        console.error('Error en confirmarAnalisis:', error);
-        alert('Error al confirmar análisis: ' + error.message);
+        console.error('Error guardando temperaturas:', error);
+        alert('Error al guardar: ' + error.message);
     });
+}
+
+// Mantener la versión antigua para compatibilidad pero que recargue
+function confirmarAnalisis(activoId) {
+    confirmarAnalisisYRecargar(activoId);
+}
+
+function cerrarModalAnalisis(activoId) {
+    cerrarModalAnalisisYRecargar(activoId);
 }
 
 function verAnalisisTermico(activoId) {
@@ -1422,7 +1857,7 @@ function verAnalisisTermico(activoId) {
             }
             
             // Mostrar el modal del análisis
-            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
+            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, null, null);
         } else {
             alert('⚠️ Sin análisis disponible\n\nPor favor, sube una foto térmica primero.');
         }

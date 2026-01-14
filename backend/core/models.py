@@ -246,7 +246,19 @@ class AnalisisTermico(models.Model):
     porcentaje_zona_critica = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona crítica')
     porcentaje_zona_alerta = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona de alerta')
     
-    # Rangos de temperatura (nuevo)
+    # Rangos de temperatura operacional por zona - BUENO
+    zona_bueno_min = models.FloatField(default=20, help_text='Temperatura mínima - Zona BUENO')
+    zona_bueno_max = models.FloatField(default=50, help_text='Temperatura máxima - Zona BUENO')
+    
+    # Rangos de temperatura operacional por zona - ALARMA
+    zona_alarma_min = models.FloatField(default=50, help_text='Temperatura mínima - Zona ALARMA')
+    zona_alarma_max = models.FloatField(default=65, help_text='Temperatura máxima - Zona ALARMA')
+    
+    # Rangos de temperatura operacional por zona - EMERGENCIA
+    zona_emergencia_min = models.FloatField(default=65, help_text='Temperatura mínima - Zona EMERGENCIA')
+    zona_emergencia_max = models.FloatField(default=100, help_text='Temperatura máxima - Zona EMERGENCIA')
+    
+    # Rangos antiguos (compatibilidad)
     rango_minimo = models.FloatField(default=0, help_text='Rango mínimo de temperatura en °C')
     rango_maximo = models.FloatField(default=0, help_text='Rango máximo de temperatura en °C')
     

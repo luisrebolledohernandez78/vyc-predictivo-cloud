@@ -73,10 +73,27 @@
         }
 
         .content {
-            background: white;
             border-radius: 12px;
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Patrón para Vibraciones */
+        .content.content-vibraciones {
+            background-image: 
+                url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Cpath d='M0,50 Q50,30 100,50 T200,50' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,60 Q50,40 100,60 T200,60' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,40 Q50,20 100,40 T200,40' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,70 Q50,50 100,70 T200,70' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Ccircle cx='100' cy='50' r='8' fill='%23667eea' opacity='0.08'/%3E%3C/svg%3E"),
+                linear-gradient(white, white);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+        }
+
+        /* Patrón para Termografías */
+        .content.content-termografias {
+            background-image: 
+                url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='%23808080' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='%23808080' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='%23808080' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='%23808080' opacity='0.05'/%3E%3C/svg%3E"),
+                linear-gradient(white, white);
+            background-repeat: repeat;
+            background-size: 150px 150px;
         }
 
         .content h2 {
@@ -281,7 +298,7 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-        <section class="content">
+        <section class="content {% if modulo %}content-{{ modulo }}{% endif %}">
             <!-- Breadcrumb y Botón -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <nav aria-label="breadcrumb" class="breadcrumb-container">
