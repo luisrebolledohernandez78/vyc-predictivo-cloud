@@ -38,24 +38,37 @@ class AnalizadorTermico:
         Analiza una imagen térmica y devuelve estadísticas.
         
         Args:
-            ruta_imagen: Ruta o objeto archivo de la imagen
+            ruta_imagen: Ruta (str), objeto FieldFile de Django, o BytesIO
         
         Returns:
             dict: Diccionario con resultados del análisis
         """
         try:
-            # Leer imagen
+            imagen = None
+            
+            # Caso 1: Ruta como string
             if isinstance(ruta_imagen, str):
                 imagen = cv2.imread(ruta_imagen)
-            else:
-                # Si es archivo enviado
-                contenido = ruta_imagen.read()
-                nparr = np.frombuffer(contenido, np.uint8)
-                imagen = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                ruta_imagen.seek(0)  # Reset file pointer
+                if imagen is None:
+                    return {'error': f'No se pudo cargar la imagen desde: {ruta_imagen}'}
+            
+            # Caso 2: Objeto FieldFile de Django (tiene .read() y .file)
+            elif hasattr(ruta_imagen, 'read'):
+                try:
+                    contenido = ruta_imagen.read()
+                    if isinstance(contenido, bytes):
+                        nparr = np.frombuffer(contenido, np.uint8)
+                        imagen = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                        if hasattr(ruta_imagen, 'seek'):
+                            ruta_imagen.seek(0)  # Reset file pointer
+                except Exception as e:
+                    return {'error': f'Error leyendo archivo: {str(e)}'}
             
             if imagen is None:
-                return {'error': 'No se pudo cargar la imagen'}
+                return {'error': 'No se pudo decodificar la imagen'}
+            
+            # Convertir BGR a HSV
+            hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
             
             # Convertir BGR a HSV
             hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)

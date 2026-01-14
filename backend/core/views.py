@@ -1153,6 +1153,9 @@ def subir_foto_termica(request, activo_id):
     try:
         from .analisis_termico import AnalizadorTermico
         from .models import AnalisisTermico
+        import logging
+        
+        logger = logging.getLogger(__name__)
         
         activo = get_object_or_404(Activo, id=activo_id)
         
@@ -1160,6 +1163,7 @@ def subir_foto_termica(request, activo_id):
             return JsonResponse({'success': False, 'error': 'No se proporcionó archivo'}, status=400)
         
         archivo = request.FILES['foto']
+        logger.info(f"Archivo recibido: {archivo.name}, tipo: {archivo.content_type}, tamaño: {archivo.size}")
         
         # Validar que sea una imagen
         if not archivo.content_type.startswith('image/'):
@@ -1172,12 +1176,14 @@ def subir_foto_termica(request, activo_id):
         # Guardar nueva foto
         activo.foto_termica = archivo
         activo.save()
+        logger.info(f"Foto guardada en: {activo.foto_termica.path}")
         
-        # Analizar la imagen térmica
+        # Analizar la imagen térmica - pasar el archivo en lugar de la ruta
         analizador = AnalizadorTermico()
-        resultado_analisis = analizador.analizar_imagen(activo.foto_termica.path)
+        resultado_analisis = analizador.analizar_imagen(activo.foto_termica)
         
         if 'error' in resultado_analisis:
+            logger.warning(f"Error en análisis: {resultado_analisis['error']}")
             return JsonResponse({
                 'success': True,
                 'foto_url': activo.foto_termica.url,
@@ -1197,6 +1203,7 @@ def subir_foto_termica(request, activo_id):
                 'estado': resultado_analisis['estado'],
             }
         )
+        logger.info(f"Análisis guardado para activo {activo_id}: estado={resultado_analisis['estado']}")
         
         return JsonResponse({
             'success': True,
@@ -1207,12 +1214,14 @@ def subir_foto_termica(request, activo_id):
                 'temperatura_maxima': resultado_analisis['temperatura_maxima'],
                 'temperatura_minima': resultado_analisis['temperatura_minima'],
                 'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
+                'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
                 'porcentaje_zona_caliente': resultado_analisis['porcentaje_zona_caliente'],
                 'estado': resultado_analisis['estado'],
-                'mensaje_analisis': resultado_analisis['mensaje']
+                'mensaje': resultado_analisis['mensaje']
             }
         })
     except Exception as e:
+        logger.error(f"Error subiendo foto térmica: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
