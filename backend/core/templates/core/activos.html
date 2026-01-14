@@ -675,6 +675,8 @@
                         </thead>
                         <tbody>
                             {% for activo in activos %}
+                                <!-- Contenedor dinámico para análisis de este activo -->
+                                <div id="resultado-analisis-{{ activo.id }}" style="display:none;"></div>
                                 <tr>
                                     <td>
                                         <strong>{{ activo.nombre }}</strong>
@@ -748,79 +750,7 @@
     </div>
 </div>
 
-<!-- Modal para resultados de análisis térmico -->
-<div id="modal-analisis" class="modal-analisis">
-    <div class="modal-analisis-content">
-        <button class="close-modal" onclick="cerrarModalAnalisis()">&times;</button>
-        <div class="modal-analisis-header">
-            <h5>📊 Análisis Térmico</h5>
-            <p id="activo-nombre" class="text-muted"></p>
-        </div>
-        
-        <div class="row" style="gap: 20px;">
-            <!-- Foto miniatura -->
-            <div class="col" style="flex: 0 0 150px;">
-                <img id="analisis-foto" src="" alt="Foto" style="width: 100%; border-radius: 8px;">
-            </div>
-            
-            <!-- Resultados -->
-            <div class="col" style="flex: 1; min-width: 250px;">
-                <div class="analisis-resultado">
-                    <div class="resultado-item">
-                        <label>Estado General</label>
-                        <div id="estado-badge" class="estado-badge"></div>
-                    </div>
-                    
-                    <div class="resultado-item">
-                        <label>🌡️ Temperatura Promedio</label>
-                        <div class="valor"><span id="temp-promedio">0</span>°C</div>
-                    </div>
-                    
-                    <div class="resultado-item">
-                        <label>🔥 Temperatura Máxima</label>
-                        <div class="valor"><span id="temp-maxima">0</span>°C</div>
-                    </div>
-                    
-                    <div class="resultado-item">
-                        <label>❄️ Temperatura Mínima</label>
-                        <div class="valor"><span id="temp-minima">0</span>°C</div>
-                    </div>
-                </div>
-                
-                <div class="analisis-barras" style="margin-top: 20px;">
-                    <div class="barra-item">
-                        <label>Zona Crítica</label>
-                        <div class="barra-contenedor">
-                            <div id="barra-critica" class="barra rojo"></div>
-                        </div>
-                        <span id="pct-critica">0</span>%
-                    </div>
-                    
-                    <div class="barra-item">
-                        <label>Zona Alerta</label>
-                        <div class="barra-contenedor">
-                            <div id="barra-alerta" class="barra naranja"></div>
-                        </div>
-                        <span id="pct-alerta">0</span>%
-                    </div>
-                </div>
-                
-                <div class="mensaje-analisis" id="mensaje-analisis"></div>
-            </div>
-        </div>
-        
-        <!-- Botones de acción -->
-        <div class="modal-analisis-footer">
-            <button type="button" class="btn btn-secondary" onclick="cerrarModalAnalisis()">
-                Rechazar
-            </button>
-            <button type="button" class="btn btn-success" onclick="confirmarAnalisis()">
-                ✓ Confirmar
-            </button>
-        </div>
-    </div>
-</div>
-
+<!-- Nota: El modal de análisis se crea dinámicamente en JavaScript por cada activo -->
 <!-- Input file oculto para subir fotos -->
 <input type="file" id="foto-input" style="display:none;" accept="image/*" onchange="procesarSubidaFoto(this)">
 
@@ -1117,7 +1047,7 @@ function procesarSubidaFoto(input) {
                     const fila = boton.closest('tr');
                     if (fila) {
                         const nombreActivo = fila.querySelector('td:first-child').textContent.trim();
-                        mostrarAnalisisTermico(data.analisis, data.foto_url, nombreActivo);
+                        mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
                     }
                 }
             } else {
@@ -1151,64 +1081,109 @@ function procesarSubidaFoto(input) {
     });
 }
 
-function mostrarAnalisisTermico(analisis, fotoUrl, activoNombre) {
-    // Llenar datos del modal
-    document.getElementById('activo-nombre').textContent = activoNombre || 'Análisis Térmico';
-    document.getElementById('analisis-foto').src = fotoUrl;
+function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
+    // Obtener contenedor dinámico de este activo
+    const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
     
-    // Temperatura promedio
-    document.getElementById('temp-promedio').textContent = 
-        analisis.temperatura_promedio.toFixed(1);
-    
-    // Temperatura máxima
-    document.getElementById('temp-maxima').textContent = 
-        analisis.temperatura_maxima.toFixed(1);
-    
-    // Temperatura mínima
-    document.getElementById('temp-minima').textContent = 
-        analisis.temperatura_minima.toFixed(1);
-    
-    // Estado badge
-    const estadoBadge = document.getElementById('estado-badge');
-    estadoBadge.textContent = analisis.estado.toUpperCase();
-    estadoBadge.className = 'estado-badge ' + analisis.estado;
-    
-    // Barras de zonas
-    const barrasCritica = document.getElementById('barra-critica');
-    barrasCritica.style.width = analisis.porcentaje_zona_critica + '%';
-    barrasCritica.textContent = analisis.porcentaje_zona_critica.toFixed(1);
-    
-    const barrasAlerta = document.getElementById('barra-alerta');
-    barrasAlerta.style.width = analisis.porcentaje_zona_alerta + '%';
-    barrasAlerta.textContent = analisis.porcentaje_zona_alerta.toFixed(1);
-    
-    // Mensaje
-    if (analisis.mensaje) {
-        document.getElementById('analisis-mensaje').innerHTML = analisis.mensaje;
+    if (!contenedor) {
+        console.error('No existe contenedor resultado-analisis-' + activoId);
+        alert('Error: no se encontró contenedor para mostrar análisis');
+        return;
     }
     
-    // Mostrar modal
-    document.getElementById('modal-analisis').classList.add('show');
+    // Construir HTML del análisis
+    const htmlAnalisis = `
+        <div class="modal-analisis" id="modal-analisis-${activoId}">
+            <div class="modal-analisis-content">
+                <div class="modal-analisis-header">
+                    <h5>${activoNombre || 'Análisis Térmico'}</h5>
+                    <button type="button" class="btn-close" onclick="cerrarModalAnalisis(${activoId})"></button>
+                </div>
+                
+                <div class="modal-analisis-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <img src="${fotoUrl}" alt="Foto térmica" style="width: 100%; border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6>Estado</h6>
+                                <span class="estado-badge ${analisis.estado}">${analisis.estado.toUpperCase()}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Temperaturas (°C)</h6>
+                                <div class="temp-display">
+                                    <p><strong>Promedio:</strong> ${analisis.temperatura_promedio.toFixed(1)}°C</p>
+                                    <p><strong>Máxima:</strong> ${analisis.temperatura_maxima.toFixed(1)}°C</p>
+                                    <p><strong>Mínima:</strong> ${analisis.temperatura_minima.toFixed(1)}°C</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Zonas Térmicas</h6>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Crítica</small>
+                                        <small>${analisis.porcentaje_zona_critica.toFixed(1)}%</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" style="width: ${analisis.porcentaje_zona_critica}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Alerta</small>
+                                        <small>${analisis.porcentaje_zona_alerta.toFixed(1)}%</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: ${analisis.porcentaje_zona_alerta}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <p class="text-muted small">${analisis.mensaje || ''}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-analisis-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalAnalisis(${activoId})">Cerrar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmarAnalisis(${activoId})">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insertar HTML en el contenedor
+    contenedor.innerHTML = htmlAnalisis;
+    contenedor.style.display = 'block';
     
     // Guardar estado actual para confirmar después
     window.analisisActual = {
-        activo_id: window.activoActualId,
+        activo_id: activoId,
         analisis: analisis
     };
 }
 
-function cerrarModalAnalisis() {
-    document.getElementById('modal-analisis').classList.remove('show');
+function cerrarModalAnalisis(activoId) {
+    const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
+    if (contenedor) {
+        contenedor.style.display = 'none';
+        contenedor.innerHTML = '';
+    }
     window.analisisActual = null;
 }
 
-function confirmarAnalisis() {
-    if (!window.analisisActual) return;
+function confirmarAnalisis(activoId) {
+    if (!window.analisisActual) {
+        console.error('No hay análisis guardado');
+        return;
+    }
     
-    // Aquí puedes enviar la confirmación al servidor si lo deseas
-    // Por ahora simplemente cerramos el modal
-    
-    cerrarModalAnalisis();
+    cerrarModalAnalisis(activoId);
     
     // Mostrar notificación de éxito
     alert('Análisis confirmado y guardado correctamente.');
