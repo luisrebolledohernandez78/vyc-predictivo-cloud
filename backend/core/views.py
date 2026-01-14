@@ -1237,34 +1237,40 @@ def obtener_analisis_termico(request, activo_id):
         
         activo = get_object_or_404(Activo, id=activo_id)
         
-        # Intentar obtener el análisis guardado
-        try:
-            analisis = activo.analisisTermico
-        except AnalisisTermico.DoesNotExist:
+        # Intentar obtener el análisis guardado usando el related_name correcto
+        if not hasattr(activo, 'analisis_termico') or activo.analisis_termico is None:
             logger.warning(f"No existe análisis para activo {activo_id}")
             return JsonResponse({
                 'success': False,
                 'error': 'No hay análisis disponible para este activo'
             }, status=404)
         
-        # Devolver análisis guardado
+        analisis = activo.analisis_termico
+        
+        # Construir respuesta con valores convertidos a float para evitar errores de serialización
+        foto_url = ''
+        if activo.foto_termica:
+            foto_url = activo.foto_termica.url
+        
+        zona_caliente = float(analisis.porcentaje_zona_critica) + float(analisis.porcentaje_zona_alerta)
+        
         return JsonResponse({
             'success': True,
-            'foto_url': activo.foto_termica.url if activo.foto_termica else '',
+            'foto_url': foto_url,
             'analisis': {
-                'temperatura_promedio': analisis.temperatura_promedio,
-                'temperatura_maxima': analisis.temperatura_maxima,
-                'temperatura_minima': analisis.temperatura_minima,
-                'porcentaje_zona_critica': analisis.porcentaje_zona_critica,
-                'porcentaje_zona_alerta': analisis.porcentaje_zona_alerta,
-                'porcentaje_zona_caliente': (analisis.porcentaje_zona_critica + analisis.porcentaje_zona_alerta),
+                'temperatura_promedio': float(analisis.temperatura_promedio),
+                'temperatura_maxima': float(analisis.temperatura_maxima),
+                'temperatura_minima': float(analisis.temperatura_minima),
+                'porcentaje_zona_critica': float(analisis.porcentaje_zona_critica),
+                'porcentaje_zona_alerta': float(analisis.porcentaje_zona_alerta),
+                'porcentaje_zona_caliente': zona_caliente,
                 'estado': analisis.estado,
-                'mensaje': f"{analisis.estado.upper()}: {analisis.porcentaje_zona_critica + analisis.porcentaje_zona_alerta:.1f}% de zona caliente detectada"
+                'mensaje': f"{analisis.estado.upper()}: {zona_caliente:.1f}% de zona caliente detectada"
             }
         })
     except Exception as e:
         logger.error(f"Error obteniendo análisis térmico: {str(e)}", exc_info=True)
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
 
 
 @login_required(login_url='/login/')
