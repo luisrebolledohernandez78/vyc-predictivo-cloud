@@ -1159,7 +1159,15 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
     
     // Insertar HTML en el contenedor
     contenedor.innerHTML = htmlAnalisis;
-    contenedor.style.display = 'block';
+    
+    // Obtener el modal recién creado y agregar clase 'show'
+    const modalElement = contenedor.querySelector(`#modal-analisis-${activoId}`);
+    if (modalElement) {
+        modalElement.classList.add('show');
+        console.log('Modal mostrado:', modalElement);
+    } else {
+        console.error('No se encontró elemento modal-analisis-' + activoId);
+    }
     
     // Guardar estado actual para confirmar después
     window.analisisActual = {
@@ -1171,8 +1179,13 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
 function cerrarModalAnalisis(activoId) {
     const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
     if (contenedor) {
-        contenedor.style.display = 'none';
-        contenedor.innerHTML = '';
+        const modalElement = contenedor.querySelector(`#modal-analisis-${activoId}`);
+        if (modalElement) {
+            modalElement.classList.remove('show');
+        }
+        setTimeout(() => {
+            contenedor.innerHTML = '';
+        }, 300);
     }
     window.analisisActual = null;
 }
