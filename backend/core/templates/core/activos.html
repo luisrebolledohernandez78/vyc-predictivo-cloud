@@ -952,6 +952,32 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function getCSRFToken() {
+    // Método 1: Buscar en input del formulario
+    let token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (token) {
+        console.log('CSRF token obtenido del formulario');
+        return token;
+    }
+    
+    // Método 2: Buscar en cookies
+    token = getCookie('csrftoken');
+    if (token) {
+        console.log('CSRF token obtenido de cookies (csrftoken)');
+        return token;
+    }
+    
+    // Método 3: Buscar en meta tags
+    token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (token) {
+        console.log('CSRF token obtenido de meta tag');
+        return token;
+    }
+    
+    console.warn('No se pudo obtener CSRF token');
+    return '';
+}
+
 function abrirCargadorFoto(activoId) {
     const input = document.getElementById('foto-input');
     input.setAttribute('data-activo-id', activoId);
@@ -1004,7 +1030,8 @@ function procesarSubidaFoto(input) {
     const formData = new FormData();
     formData.append('foto', archivo);
     
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    const csrftoken = getCSRFToken();
+    console.log('CSRF Token a enviar:', csrftoken ? 'OK' : 'FALTANTE');
     
     // Mostrar indicador de carga
     const boton = document.querySelector(`button[onclick="abrirCargadorFoto(${activoId})"]`);

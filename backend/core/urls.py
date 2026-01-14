@@ -16,6 +16,7 @@ from .views import (
     actualizar_estado_equipo, actualizar_observacion_equipo, actualizar_estado_activo, actualizar_observacion_activo,
     subir_foto_termica, configuracion, upload_profile_photo, save_config,
 )
+from .views_debug import test_upload_sin_autenticacion
 
 urlpatterns = [
     path("", welcome, name="welcome"),
@@ -95,6 +96,9 @@ urlpatterns = [
     path("api/activo/<int:activo_id>/actualizar-estado/", actualizar_estado_activo, name="actualizar_estado_activo"),
     path("api/activo/<int:activo_id>/actualizar-observacion/", actualizar_observacion_activo, name="actualizar_observacion_activo"),
     path("api/activo/<int:activo_id>/subir-foto-termica/", subir_foto_termica, name="subir_foto_termica"),
+    
+    # DEBUG: Endpoint de prueba sin autenticación
+    path("api/debug/activo/<int:activo_id>/test-upload/", test_upload_sin_autenticacion, name="test_upload_debug"),
     
     # Configuración
     path("configuracion/", configuracion, name="configuracion"),
