@@ -1103,20 +1103,9 @@ function procesarSubidaFoto(input) {
 function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
     console.log('mostrarAnalisisTermico() LLAMADA con:', {activoId, nombreActivo: activoNombre, estadoAnalisis: analisis.estado});
     
-    // Obtener contenedor dinámico de este activo
-    const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
-    
-    if (!contenedor) {
-        console.error('CRÍTICO: No existe contenedor resultado-analisis-' + activoId);
-        alert('Error: no se encontró contenedor para mostrar análisis');
-        return;
-    }
-    
-    console.log('Contenedor encontrado:', contenedor);
-    
-    // Construir HTML del análisis
+    // Crear HTML del modal
     const htmlAnalisis = `
-        <div class="modal-analisis" id="modal-analisis-${activoId}">
+        <div class="modal-analisis show" id="modal-analisis-${activoId}">
             <div class="modal-analisis-content">
                 <div class="modal-analisis-header">
                     <h5>${activoNombre || 'Análisis Térmico'}</h5>
@@ -1180,17 +1169,32 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
         </div>
     `;
     
-    // Insertar HTML en el contenedor
-    contenedor.innerHTML = htmlAnalisis;
-    
-    // Obtener el modal recién creado y agregar clase 'show'
-    const modalElement = contenedor.querySelector(`#modal-analisis-${activoId}`);
-    if (modalElement) {
-        modalElement.classList.add('show');
-        console.log('✅ ÉXITO: Modal mostrado con clase show');
-    } else {
-        console.error('CRÍTICO: No se encontró elemento modal-analisis-' + activoId);
+    // Crear contenedor temporal si no existe
+    let contenedorModales = document.getElementById('contenedor-modales-analisis');
+    if (!contenedorModales) {
+        contenedorModales = document.createElement('div');
+        contenedorModales.id = 'contenedor-modales-analisis';
+        document.body.appendChild(contenedorModales);
+        console.log('Contenedor de modales creado en body');
     }
+    
+    // Crear elemento del modal
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = htmlAnalisis;
+    
+    // Obtener el primer (y único) hijo que es el modal
+    const modalElement = modalDiv.firstElementChild;
+    
+    // Agregar event listener para cerrar al hacer click fuera
+    modalElement.addEventListener('click', function(event) {
+        if (event.target === this) {
+            cerrarModalAnalisis(activoId);
+        }
+    });
+    
+    // Insertar en el contenedor
+    contenedorModales.appendChild(modalElement);
+    console.log('✅ ÉXITO: Modal creado e insertado en body con clase show');
     
     // Guardar estado actual para confirmar después
     window.analisisActual = {
@@ -1200,14 +1204,13 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
 }
 
 function cerrarModalAnalisis(activoId) {
-    const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
-    if (contenedor) {
-        const modalElement = contenedor.querySelector(`#modal-analisis-${activoId}`);
-        if (modalElement) {
-            modalElement.classList.remove('show');
-        }
+    const modal = document.getElementById(`modal-analisis-${activoId}`);
+    if (modal) {
+        modal.classList.remove('show');
+        // Remover después de animación
         setTimeout(() => {
-            contenedor.innerHTML = '';
+            modal.remove();
+            console.log('Modal cerrado y removido del DOM');
         }, 300);
     }
     window.analisisActual = null;
