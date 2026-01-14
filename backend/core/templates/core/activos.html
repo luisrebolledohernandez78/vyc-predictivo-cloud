@@ -1041,15 +1041,31 @@ function procesarSubidaFoto(input) {
             window.activoActualId = activoId;
             
             // Mostrar análisis si está disponible
+            console.log('¿Tiene análisis?', data.analisis ? 'SÍ' : 'NO');
             if (data.analisis) {
-                // Buscar el nombre del activo en la fila
-                if (boton) {
-                    const fila = boton.closest('tr');
-                    if (fila) {
-                        const nombreActivo = fila.querySelector('td:first-child').textContent.trim();
-                        mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
+                console.log('Análisis recibido:', data.analisis);
+                // Buscar el nombre del activo en la tabla
+                let nombreActivo = 'Activo';
+                const filaBoton = boton ? boton.closest('tr') : null;
+                if (filaBoton) {
+                    nombreActivo = filaBoton.querySelector('td:first-child strong').textContent.trim();
+                    console.log('Nombre del activo encontrado:', nombreActivo);
+                } else {
+                    console.log('No se encontró fila, buscando en tabla completa...');
+                    const filas = document.querySelectorAll('tr');
+                    for (let fila of filas) {
+                        // Verificar si esta fila contiene el activo buscado
+                        const contenedorAnalisis = document.getElementById(`resultado-analisis-${activoId}`);
+                        if (contenedorAnalisis && contenedorAnalisis.closest('tr') === fila) {
+                            nombreActivo = fila.querySelector('td:first-child strong').textContent.trim();
+                            console.log('Nombre encontrado en tabla:', nombreActivo);
+                            break;
+                        }
                     }
                 }
+                
+                console.log('Llamando mostrarAnalisisTermico con:', {activoId, nombreActivo, foto: data.foto_url});
+                mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
             } else {
                 alert('Foto subida correctamente');
             }
@@ -1082,14 +1098,18 @@ function procesarSubidaFoto(input) {
 }
 
 function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
+    console.log('mostrarAnalisisTermico() LLAMADA con:', {activoId, nombreActivo: activoNombre, estadoAnalisis: analisis.estado});
+    
     // Obtener contenedor dinámico de este activo
     const contenedor = document.getElementById(`resultado-analisis-${activoId}`);
     
     if (!contenedor) {
-        console.error('No existe contenedor resultado-analisis-' + activoId);
+        console.error('CRÍTICO: No existe contenedor resultado-analisis-' + activoId);
         alert('Error: no se encontró contenedor para mostrar análisis');
         return;
     }
+    
+    console.log('Contenedor encontrado:', contenedor);
     
     // Construir HTML del análisis
     const htmlAnalisis = `
@@ -1164,9 +1184,9 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre) {
     const modalElement = contenedor.querySelector(`#modal-analisis-${activoId}`);
     if (modalElement) {
         modalElement.classList.add('show');
-        console.log('Modal mostrado:', modalElement);
+        console.log('✅ ÉXITO: Modal mostrado con clase show');
     } else {
-        console.error('No se encontró elemento modal-analisis-' + activoId);
+        console.error('CRÍTICO: No se encontró elemento modal-analisis-' + activoId);
     }
     
     // Guardar estado actual para confirmar después
