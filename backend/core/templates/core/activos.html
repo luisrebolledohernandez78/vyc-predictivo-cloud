@@ -1035,20 +1035,53 @@ function procesarSubidaFoto(input) {
     
     const csrftoken = getCSRFToken();
     console.log('CSRF Token a enviar:', csrftoken ? 'OK' : 'FALTANTE');
+    console.log('Activo ID:', activoId);
     
-    // Usar la referencia directa al botón que guardamos
-    const boton = input.botonElement;
+    // Intentar obtener referencia al botón de varias formas
+    let boton = null;
     
-    if (!boton) {
-        console.error('No se encontró referencia al botón');
-        alert('Error: No se pudo encontrar el botón de carga');
-        return;
+    // Forma 1: Referencia guardada en el input
+    if (input.botonElement) {
+        boton = input.botonElement;
+        console.log('Botón obtenido de referencia guardada');
     }
     
-    console.log('Botón encontrado:', boton);
-    const iconoOriginal = boton.innerHTML;
-    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    boton.disabled = true;
+    // Forma 2: Buscar en el DOM
+    if (!boton) {
+        const botones = document.querySelectorAll(`button[data-activo-id="${activoId}"]`);
+        if (botones.length > 0) {
+            // Tomar el primer botón (el de subir foto, no el de ver foto)
+            boton = botones[0];
+            console.log('Botón obtenido del DOM, encontrados:', botones.length);
+        }
+    }
+    
+    // Forma 3: Buscar el botón más cercano (menos confiable pero es fallback)
+    if (!boton) {
+        // Encontrar cualquier botón en la tabla que esté cerca
+        const allButtons = document.querySelectorAll('button[data-activo-id]');
+        for (let btn of allButtons) {
+            if (btn.getAttribute('data-activo-id') == activoId) {
+                boton = btn;
+                console.log('Botón obtenido buscando todos los botones');
+                break;
+            }
+        }
+    }
+    
+    if (!boton) {
+        console.warn('No se encontró botón, continuando sin cambiar UI del botón');
+    } else {
+        console.log('Botón encontrado, cambiando estado a cargando...');
+        const iconoOriginal = boton.innerHTML;
+        boton.setAttribute('data-icono-original', iconoOriginal);
+        try {
+            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            boton.disabled = true;
+        } catch (e) {
+            console.error('Error al modificar botón:', e);
+        }
+    }
     
     fetch(`/api/activo/${activoId}/subir-foto-termica/`, {
         method: 'POST',
@@ -1067,10 +1100,12 @@ function procesarSubidaFoto(input) {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            // Cambiar el icono a verde y mostrar cámara
-            boton.className = 'btn btn-action btn-success';
-            boton.innerHTML = '<i class="fas fa-camera"></i>';
-            boton.setAttribute('title', 'Cambiar foto térmica');
+            if (boton) {
+                // Cambiar el icono a verde y mostrar cámara
+                boton.className = 'btn btn-action btn-success';
+                boton.innerHTML = '<i class="fas fa-camera"></i>';
+                boton.setAttribute('title', 'Cambiar foto térmica');
+            }
             
             // Guardar el ID del activo actual para usar en el modal
             window.activoActualId = activoId;
@@ -1078,24 +1113,40 @@ function procesarSubidaFoto(input) {
             // Mostrar análisis si está disponible
             if (data.analisis) {
                 // Buscar el nombre del activo en la fila
-                const fila = boton.closest('tr');
-                const nombreActivo = fila.querySelector('td:first-child').textContent.trim();
-                mostrarAnalisisTermico(data.analisis, data.foto_url, nombreActivo);
+                if (boton) {
+                    const fila = boton.closest('tr');
+                    if (fila) {
+                        const nombreActivo = fila.querySelector('td:first-child').textContent.trim();
+                        mostrarAnalisisTermico(data.analisis, data.foto_url, nombreActivo);
+                    }
+                }
             } else {
                 alert('Foto subida correctamente');
             }
         } else {
             alert('Error al subir la foto: ' + (data.error || 'Error desconocido'));
-            boton.innerHTML = iconoOriginal;
+            if (boton) {
+                const iconoOriginal = boton.getAttribute('data-icono-original');
+                if (iconoOriginal) {
+                    boton.innerHTML = iconoOriginal;
+                }
+            }
         }
-        boton.disabled = false;
+        if (boton) {
+            boton.disabled = false;
+        }
         input.value = '';
     })
     .catch(error => {
         console.error('Upload error:', error);
         alert('Error al subir la foto: ' + error.message);
-        boton.innerHTML = iconoOriginal;
-        boton.disabled = false;
+        if (boton) {
+            const iconoOriginal = boton.getAttribute('data-icono-original');
+            if (iconoOriginal) {
+                boton.innerHTML = iconoOriginal;
+            }
+            boton.disabled = false;
+        }
         input.value = '';
     });
 }
