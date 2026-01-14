@@ -14,7 +14,7 @@ from .views import (
     activos_termografias, crear_activo_termografias, editar_activo_termografias, eliminar_activo_termografias,
     upload_equipos_termografias, confirmar_upload_equipos_termografias,
     actualizar_estado_equipo, actualizar_observacion_equipo, actualizar_estado_activo, actualizar_observacion_activo,
-    subir_foto_termica, configuracion, upload_profile_photo, save_config,
+    subir_foto_termica, obtener_analisis_termico, configuracion, upload_profile_photo, save_config,
 )
 from .views_debug import test_upload_sin_autenticacion
 
@@ -96,6 +96,7 @@ urlpatterns = [
     path("api/activo/<int:activo_id>/actualizar-estado/", actualizar_estado_activo, name="actualizar_estado_activo"),
     path("api/activo/<int:activo_id>/actualizar-observacion/", actualizar_observacion_activo, name="actualizar_observacion_activo"),
     path("api/activo/<int:activo_id>/subir-foto-termica/", subir_foto_termica, name="subir_foto_termica"),
+    path("api/activo/<int:activo_id>/obtener-analisis/", obtener_analisis_termico, name="obtener_analisis_termico"),
     
     # DEBUG: Endpoint de prueba sin autenticación
     path("api/debug/activo/<int:activo_id>/test-upload/", test_upload_sin_autenticacion, name="test_upload_debug"),

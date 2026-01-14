@@ -1225,6 +1225,48 @@ def subir_foto_termica(request, activo_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+@require_http_methods(["GET"])
+@login_required(login_url='/login/')
+def obtener_analisis_termico(request, activo_id):
+    """Obtiene el análisis térmico guardado para un activo"""
+    try:
+        from .models import AnalisisTermico
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        activo = get_object_or_404(Activo, id=activo_id)
+        
+        # Intentar obtener el análisis guardado
+        try:
+            analisis = activo.analisisTermico
+        except AnalisisTermico.DoesNotExist:
+            logger.warning(f"No existe análisis para activo {activo_id}")
+            return JsonResponse({
+                'success': False,
+                'error': 'No hay análisis disponible para este activo'
+            }, status=404)
+        
+        # Devolver análisis guardado
+        return JsonResponse({
+            'success': True,
+            'foto_url': activo.foto_termica.url if activo.foto_termica else '',
+            'analisis': {
+                'temperatura_promedio': analisis.temperatura_promedio,
+                'temperatura_maxima': analisis.temperatura_maxima,
+                'temperatura_minima': analisis.temperatura_minima,
+                'porcentaje_zona_critica': analisis.porcentaje_zona_critica,
+                'porcentaje_zona_alerta': analisis.porcentaje_zona_alerta,
+                'porcentaje_zona_caliente': (analisis.porcentaje_zona_critica + analisis.porcentaje_zona_alerta),
+                'estado': analisis.estado,
+                'mensaje': f"{analisis.estado.upper()}: {analisis.porcentaje_zona_critica + analisis.porcentaje_zona_alerta:.1f}% de zona caliente detectada"
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error obteniendo análisis térmico: {str(e)}", exc_info=True)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 @login_required(login_url='/login/')
 def configuracion(request):
     """Vista de configuración del usuario"""

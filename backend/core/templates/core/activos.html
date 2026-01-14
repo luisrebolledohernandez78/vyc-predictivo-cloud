@@ -714,6 +714,11 @@
                                                 <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-info{% else %}btn-secondary opacity-50{% endif %}" title="Ver foto térmica" data-bs-toggle="tooltip" {% if not activo.foto_termica %}disabled{% endif %} onclick="{% if activo.foto_termica %}verFotoTermica('{{ activo.foto_termica.url }}', '{{ activo.nombre }}'){% endif %}">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
+                                                {% if activo.analisisTermico %}
+                                                <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </button>
+                                                {% endif %}
                                                 <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -1220,6 +1225,53 @@ function confirmarAnalisis(activoId) {
     
     // Mostrar notificación de éxito
     alert('Análisis confirmado y guardado correctamente.');
+}
+
+function verAnalisisTermico(activoId) {
+    console.log('Obteniendo análisis para activo:', activoId);
+    
+    // Obtener el CSRF token
+    const csrftoken = getCSRFToken();
+    
+    // Fetch al endpoint de obtener análisis
+    fetch(`/api/activo/${activoId}/obtener-analisis/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Análisis obtenido:', data);
+        if (data.success && data.analisis) {
+            // Obtener nombre del activo de la tabla
+            let nombreActivo = 'Activo';
+            const filas = document.querySelectorAll('tr');
+            for (let fila of filas) {
+                const contenedorAnalisis = document.getElementById(`resultado-analisis-${activoId}`);
+                if (contenedorAnalisis && contenedorAnalisis.closest('tr') === fila) {
+                    nombreActivo = fila.querySelector('td:first-child strong').textContent.trim();
+                    break;
+                }
+            }
+            
+            // Mostrar el modal del análisis
+            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo);
+        } else {
+            alert('No hay análisis disponible para este activo');
+        }
+    })
+    .catch(error => {
+        console.error('Error obteniendo análisis:', error);
+        alert('Error al obtener el análisis: ' + error.message);
+    });
 }
 </script>
 {% endblock %}
