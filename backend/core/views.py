@@ -863,7 +863,7 @@ def activos_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
     equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
-    activos = equipo.activos.filter(activo=True).order_by('nombre')
+    activos = equipo.activos.filter(activo=True).select_related('analisis_termico').order_by('nombre')
     
     context = {
         'user': request.user,
@@ -1198,12 +1198,19 @@ def subir_foto_termica(request, activo_id):
                 'temperatura_promedio': resultado_analisis['temperatura_promedio'],
                 'temperatura_maxima': resultado_analisis['temperatura_maxima'],
                 'temperatura_minima': resultado_analisis['temperatura_minima'],
+                'rango_minimo': resultado_analisis['temperatura_minima'],
+                'rango_maximo': resultado_analisis['temperatura_maxima'],
                 'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
                 'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
                 'estado': resultado_analisis['estado'],
             }
         )
         logger.info(f"Análisis guardado para activo {activo_id}: estado={resultado_analisis['estado']}")
+        
+        # NUEVO: Actualizar el estado del Activo con el estado del análisis
+        activo.estado = resultado_analisis['estado']
+        activo.save()
+        logger.info(f"Estado del activo {activo_id} actualizado a: {resultado_analisis['estado']}")
         
         return JsonResponse({
             'success': True,

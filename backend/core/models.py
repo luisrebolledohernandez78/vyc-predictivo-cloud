@@ -197,6 +197,7 @@ class Activo(models.Model):
         ('bueno', 'Bueno'),
         ('observacion', 'Observación'),
         ('alarma', 'Alarma'),
+        ('emergencia', 'Emergencia'),
         ('falla', 'Falla'),
         ('sin_medicion', 'Sin Medición'),
     ]
@@ -240,18 +241,23 @@ class AnalisisTermico(models.Model):
     
     # Estadísticas térmicas
     temperatura_promedio = models.FloatField(default=0, help_text='Temperatura promedio estimada (0-100)')
+    temperatura_minima = models.FloatField(default=0, help_text='Temperatura mínima detectada')
+    temperatura_maxima = models.FloatField(default=0, help_text='Temperatura máxima detectada')
     porcentaje_zona_critica = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona crítica')
     porcentaje_zona_alerta = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona de alerta')
-    temperatura_maxima = models.FloatField(default=0, help_text='Temperatura máxima detectada')
-    temperatura_minima = models.FloatField(default=0, help_text='Temperatura mínima detectada')
+    
+    # Rangos de temperatura (nuevo)
+    rango_minimo = models.FloatField(default=0, help_text='Rango mínimo de temperatura en °C')
+    rango_maximo = models.FloatField(default=0, help_text='Rango máximo de temperatura en °C')
     
     # Estado del análisis
     ESTADO_CHOICES = [
-        ('normal', 'Normal'),
-        ('alerta', 'Alerta'),
-        ('critico', 'Crítico'),
+        ('bueno', 'Bueno'),
+        ('alarma', 'Alarma'),
+        ('emergencia', 'Emergencia'),
+        ('sin_medicion', 'Sin Medición'),
     ]
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='normal')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='sin_medicion')
     
     # Metadata
     creado = models.DateTimeField(auto_now_add=True)

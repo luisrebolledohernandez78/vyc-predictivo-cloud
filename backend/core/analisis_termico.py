@@ -107,13 +107,16 @@ class AnalizadorTermico:
             temperatura_maxima = (np.max(hsv[:, :, 2]) / 255) * 100
             temperatura_minima = (np.min(hsv[:, :, 2]) / 255) * 100
             
-            # Determinar estado
+            # Determinar estado (nuevo mapeo: bueno, alarma, emergencia)
             if porcentaje_critico > 5:
-                estado = 'critico'
+                # Emergencia: Zona crítica muy alta
+                estado = 'emergencia'
             elif porcentaje_zona_caliente > 20:
-                estado = 'alerta'
+                # Alarma: Zona caliente significativa
+                estado = 'alarma'
             else:
-                estado = 'normal'
+                # Bueno: Operación normal
+                estado = 'bueno'
             
             return {
                 'exito': True,
@@ -132,9 +135,9 @@ class AnalizadorTermico:
     
     def _generar_mensaje(self, estado, porcentaje_caliente, temp_max):
         """Genera un mensaje descriptivo del análisis"""
-        if estado == 'critico':
-            return f'⚠️ CRÍTICO: {porcentaje_caliente:.1f}% de zona caliente detectada. Temp máx: {temp_max:.1f}°C'
-        elif estado == 'alerta':
-            return f'⚠️ ALERTA: {porcentaje_caliente:.1f}% de zona caliente detectada. Temp máx: {temp_max:.1f}°C'
+        if estado == 'emergencia':
+            return f'🚨 EMERGENCIA: {porcentaje_caliente:.1f}% de zona caliente detectada. Temp máx: {temp_max:.1f}°C'
+        elif estado == 'alarma':
+            return f'⚠️ ALARMA: {porcentaje_caliente:.1f}% de zona caliente detectada. Temp máx: {temp_max:.1f}°C'
         else:
-            return f'✅ NORMAL: Operación dentro de parámetros normales'
+            return f'✅ BUENO: Operación dentro de parámetros normales'
