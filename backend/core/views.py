@@ -1248,6 +1248,48 @@ def subir_foto_termica(request, activo_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+@require_http_methods(["POST"])
+@login_required(login_url='login')
+def eliminar_foto_termica(request, activo_id):
+    """Elimina la foto térmica y análisis de un activo, reseteando la medición"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        from .models import AnalisisTermico
+        
+        activo = get_object_or_404(Activo, id=activo_id)
+        logger.info(f"🗑️ Eliminando foto térmica del activo {activo_id}")
+        
+        # Eliminar análisis asociado
+        try:
+            analisis = AnalisisTermico.objects.get(activo=activo)
+            analisis.delete()
+            logger.info(f"✅ Análisis eliminado")
+        except AnalisisTermico.DoesNotExist:
+            logger.info(f"ℹ️ No hay análisis para eliminar")
+        
+        # Eliminar archivo de foto
+        if activo.foto_termica:
+            archivo_path = activo.foto_termica.path if hasattr(activo.foto_termica, 'path') else None
+            activo.foto_termica.delete()
+            logger.info(f"✅ Archivo de foto eliminado")
+        
+        # Resetear estado del activo
+        activo.estado = 'sin_medicion'
+        activo.save()
+        logger.info(f"✅ Estado del activo reseteado a: sin_medicion")
+        
+        return JsonResponse({
+            'success': True,
+            'mensaje': 'Foto térmica y análisis eliminados correctamente'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error eliminando foto térmica: {str(e)}", exc_info=True)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 @require_http_methods(["GET"])
 @login_required(login_url='/login/')
 def obtener_analisis_termico(request, activo_id):

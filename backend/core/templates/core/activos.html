@@ -1018,6 +1018,17 @@
                                                         <i class="fas fa-chart-bar"></i>
                                                     </button>
                                                 {% endif %}
+                                                
+                                                <!-- Botón Eliminar foto -->
+                                                {% if activo.foto_termica %}
+                                                    <button type="button" class="btn btn-action btn-danger" title="Eliminar foto térmica" data-bs-toggle="tooltip" onclick="eliminarFotoTermica({{ activo.id }}, this)">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-action btn-secondary" title="Eliminar foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                {% endif %}
                                             </div>
                                         </td>
                                         <!-- TERMOGRAFÍAS: Temperaturas -->
@@ -1287,6 +1298,43 @@ function verFotoTermica(fotoUrl, activoNombre, activoId) {
     img.src = fotoUrl;
     titulo.textContent = 'Foto térmica - ' + activoNombre;
     modal.classList.add('show');
+}
+
+function eliminarFotoTermica(activoId, botonElement) {
+    if (!confirm('⚠️ ¿Estás seguro de que deseas eliminar la foto térmica?\n\nEsto también eliminará el análisis y resetará la medición del activo.')) {
+        return;
+    }
+    
+    console.log('🗑️ Eliminando foto térmica del activo:', activoId);
+    
+    const csrftoken = getCSRFToken();
+    
+    fetch(`/api/activo/${activoId}/eliminar-foto-termica/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            alert('✅ Foto térmica eliminada correctamente');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error al eliminar la foto: ' + error.message);
+    });
 }
 
 function cerrarModalFoto() {
