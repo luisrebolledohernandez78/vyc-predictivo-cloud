@@ -1301,6 +1301,10 @@ function verFotoTermica(fotoUrl, activoNombre, activoId) {
 }
 
 function eliminarFotoTermica(activoId, botonElement) {
+    if (!confirm('⚠️ ¿Estás seguro de que deseas eliminar la foto térmica?\n\nEsto también eliminará el análisis y resetará la medición del activo.')) {
+        return;
+    }
+    
     console.log('🗑️ Eliminando foto térmica del activo:', activoId);
     
     const csrftoken = getCSRFToken();
