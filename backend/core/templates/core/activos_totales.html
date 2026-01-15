@@ -1,0 +1,465 @@
+{% extends 'core/equipos.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<style>
+    .breadcrumb-container {
+        margin-bottom: 15px;
+        padding: 0;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 1em;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+
+    .content {
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .content.content-termografias {
+        background-image: 
+            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='%23808080' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='%23808080' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='%23808080' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='%23808080' opacity='0.05'/%3E%3C/svg%3E"),
+            linear-gradient(white, white);
+        background-repeat: repeat;
+        background-size: 150px 150px;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 6px;
+        border: none;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+        margin: 0 2px;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-action.btn-edit {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-action.btn-edit:hover {
+        background-color: #d97706;
+    }
+
+    .btn-action.btn-delete {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-action.btn-delete:hover {
+        background-color: #dc2626;
+    }
+
+    .btn-action i {
+        font-size: 0.9em;
+    }
+
+    .btn-action.btn-secondary {
+        background-color: #d1d5db;
+        color: #666;
+    }
+
+    .btn-action.btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+
+    .btn-action.btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-action.btn-success:hover {
+        background-color: #059669;
+    }
+
+    .btn-action.btn-info {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-action.btn-info:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-action.btn-warning {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-action.btn-warning:hover {
+        background-color: #d97706;
+    }
+
+    .btn-action.btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-action.btn-danger:hover {
+        background-color: #dc2626;
+    }
+
+    .btn-action:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+        border: none;
+        padding: 12px 15px;
+        font-size: 0.9em;
+    }
+
+    .table tbody td {
+        border: none;
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .area-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        color: white;
+    }
+
+    .area-badge.aserradero {
+        background-color: #27ae60;
+    }
+
+    .area-badge.elaborado {
+        background-color: #d4af37;
+        color: #333;
+    }
+
+    .area-badge.caldera {
+        background-color: #e53935;
+    }
+
+    .estado-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .estado-badge.bueno {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .estado-badge.alarma {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .estado-badge.emergencia {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .estado-badge.sin_medicion {
+        background-color: #e5e7eb;
+        color: #374151;
+    }
+
+    .estado-badge.observacion {
+        background-color: #fef3c7;
+        color: #78350f;
+    }
+
+    .estado-badge.falla {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Header Section */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        color: #111;
+        font-size: 1.8em;
+        font-weight: 700;
+    }
+
+    .section-header p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.95em;
+    }
+
+    .section-title {
+        flex: 1;
+    }
+
+    .btn-new {
+        padding: 10px 20px;
+        background-color: #10b981;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+    }
+
+    .btn-new:hover {
+        background-color: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-back {
+        padding: 10px 16px;
+        background-color: #6b7280;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-back:hover {
+        background-color: #4b5563;
+        color: white;
+    }
+
+    .actions-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="content content-{{ modulo }}">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'termografias' %}">Termografías</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a></li>
+            <li class="breadcrumb-item active">Todos los Activos</li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="section-header">
+        <div class="section-title">
+            <h2>{{ titulo }}</h2>
+            <p>{{ descripcion }}</p>
+        </div>
+        <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-center">Área</th>
+                    <th class="text-center">Maquinaria</th>
+                    <th>Activo</th>
+                    <th>Descripción</th>
+                    <th class="text-center">Imagen FLIR</th>
+                    <th class="text-center">Temperaturas (°C)</th>
+                    <th class="text-center">Estado</th>
+                    <th>Observaciones</th>
+                    <th class="text-center" style="width: 120px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activo in activos %}
+                <tr>
+                    <!-- Área -->
+                    <td class="text-center">
+                        <span class="area-badge {{ activo.equipo.area.nombre|lower }}">
+                            {{ activo.equipo.area.get_nombre_display }}
+                        </span>
+                    </td>
+
+                    <!-- Maquinaria -->
+                    <td class="text-center">
+                        <strong>{{ activo.equipo.nombre }}</strong>
+                    </td>
+
+                    <!-- Activo -->
+                    <td>
+                        <strong>{{ activo.nombre }}</strong>
+                    </td>
+
+                    <!-- Descripción -->
+                    <td>
+                        <small>{{ activo.descripcion|default:"None" }}</small>
+                    </td>
+
+                    <!-- Imagen FLIR -->
+                    <td class="text-center">
+                        {% if modulo == 'termografias' %}
+                            <div class="actions-cell" style="justify-content: center; gap: 6px;">
+                                <!-- Botón Subir/Cambiar foto -->
+                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
+                                    <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
+                                </button>
+                                
+                                <!-- Botón Ver foto -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" onclick="verFotoTermica('{{ activo.foto_termica.url|escapejs }}', '{{ activo.nombre|escapejs }}', {{ activo.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-action btn-secondary" title="Ver foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <!-- Botón Ver análisis -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-action btn-secondary" title="Ver análisis térmico" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <!-- Botón Eliminar foto -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-danger" title="Eliminar foto térmica" data-bs-toggle="tooltip" onclick="eliminarFotoTermica({{ activo.id }}, this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-action btn-secondary" title="Eliminar foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Temperaturas -->
+                        <td class="text-center">
+                            {% if activo.analisis_termico %}
+                                T° Detectada: <strong>{{ activo.analisis_termico.temperatura_promedio|floatformat:1 }}°C</strong><br>
+                                <small>Rango correcto: {{ activo.analisis_termico.rango_minimo|floatformat:1 }} – {{ activo.analisis_termico.rango_maximo|floatformat:1 }}°C</small>
+                            {% else %}
+                                <small style="color: #999;">— Sin análisis</small>
+                            {% endif %}
+                        </td>
+
+                        <!-- Estado -->
+                        <td class="text-center">
+                            <span class="estado-badge {{ activo.estado }}">{{ activo.get_estado_display }}</span>
+                        </td>
+
+                        <!-- Observaciones -->
+                        <td>
+                            <small>{{ activo.observaciones }}</small>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td class="text-center">
+                            <div class="actions-cell">
+                                <button type="button" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button type="button" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <p style="color: #999; font-size: 1.1em;">No hay activos registrados en esta sucursal</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% include 'core/activos_modal.html' %}
+
+<script>
+{% include 'core/activos_js.html' %}
+</script>
+
+{% endblock %}

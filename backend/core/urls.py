@@ -9,7 +9,7 @@ from .views import (
     upload_equipos_vibraciones, confirmar_upload_equipos_vibraciones,
     termografias, crear_cliente_termografias, editar_cliente_termografias, eliminar_cliente_termografias,
     sucursales_termografias, crear_sucursal_termografias, editar_sucursal_termografias, eliminar_sucursal_termografias,
-    areas_termografias, editar_area_termografias, eliminar_area_termografias,
+    areas_termografias, activos_totales_termografias, editar_area_termografias, eliminar_area_termografias,
     equipos_termografias, crear_equipo_termografias, editar_equipo_termografias, eliminar_equipo_termografias,
     activos_termografias, crear_activo_termografias, editar_activo_termografias, eliminar_activo_termografias,
     upload_equipos_termografias, confirmar_upload_equipos_termografias,
@@ -71,6 +71,7 @@ urlpatterns = [
     
     # Termografías - Áreas
     path("termografias/cliente/<int:cliente_id>/sucursal/<int:sucursal_id>/areas/", areas_termografias, name="areas_termografias"),
+    path("termografias/cliente/<int:cliente_id>/sucursal/<int:sucursal_id>/activos-totales/", activos_totales_termografias, name="activos_totales_termografias"),
     path("termografias/cliente/<int:cliente_id>/sucursal/<int:sucursal_id>/area/<int:area_id>/editar/", editar_area_termografias, name="editar_area_termografias"),
     path("termografias/cliente/<int:cliente_id>/sucursal/<int:sucursal_id>/area/<int:area_id>/eliminar/", eliminar_area_termografias, name="eliminar_area_termografias"),
     

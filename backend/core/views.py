@@ -425,6 +425,35 @@ def areas_termografias(request, cliente_id, sucursal_id):
 
 
 @login_required(login_url='login')
+def activos_totales_termografias(request, cliente_id, sucursal_id):
+    """Página de TODOS los activos de una sucursal (sin filtro de área)"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener todos los activos de la sucursal (a través de equipos)
+    activos = Activo.objects.filter(
+        equipo__area__sucursal=sucursal,
+        activo=True
+    ).select_related(
+        'equipo',
+        'equipo__area',
+        'analisis_termico'
+    ).order_by('equipo__area__nombre', 'equipo__nombre', 'nombre')
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'activos': activos,
+        'modulo': 'termografias',
+        'titulo': f'Todos los Activos - {sucursal.nombre}',
+        'descripcion': 'Listado total de todos los activos monitorados en esta sucursal',
+        'es_listado_total': True  # Bandera para indicar que es un listado total
+    }
+    return render(request, 'core/activos_totales.html', context)
+
+
+@login_required(login_url='login')
 def editar_area_termografias(request, cliente_id, sucursal_id, area_id):
     """Editar área desde módulo de termografías"""
     cliente = get_object_or_404(Cliente, id=cliente_id)

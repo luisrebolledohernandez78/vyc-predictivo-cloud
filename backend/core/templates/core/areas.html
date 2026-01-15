@@ -404,7 +404,12 @@
                 </div>
             {% endif %}
 
-            <div style="margin-top: 40px;">
+            <div style="margin-top: 40px; display: flex; gap: 10px; align-items: center;">
+                {% if modulo == 'termografias' %}
+                    <a href="{% url 'activos_totales_termografias' cliente.id sucursal.id %}" class="btn-back" style="background-color: #667eea;">
+                        📋 Ver listado total de activos
+                    </a>
+                {% endif %}
                 <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" class="btn-back">
                     ← Volver a sucursales
                 </a>
