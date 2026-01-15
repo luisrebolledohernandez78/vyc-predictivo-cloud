@@ -409,40 +409,41 @@
                                     </button>
                                 {% endif %}
                             </div>
-                        </td>
+                        {% endif %}
+                    </td>
 
-                        <!-- Temperaturas -->
-                        <td class="text-center">
-                            {% if activo.analisis_termico %}
-                                T° Detectada: <strong>{{ activo.analisis_termico.temperatura_promedio|floatformat:1 }}°C</strong><br>
-                                <small>Rango correcto: {{ activo.analisis_termico.rango_minimo|floatformat:1 }} – {{ activo.analisis_termico.rango_maximo|floatformat:1 }}°C</small>
-                            {% else %}
-                                <small style="color: #999;">— Sin análisis</small>
-                            {% endif %}
-                        </td>
+                    <!-- Temperaturas -->
+                    <td class="text-center">
+                        {% if activo.analisis_termico %}
+                            T° Detectada: <strong>{{ activo.analisis_termico.temperatura_promedio|floatformat:1 }}°C</strong><br>
+                            <small>Rango correcto: {{ activo.analisis_termico.rango_minimo|floatformat:1 }} – {{ activo.analisis_termico.rango_maximo|floatformat:1 }}°C</small>
+                        {% else %}
+                            <small style="color: #999;">— Sin análisis</small>
+                        {% endif %}
+                    </td>
 
-                        <!-- Estado -->
-                        <td class="text-center">
-                            <span class="estado-badge {{ activo.estado }}">{{ activo.get_estado_display }}</span>
-                        </td>
+                    <!-- Estado -->
+                    <td class="text-center">
+                        <span class="estado-badge {{ activo.estado }}">{{ activo.get_estado_display }}</span>
+                    </td>
 
-                        <!-- Observaciones -->
-                        <td>
-                            <small>{{ activo.observaciones }}</small>
-                        </td>
+                    <!-- Observaciones -->
+                    <td>
+                        <small>{{ activo.observaciones }}</small>
+                    </td>
 
-                        <!-- Acciones -->
-                        <td class="text-center">
-                            <div class="actions-cell">
-                                <button type="button" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </button>
-                                <button type="button" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <!-- Acciones -->
+                    <td class="text-center">
+                        <div class="actions-cell">
+                            <button type="button" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
                 {% empty %}
                 <tr>
                     <td colspan="9" class="text-center py-5">
