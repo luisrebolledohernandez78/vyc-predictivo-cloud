@@ -245,6 +245,7 @@ class AnalisisTermico(models.Model):
     temperatura_maxima = models.FloatField(default=0, help_text='Temperatura máxima detectada')
     porcentaje_zona_critica = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona crítica')
     porcentaje_zona_alerta = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona de alerta')
+    porcentaje_zona_caliente = models.FloatField(default=0, help_text='Porcentaje de píxeles en zona caliente')
     
     # Rangos de temperatura operacional por zona - BUENO
     zona_bueno_min = models.FloatField(default=20, help_text='Temperatura mínima - Zona BUENO')

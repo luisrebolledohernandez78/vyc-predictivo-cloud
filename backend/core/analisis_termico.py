@@ -8,16 +8,16 @@ logger = logging.getLogger(__name__)
 try:
     import pytesseract
     HAS_TESSERACT = True
-except ImportError:
+except (ImportError, Exception) as e:
     HAS_TESSERACT = False
-    logger.warning("pytesseract no instalado. Install: pip install pytesseract")
+    logger.warning(f"pytesseract no disponible: {e}")
 
 try:
     import easyocr
     HAS_EASYOCR = True
-except ImportError:
+except (ImportError, Exception) as e:
     HAS_EASYOCR = False
-    logger.warning("EasyOCR no instalado o con problemas de torch")
+    logger.warning(f"EasyOCR no disponible (torch/dll issues): {e}")
 
 
 class AnalizadorTermico:
@@ -41,7 +41,8 @@ class AnalizadorTermico:
                 logger.info("✅ EasyOCR OK")
                 self.has_easyocr_ok = True
             except Exception as e:
-                logger.warning(f"EasyOCR falló: {e}")
+                logger.warning(f"EasyOCR falló durante inicialización: {e}")
+                self.has_easyocr_ok = False
         
         # Umbrales para estados
         self.umbral_emergencia = 65.0  # >= 65°C

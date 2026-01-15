@@ -1148,11 +1148,12 @@ def actualizar_observacion_activo(request, activo_id):
 
 
 @require_http_methods(["POST"])
-@login_required
+@login_required(login_url='login')
 def subir_foto_termica(request, activo_id):
     """Sube una foto térmica para un activo y la analiza automáticamente"""
     import logging
     logger = logging.getLogger(__name__)
+    from .analisis_termico import AnalizadorTermico
     
     try:
         from .models import AnalisisTermico
@@ -1181,7 +1182,6 @@ def subir_foto_termica(request, activo_id):
         # Intentar analizar - si falla, devolvemos la foto sin análisis
         resultado_analisis = None
         try:
-            from .analisis_termico import AnalizadorTermico
             analizador = AnalizadorTermico()
             logger.info(f"🔬 Iniciando análisis OCR...")
             resultado_analisis = analizador.analizar_imagen(activo.foto_termica)
@@ -1213,6 +1213,7 @@ def subir_foto_termica(request, activo_id):
                 'rango_maximo': resultado_analisis['rango_maximo'],
                 'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
                 'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
+                'porcentaje_zona_caliente': resultado_analisis['porcentaje_zona_caliente'],
                 'estado': resultado_analisis['estado'],
             }
         )
