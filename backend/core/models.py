@@ -49,6 +49,9 @@ class Cliente(models.Model):
     industria = models.CharField(max_length=100, blank=True)
     empleados = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
     
+    # Imagen/Icono del cliente
+    logo = models.ImageField(upload_to='clientes/', blank=True, null=True, verbose_name='Logo o icono del cliente')
+    
     # Timestamps
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
@@ -81,6 +84,9 @@ class Sucursal(models.Model):
     contacto_puesto = models.CharField(max_length=100, blank=True)
     contacto_email = models.EmailField(blank=True)
     contacto_telefono = models.CharField(max_length=20, blank=True)
+    
+    # Plano o imagen de la planta
+    plano_planta = models.ImageField(upload_to='plantas/', blank=True, null=True, verbose_name='Plano de la planta')
     
     # Timestamps
     creado = models.DateTimeField(auto_now_add=True)
@@ -237,7 +243,7 @@ class Activo(models.Model):
 class AnalisisTermico(models.Model):
     """Modelo para guardar análisis de imágenes térmicas"""
     
-    activo = models.OneToOneField(Activo, on_delete=models.CASCADE, related_name='analisis_termico', null=True, blank=True)
+    activo = models.ForeignKey(Activo, on_delete=models.CASCADE, related_name='analisis_termicos', null=True, blank=True)
     
     # Estadísticas térmicas
     temperatura_promedio = models.FloatField(default=0, help_text='Temperatura promedio estimada (0-100)')
@@ -282,3 +288,181 @@ class AnalisisTermico(models.Model):
     
     def __str__(self):
         return f"Análisis - {self.activo.nombre if self.activo else 'N/A'}"
+
+
+class MuestreoActivo(models.Model):
+    """Modelo para guardar historial de muestreos/pruebas de cada activo"""
+    
+    activo = models.ForeignKey(Activo, on_delete=models.CASCADE, related_name='muestreos')
+    
+    # Fecha del muestreo
+    fecha_muestreo = models.DateField(help_text='Fecha en que se realizó el muestreo')
+    
+    # Metadata
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-fecha_muestreo']
+        verbose_name = 'Muestreo de Activo'
+        verbose_name_plural = 'Muestreos de Activos'
+        unique_together = ('activo', 'fecha_muestreo')  # Una fecha por activo
+
+
+class MuestreoEquipo(models.Model):
+    """Modelo para guardar historial de muestreos/pruebas de cada equipo"""
+    
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='muestreos')
+    
+    # Fecha del muestreo
+    fecha_muestreo = models.DateField(help_text='Fecha en que se realizó el muestreo')
+    
+    # Metadata
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-fecha_muestreo']
+        verbose_name = 'Muestreo de Equipo'
+        verbose_name_plural = 'Muestreos de Equipos'
+        unique_together = ('equipo', 'fecha_muestreo')  # Una fecha por equipo
+    
+    def __str__(self):
+        return f"{self.activo.nombre} - {self.fecha_muestreo}"
+
+
+# ============================================================================
+# MODELOS INDEPENDIENTES PARA ANÁLISIS HISTÓRICOS
+# ============================================================================
+
+class TermografiaAnalisis(models.Model):
+    """Modelo para registros históricos de análisis de termografía"""
+    
+    RESULTADO_CHOICES = [
+        ('normal', 'Normal'),
+        ('alerta', 'Alerta'),
+        ('critico', 'Crítico'),
+    ]
+    
+    activo = models.ForeignKey(
+        Activo, 
+        on_delete=models.CASCADE, 
+        related_name='analisis_termografia_historico',
+        help_text='Activo analizado'
+    )
+    
+    # Datos de la medición
+    fecha_muestreo = models.DateField(help_text='Fecha del análisis de termografía')
+    hora_muestreo = models.TimeField(blank=True, null=True, help_text='Hora del análisis (opcional)')
+    
+    # Mediciones térmicas
+    temperatura_promedio = models.FloatField(default=0, help_text='Temperatura promedio en °C')
+    temperatura_minima = models.FloatField(default=0, help_text='Temperatura mínima en °C')
+    temperatura_maxima = models.FloatField(default=0, help_text='Temperatura máxima en °C')
+    
+    # Zonas de temperatura
+    porcentaje_zona_buena = models.FloatField(default=0, help_text='Porcentaje de zona normal (%)')
+    porcentaje_zona_alerta = models.FloatField(default=0, help_text='Porcentaje de zona de alerta (%)')
+    porcentaje_zona_critica = models.FloatField(default=0, help_text='Porcentaje de zona crítica (%)')
+    
+    # Imagen térmica
+    imagen_termica = models.ImageField(
+        upload_to='termografias/analisis_historico/',
+        blank=True,
+        null=True,
+        help_text='Fotografía térmica capturada'
+    )
+    
+    # Resultado del análisis
+    resultado = models.CharField(
+        max_length=20,
+        choices=RESULTADO_CHOICES,
+        default='normal',
+        help_text='Resultado del análisis'
+    )
+    
+    # Notas y observaciones
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Observaciones adicionales del análisis'
+    )
+    
+    # Metadata
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-fecha_muestreo']
+        verbose_name = 'Análisis de Termografía'
+        verbose_name_plural = 'Análisis de Termografía'
+        indexes = [
+            models.Index(fields=['-fecha_muestreo']),
+            models.Index(fields=['activo', '-fecha_muestreo']),
+        ]
+    
+    def __str__(self):
+        return f"Termografía - {self.activo.nombre} ({self.fecha_muestreo})"
+
+
+class VibracionesAnalisis(models.Model):
+    """Modelo para registros históricos de análisis de vibraciones"""
+    
+    RESULTADO_CHOICES = [
+        ('bueno', 'Bueno'),
+        ('observacion', 'Observación'),
+        ('alarma', 'Alarma'),
+        ('falla', 'Falla'),
+        ('sin_medicion', 'Sin Medición'),
+    ]
+    
+    activo = models.ForeignKey(
+        Activo,
+        on_delete=models.CASCADE,
+        related_name='analisis_vibraciones_historico',
+        help_text='Activo analizado'
+    )
+    
+    # Datos de la medición
+    fecha_muestreo = models.DateField(help_text='Fecha del análisis de vibraciones')
+    hora_muestreo = models.TimeField(blank=True, null=True, help_text='Hora del análisis (opcional)')
+    
+    # Mediciones de vibración
+    velocidad_rms = models.FloatField(default=0, help_text='Velocidad RMS en mm/s')
+    aceleracion = models.FloatField(default=0, help_text='Aceleración en g (gravedades)')
+    frecuencia_dominante = models.FloatField(blank=True, null=True, help_text='Frecuencia dominante en Hz')
+    
+    # Desplazamiento (opcional)
+    desplazamiento = models.FloatField(blank=True, null=True, help_text='Desplazamiento en µm (micras)')
+    
+    # Resultado del análisis
+    resultado = models.CharField(
+        max_length=20,
+        choices=RESULTADO_CHOICES,
+        default='sin_medicion',
+        help_text='Resultado del análisis'
+    )
+    
+    # Notas y observaciones
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Observaciones adicionales del análisis'
+    )
+    
+    # Metadata
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-fecha_muestreo']
+        verbose_name = 'Análisis de Vibraciones'
+        verbose_name_plural = 'Análisis de Vibraciones'
+        indexes = [
+            models.Index(fields=['-fecha_muestreo']),
+            models.Index(fields=['activo', '-fecha_muestreo']),
+        ]
+    
+    def __str__(self):
+        return f"Vibraciones - {self.activo.nombre} ({self.fecha_muestreo})"
+

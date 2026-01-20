@@ -1,0 +1,281 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-2" style="color: #c4491e;">
+                <i class="fas fa-history"></i> {{ titulo }}
+            </h1>
+            <p class="text-muted">{{ descripcion }}</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'exportar_historico_termografias_csv' cliente.id sucursal.id %}" 
+               class="btn btn-success me-2" title="Descargar en formato CSV">
+                <i class="fas fa-file-csv"></i> CSV
+            </a>
+            <a href="{% url 'exportar_historico_termografias_pdf' cliente.id sucursal.id %}" 
+               class="btn btn-danger me-2" title="Descargar en formato PDF">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
+            <a href="{% url 'activos_totales_termografias' cliente.id sucursal.id %}" 
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Información de contexto -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                <strong>Cliente:</strong> {{ cliente.nombre }} | 
+                <strong>Planta:</strong> {{ sucursal.nombre }}
+            </div>
+        </div>
+    </div>
+
+    {% if datos_historico %}
+        <!-- Gráfico de tendencias -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: #c4491e;">
+                        <h5 class="mb-0" style="color: white;">
+                            <i class="fas fa-chart-line"></i> Tendencias de Temperatura
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="graficoTermografias" style="height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Histórico -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-danger">
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 12%;">Área</th>
+                        <th style="width: 15%;">Equipo</th>
+                        <th style="width: 15%;">Activo</th>
+                        {% for fecha in fechas %}
+                        <th style="width: 10%;">
+                            <small>{{ fecha|date:"d/m/Y" }}</small>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in datos_historico %}
+                    <tr>
+                        <td><strong>{{ forloop.counter }}</strong></td>
+                        <td>
+                            <span class="badge bg-warning">
+                                {{ item.area.get_nombre_display }}
+                            </span>
+                        </td>
+                        <td>{{ item.equipo.nombre }}</td>
+                        <td>
+                            <strong>{{ item.activo.nombre }}</strong><br>
+                            <small class="text-muted">{{ item.activo.descripcion }}</small>
+                        </td>
+                        {% for fecha in fechas %}
+                        <td>
+                            {% with analisis=item.analisis_por_fecha|dictsort:fecha %}
+                                {% if item.analisis_por_fecha|dictsort:fecha %}
+                                    {% for k, v in analisis %}
+                                        {% if k == fecha %}
+                                            {% if v %}
+                                                <span class="badge 
+                                                    {% if v.resultado == 'normal' %}bg-success
+                                                    {% elif v.resultado == 'alerta' %}bg-warning
+                                                    {% elif v.resultado == 'critico' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}
+                                                " title="T°Max: {{ v.temperatura_maxima }}°C | T°Min: {{ v.temperatura_minima }}°C">
+                                                    {{ v.get_resultado_display|upper }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">{{ v.temperatura_maxima|floatformat:1 }}°C</small>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h5>Leyenda de Estados</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <span class="badge bg-success">NORMAL</span> - Operación correcta
+                    </div>
+                    <div class="col-md-3">
+                        <span class="badge bg-warning">ALERTA</span> - Anomalía térmica detectada
+                    </div>
+                    <div class="col-md-3">
+                        <span class="badge bg-danger">CRITICO</span> - Fallo inminente
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted">—</span> - Sin datos registrados
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Sin datos -->
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-info-circle"></i> 
+            No hay registros de análisis de termografía para esta sucursal.
+            <br>
+            <small>Comienza a registrar análisis en los activos para ver el histórico aquí.</small>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .table-responsive {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .table th {
+        background-color: #c4491e;
+        color: white;
+        font-weight: 600;
+        vertical-align: middle;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table tbody td {
+        vertical-align: middle;
+        padding: 12px;
+    }
+    
+    .badge {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Preparar datos para gráfico
+        const datos = {{ datos_historico_json|safe }};
+        const fechas = {{ fechas_json|safe }};
+        
+        if (datos.length > 0 && fechas.length > 0) {
+            // Obtener primeros 5 activos para no saturar el gráfico
+            const activosGrafico = datos.slice(0, 5);
+            
+            // Convertir fechas a strings formateados
+            const fechasFormato = fechas.map(f => {
+                const [year, month, day] = f.split('-');
+                return `${day}/${month}/${year}`;
+            });
+            
+            // Crear datasets para cada activo
+            const datasets = activosGrafico.map((item, index) => {
+                const colores = ['#c4491e', '#FF6B35', '#FFA500', '#FF1744', '#D32F2F'];
+                const valores = fechas.map(fecha => {
+                    const analisis = item.analisis_por_fecha[fecha];
+                    return analisis ? analisis.temperatura_maxima : null;
+                });
+                
+                return {
+                    label: `${item.activo.nombre} (${item.equipo.nombre})`,
+                    data: valores,
+                    borderColor: colores[index % colores.length],
+                    backgroundColor: colores[index % colores.length] + '20',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: colores[index % colores.length],
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                };
+            });
+            
+            const ctx = document.getElementById('graficoTermografias').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechasFormato,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 11 },
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}°C`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { size: 11 } },
+                            title: {
+                                display: true,
+                                text: 'Temperatura Máxima (°C)',
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            ticks: { font: { size: 11 } },
+                            title: {
+                                display: true,
+                                text: 'Fecha de Muestreo',
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

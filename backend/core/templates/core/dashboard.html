@@ -36,6 +36,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            justify-content: flex-end;
         }
 
         .user-info {
@@ -170,6 +171,9 @@
     <header>
         <div class="logo">🔮 VYC Predictivo Cloud</div>
         <div class="user-section">
+            {% if user.profile.photo %}
+                <img src="{{ user.profile.photo.url }}" alt="Foto de perfil" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            {% endif %}
             <div class="user-info">
                 <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
                 <div class="user-role">{{ user.get_user_permissions|length }} permisos</div>
@@ -179,7 +183,6 @@
     </header>
 
     <div class="container">
-        <h1>Bienvenido al Dashboard</h1>
         
         <div class="cards">
             <div class="card">

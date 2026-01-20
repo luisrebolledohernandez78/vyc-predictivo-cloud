@@ -285,7 +285,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
+        margin-bottom: 10px;
         padding-bottom: 15px;
         border-bottom: 2px solid #e5e7eb;
     }
@@ -364,13 +364,13 @@
     }
 
     .btn-back {
-        padding: 10px 16px;
-        background-color: #6b7280;
+        background: #667eea;
         color: white;
+        padding: 10px 16px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.95em;
         transition: all 0.3s ease;
         text-decoration: none;
@@ -380,7 +380,8 @@
     }
 
     .btn-back:hover {
-        background-color: #4b5563;
+        background: #5568d3;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         color: white;
     }
 
@@ -836,19 +837,19 @@
                 </span>
             </div>
         </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'historico_vibraciones' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-history"></i> Ver Histórico
+            </a>
+        </div>
     </div>
 
     <!-- Table -->
     <div class="table-responsive">
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-            <a href="{% url 'historico_termografias' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
-                <i class="fas fa-history"></i> Ver Histórico
-            </a>
-        </div>
-
         <table class="table">
             <thead>
                 <tr>

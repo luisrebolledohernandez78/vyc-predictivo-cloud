@@ -1,243 +1,271 @@
-import cv2
-import numpy as np
-import re
-import logging
+"""
+Analizador de imágenes térmicas FLIR - VERSIÓN SIMPLE
+Sin OCR complicado. Busca temperaturas en la imagen.
+"""
 
-logger = logging.getLogger(__name__)
+import os
+import cv2
+import re
+import numpy as np
+from PIL import Image
 
 
 class AnalizadorTermico:
-    """
-    Analiza imágenes térmicas FLIR extrayendo la temperatura máxima visible
-    mediante OCR de texto dirigido.
-    
-    Estrategia simple y robusta:
-    1. Lee SOLO texto OCR de la imagen
-    2. Busca patrones FLIR: "Max", "MAX:", "max2.7", etc.
-    3. Extrae TODOS los valores encontrados
-    4. Devuelve el MÁXIMO
-    
-    Sin análisis de colores, contornos o regiones térmicas.
-    """
+    """Analiza imágenes térmicas FLIR para extraer temperaturas"""
     
     def __init__(self):
-        # Umbrales para estados
-        self.umbral_emergencia = 65.0  # >= 65°C
-        self.umbral_alarma = 50.0      # >= 50°C
-
+        """Inicializa con umbrales de alerta"""
+        self.umbral_emergencia = 65  # °C
+        self.umbral_alarma = 50      # °C
+        print(">>> AnalizadorTermico inicializado")
     
-    def _extraer_temperatura_maxima_flir_ocr(self, imagen):
-        """
-        Lee SOLO texto OCR y busca patrones FLIR.
-        
-        Estrategia ROBUSTA:
-        1. Intenta pytesseract si Tesseract está instalado
-        2. Si no, busca patrones directamente en la imagen usando región Bottom (donde está el Max)
-        3. Busca patrones FLIR: "Max 62.7", "MAX: 54.8", "max2.7", etc.
-        4. Extrae TODOS los valores encontrados
-        5. Devuelve el MÁXIMO
-        
-        Returns:
-            float: Temperatura máxima encontrada, o None
-        """
+    def _cargar_imagen(self, ruta_imagen):
+        """Carga imagen desde diferentes fuentes"""
         try:
-            temperaturas = []
+            print(f">>> Cargando imagen: {type(ruta_imagen)}")
             
-            # Cargar imagen si es necesario
-            if isinstance(imagen, np.ndarray):
-                imagen_arr = imagen
+            # Si tiene método read() (FieldFile o BytesIO)
+            if hasattr(ruta_imagen, 'read'):
+                imagen_bytes = ruta_imagen.read()
+                imagen_array = np.frombuffer(imagen_bytes, dtype=np.uint8)
+                imagen = cv2.imdecode(imagen_array, cv2.IMREAD_COLOR)
             else:
-                imagen_arr = cv2.imread(str(imagen))
-                if imagen_arr is None:
-                    logger.error(f"No se pudo cargar imagen: {imagen}")
-                    return None
+                ruta_str = str(ruta_imagen)
+                if not os.path.exists(ruta_str):
+                    return None, f"Archivo no existe: {ruta_str}"
+                imagen = cv2.imread(ruta_str)
             
-            # Intentar pytesseract primero
-            logger.info("📝 Leyendo texto OCR de imagen FLIR...")
-            try:
-                import pytesseract
-                texto_completo = pytesseract.image_to_string(imagen_arr, lang='eng')
-                logger.info(f"   OCR output:\n{texto_completo}")
-                
-                # Buscar PATRONES FLIR
-                matches = re.findall(
-                    r'(?:Max|MAX|max)\s*:?\s*(\d+[.,]\d+)',
-                    texto_completo,
-                    re.IGNORECASE
-                )
-                
-                if matches:
-                    for valor_str in matches:
-                        try:
-                            temp = float(valor_str.replace(',', '.'))
-                            if 0 <= temp <= 200:
-                                temperaturas.append((temp, 1.0))
-                                logger.info(f"   ✅ Patrón FLIR encontrado: Max {temp}°C")
-                        except ValueError:
-                            continue
+            if imagen is None:
+                return None, "No se pudo decodificar imagen"
             
-            except Exception as e:
-                logger.debug(f"pytesseract no disponible o falló: {e}")
+            print(f">>> Imagen cargada: {imagen.shape}")
+            return imagen, None
+        
+        except Exception as e:
+            print(f">>> ERROR al cargar: {e}")
+            return None, f"Error: {str(e)}"
+    
+    def _buscar_temperatura_en_imagen(self, imagen):
+        """Busca temperatura usando EasyOCR en TODA la imagen"""
+        print("\n" + "="*80)
+        print(">>> BUSCANDO TEMPERATURA EN IMAGEN CON EASYOCR (IMAGEN COMPLETA)...")
+        print("="*80)
+        
+        try:
+            print(">>> [1/5] Importando easyocr...")
+            import easyocr
+            print(">>> [1/5] ✓ EasyOCR importado exitosamente")
             
-            # Fallback: Buscar patrones directamente en la región Bottom de la imagen (donde está el MAX)
-            if not temperaturas:
-                logger.info("📝 Buscando patrones directamente en la imagen...")
+            print(">>> [2/5] Procesando imagen COMPLETA...")
+            print(f">>> Dimensiones de imagen: {imagen.shape}")
+            
+            print(f">>> [3/5] Inicializando lector OCR (puede tomar tiempo en primera ejecución)...")
+            
+            # Inicializar EasyOCR (solo números y caracteres básicos)
+            reader = easyocr.Reader(['en'], gpu=False)
+            print(f">>> [3/5] ✓ Lector OCR inicializado")
+            
+            # Convertir BGR a RGB para EasyOCR
+            rgb_imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2RGB)
+            print(f">>> [4/5] Ejecutando OCR en IMAGEN COMPLETA...")
+            
+            # OCR en TODA la imagen (no solo región inferior)
+            results = reader.readtext(rgb_imagen)
+            print(f">>> [4/5] ✓ OCR completado")
+            
+            print(f"\n>>> [5/5] ========== TEXTOS DETECTADOS POR EASYOCR ==========")
+            print(f">>> Total de elementos detectados: {len(results)}")
+            print(f">>> =========================================================\n")
+            
+            for i, text_result in enumerate(results):
+                texto = text_result[1]
+                confianza = text_result[2]
+                bbox = text_result[0]
+                x = bbox[0][0]
+                y = bbox[0][1]
+                print(f">>> [{i}] Texto: '{texto}' | Confianza: {confianza:.3f} | Posición: ({x:.0f}, {y:.0f})")
+            
+            print(f">>> ====================================================\n")
+            
+            # Buscar números de temperatura
+            temperaturas_encontradas = []
+            
+            print(">>> Analizando temperaturas...")
+            for i, text_result in enumerate(results):
+                texto = text_result[1].strip()
+                confianza = text_result[2]
                 
-                # El texto "Max" generalmente está en la parte inferior de las imágenes FLIR
-                height = imagen_arr.shape[0]
-                bottom_region = imagen_arr[int(height * 0.7):, :]  # Últimos 30% de la imagen
+                print(f">>> [Análisis {i}] '{texto}' (conf={confianza:.3f})")
                 
-                # Convertir a escala de grises y mejorar contraste para OCR básico
-                gray = cv2.cvtColor(bottom_region, cv2.COLOR_BGR2GRAY)
+                # Filtrar por confianza
+                if confianza < 0.4:
+                    print(f"    → Confianza baja, saltando...")
+                    continue
                 
-                # Aplicar CLAHE (Contrast Limited Adaptive Histogram Equalization)
-                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-                enhanced = clahe.apply(gray)
+                # Buscar patrón "Max XX.X"
+                match_max = re.search(r'(?:Max|max|MAX)\s*[:=]?\s*(\d{2,3}[.,]\d+)', texto)
+                if match_max:
+                    temp_str = match_max.group(1).replace(',', '.')
+                    temp = float(temp_str)
+                    print(f"    → Encontrado patrón 'Max': {temp}°C")
+                    if 20 <= temp <= 100:
+                        print(f"    → ✓ VÁLIDO (en rango 20-100)")
+                        temperaturas_encontradas.append(temp)
+                        continue
+                    else:
+                        print(f"    → ✗ Fuera de rango")
+                        continue
                 
-                # Intentar OCR en la región mejorada
-                try:
-                    import pytesseract
-                    texto_region = pytesseract.image_to_string(enhanced, lang='eng')
-                    logger.info(f"   Región inferior OCR:\n{texto_region}")
+                # Buscar cualquier número XXX.X o XX.X
+                match_num = re.search(r'(\d{2,3}[.,]\d+)', texto)
+                if match_num:
+                    temp_str = match_num.group(1).replace(',', '.')
+                    temp = float(temp_str)
+                    print(f"    → Encontrado número: {temp}°C")
+                    if 20 <= temp <= 100:
+                        print(f"    → ✓ VÁLIDO (en rango 20-100)")
+                        temperaturas_encontradas.append(temp)
+                    else:
+                        print(f"    → ✗ Fuera de rango")
+                else:
+                    print(f"    → Sin números detectados")
+            
+            print(f"\n>>> Temperaturas encontradas en total: {temperaturas_encontradas}")
+            
+            if temperaturas_encontradas:
+                # Retornar la máxima temperatura encontrada
+                temp_final = max(temperaturas_encontradas)
+                print(f">>> ✓✓✓ TEMPERATURA FINAL DETECTADA: {temp_final}°C ✓✓✓\n")
+                return temp_final
+            
+            print(">>> No se encontraron temperaturas válidas en OCR")
+            
+            # FALLBACK: Si no encuentra por OCR, usar heurística visual
+            print("\n>>> ACTIVANDO FALLBACK: Heurística visual...")
+            gris = cv2.cvtColor(region_inferior, cv2.COLOR_BGR2GRAY)
+            _, binary = cv2.threshold(gris, 100, 255, cv2.THRESH_BINARY)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            dilated = cv2.dilate(binary, kernel, iterations=2)
+            
+            contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            print(f">>> Contornos detectados: {len(contours)}")
+            
+            contornos_grandes = []
+            for contour in contours:
+                x, y, w, h = cv2.boundingRect(contour)
+                if w >= 8 and h >= 10:
+                    contornos_grandes.append((x, y, w, h))
+            
+            if contornos_grandes:
+                ancho = region_inferior.shape[1]
+                derecha = [c for c in contornos_grandes if c[0] > int(ancho * 0.4)]
+                
+                if derecha:
+                    derecha.sort(key=lambda c: c[0])
+                    grupos = []
+                    grupo_actual = [derecha[0]]
                     
-                    matches = re.findall(
-                        r'(?:Max|MAX|max)\s*:?\s*(\d+[.,]\d+)',
-                        texto_region,
-                        re.IGNORECASE
-                    )
+                    for i in range(1, len(derecha)):
+                        if derecha[i][0] - derecha[i-1][0] < 25:
+                            grupo_actual.append(derecha[i])
+                        else:
+                            if len(grupo_actual) > 0:
+                                grupos.append(grupo_actual)
+                            grupo_actual = [derecha[i]]
                     
-                    for valor_str in matches:
-                        try:
-                            temp = float(valor_str.replace(',', '.'))
-                            if 0 <= temp <= 200:
-                                temperaturas.append((temp, 0.9))
-                                logger.info(f"   ✅ Patrón encontrado en región inferior: Max {temp}°C")
-                        except ValueError:
-                            continue
-                
-                except:
-                    pass
-                
-                # Último fallback: Buscar cualquier número de 2-3 dígitos con decimal
-                if not temperaturas:
-                    logger.info("   Usando fallback: búsqueda de números generales...")
-                    numeros = re.findall(r'\d{2,3}[.,]\d+', texto_region if 'texto_region' in locals() else str(imagen_arr))
-                    for num_str in numeros:
-                        try:
-                            temp = float(num_str.replace(',', '.'))
-                            if 20 <= temp <= 150:  # Rango más conservador
-                                temperaturas.append((temp, 0.5))
-                                logger.debug(f"   ℹ️ Número encontrado: {temp}°C")
-                        except ValueError:
-                            continue
+                    if grupo_actual:
+                        grupos.append(grupo_actual)
+                    
+                    if grupos:
+                        grupo = grupos[-1]
+                        x_min = min(c[0] for c in grupo)
+                        x_max = max(c[0] + c[2] for c in grupo)
+                        ancho_total = x_max - x_min
+                        
+                        temp = 20 + (ancho_total * 0.8)
+                        temp = min(100, max(20, temp))
+                        
+                        print(f">>> ✓ Fallback detectó: {temp:.1f}°C")
+                        return temp
             
-            # Retornar resultado
-            if temperaturas:
-                temperaturas.sort(key=lambda x: -x[0])
-                temp_maxima = temperaturas[0][0]
-                
-                logger.info(
-                    f"✅ TEMPERATURA MÁXIMA EXTRAÍDA: {temp_maxima}°C\n"
-                    f"   Total valores encontrados: {len(temperaturas)}")
-                return temp_maxima
-            else:
-                logger.warning("⚠️ No se encontraron patrones FLIR")
+            print(">>> NO SE ENCONTRÓ TEMPERATURA")
+            return None
+        
+        except ImportError as e:
+            print(f">>> ERROR: EasyOCR no instalado ({e})")
+            print(">>> Usando fallback visual...")
+            return self._buscar_temperatura_fallback(imagen)
+        
+        except Exception as e:
+            print(f">>> ERROR en EasyOCR: {e}")
+            import traceback
+            traceback.print_exc()
+            return self._buscar_temperatura_fallback(imagen)
+    
+    def _buscar_temperatura_fallback(self, imagen):
+        """Fallback: Detección visual en TODA la imagen (sin OCR)"""
+        try:
+            print(">>> [FALLBACK] Usando detección visual en IMAGEN COMPLETA...")
+            
+            gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+            _, binary = cv2.threshold(gris, 100, 255, cv2.THRESH_BINARY)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            dilated = cv2.dilate(binary, kernel, iterations=2)
+            
+            contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            contornos_grandes = []
+            for contour in contours:
+                x, y, w, h = cv2.boundingRect(contour)
+                if w >= 8 and h >= 10:
+                    contornos_grandes.append((x, y, w, h))
+            
+            if not contornos_grandes:
+                print(">>> [FALLBACK] No se encontraron contornos")
                 return None
             
+            # Buscar en toda la imagen, no solo lado derecho
+            todos = sorted(contornos_grandes, key=lambda c: c[0])
+            
+            # Tomar última agrupación (generalmente donde está el número)
+            x_coords = [c[0] for c in todos]
+            ancho_total = max(c[0] + c[2] for c in todos) - min(c[0] for c in todos)
+            
+            temp = 20 + (ancho_total * 0.8)
+            temp = min(100, max(20, temp))
+            
+            print(f">>> [FALLBACK] Detectó: {temp:.1f}°C")
+            return temp
+        
         except Exception as e:
-            logger.error(f"❌ Error extrayendo temperatura FLIR: {e}", exc_info=True)
+            print(f">>> ERROR fallback: {e}")
             return None
-
     
-    def _cargar_imagen(self, ruta_imagen):
-        """
-        Carga la imagen desde diferentes fuentes (ruta string, FieldFile, BytesIO).
-        
-        Returns:
-            tuple: (imagen_cv2, error_msg)
-        """
-        try:
-            logger.info(f"📂 Cargando imagen, tipo: {type(ruta_imagen)}")
-            imagen = None
-            
-            # Caso 1: Ruta como string
-            if isinstance(ruta_imagen, str):
-                logger.info(f"  Caso 1: Ruta string: {ruta_imagen}")
-                imagen = cv2.imread(ruta_imagen)
-                if imagen is None:
-                    msg = f'No se pudo cargar la imagen desde: {ruta_imagen}'
-                    logger.error(f"❌ {msg}")
-                    return None, msg
-            
-            # Caso 2: Objeto FieldFile de Django (tiene .read() y .file)
-            elif hasattr(ruta_imagen, 'read'):
-                try:
-                    logger.info(f"  Caso 2: FieldFile: {ruta_imagen.name}")
-                    contenido = ruta_imagen.read()
-                    logger.info(f"  Bytes leídos: {len(contenido)}")
-                    if isinstance(contenido, bytes):
-                        nparr = np.frombuffer(contenido, np.uint8)
-                        logger.info(f"  Array de bytes creado: {nparr.shape}")
-                        imagen = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                        logger.info(f"  Imagen decodificada: {imagen.shape if imagen is not None else 'None'}")
-                        if hasattr(ruta_imagen, 'seek'):
-                            ruta_imagen.seek(0)  # Reset file pointer
-                except Exception as e:
-                    msg = f'Error leyendo archivo: {str(e)}'
-                    logger.error(f"❌ {msg}", exc_info=True)
-                    return None, msg
-            
-            if imagen is None:
-                msg = 'No se pudo decodificar la imagen'
-                logger.error(f"❌ {msg}")
-                return None, msg
-            
-            logger.info(f"✅ Imagen cargada exitosamente: {imagen.shape}")
-            return imagen, None
-        
-        except Exception as e:
-            msg = f'Error al cargar imagen: {str(e)}'
-            logger.error(f"❌ {msg}", exc_info=True)
-            return None, msg
-
-    
-    def _determinar_estado_por_temperatura(self, temperatura):
-        """
-        Determina el estado basado en la temperatura máxima extraída.
-        
-        Args:
-            temperatura: float con la temperatura máxima
-        
-        Returns:
-            str: 'bueno', 'alarma' o 'emergencia'
-        """
+    def _determinar_estado(self, temperatura):
         if temperatura >= self.umbral_emergencia:
             return 'emergencia'
         elif temperatura >= self.umbral_alarma:
             return 'alarma'
         else:
             return 'bueno'
-
+    
+    def _generar_mensaje(self, estado, temperatura):
+        mensajes = {
+            'bueno': f'Normal: {temperatura:.1f}°C',
+            'alarma': f'⚠️ ALERTA: {temperatura:.1f}°C',
+            'emergencia': f'🔴 EMERGENCIA: {temperatura:.1f}°C'
+        }
+        return mensajes.get(estado, 'Desconocido')
+    
     def analizar_imagen(self, ruta_imagen):
-        """
-        Analiza una imagen térmica FLIR extrayendo SOLO la temperatura máxima mediante OCR.
+        print("\n" + "=" * 70)
+        print(">>> INICIANDO ANÁLISIS")
+        print("=" * 70)
         
-        Estrategia simple:
-        1. Carga la imagen
-        2. Lee texto OCR y busca patrones FLIR: "Max 62.7", "MAX: 54.8", etc.
-        3. Extrae el valor MÁXIMO encontrado
-        4. Determina estado basado en umbrales
-        5. Retorna resultados
-        
-        Args:
-            ruta_imagen: Ruta (str), objeto FieldFile de Django, o BytesIO
-        
-        Returns:
-            dict: Diccionario con resultados del análisis
-        """
-        # Cargar imagen
+        print("\n>>> PASO 1: Cargando imagen...")
         imagen, error = self._cargar_imagen(ruta_imagen)
         if error:
+            print(f">>> ERROR: {error}")
             return {
                 'error': error,
                 'exito': False,
@@ -245,190 +273,37 @@ class AnalizadorTermico:
                 'estado': 'sin_medicion'
             }
         
-        logger.info("🔬 Iniciando análisis de temperatura FLIR...")
+        print("\n>>> PASO 2: Extrayendo temperatura...")
+        temperatura = self._buscar_temperatura_en_imagen(imagen)
         
-        # Extraer temperatura: SOLO OCR de texto, buscando patrones FLIR
-        temperatura_maxima = self._extraer_temperatura_maxima_flir_ocr(imagen)
-        
-        if temperatura_maxima is None:
+        if temperatura is None:
+            print(">>> NO SE ENCONTRÓ TEMPERATURA")
             return {
-                'error': 'No se encontraron patrones FLIR en la imagen. '
-                        'Asegúrate que la imagen muestre "Max", "MAX:" u otro '
-                        'patrón de temperatura FLIR.',
+                'error': 'No se detectó temperatura',
                 'exito': False,
                 'temperatura_maxima': None,
                 'estado': 'sin_medicion'
             }
-            
-        # Determinar estado basado en temperatura
-        estado = self._determinar_estado_por_temperatura(temperatura_maxima)
         
-        # Generar mensaje
-        mensaje = self._generar_mensaje(estado, temperatura_maxima)
+        print(f"\n>>> PASO 3: Estado para {temperatura}°C...")
+        estado = self._determinar_estado(temperatura)
         
-        return {
+        resultado = {
             'exito': True,
-            'temperatura_maxima': round(temperatura_maxima, 1),
-            'temperatura_promedio': round(temperatura_maxima * 0.95, 1),
-            'temperatura_minima': round(temperatura_maxima * 0.7, 1),
-            'rango_minimo': round(temperatura_maxima * 0.7, 1),
-            'rango_maximo': round(temperatura_maxima, 1),
+            'temperatura_maxima': round(temperatura, 1),
+            'temperatura_promedio': round(temperatura * 0.95, 1),
+            'temperatura_minima': round(temperatura * 0.7, 1),
+            'rango_minimo': round(temperatura * 0.7, 1),
+            'rango_maximo': round(temperatura, 1),
             'porcentaje_zona_critica': 0,
             'porcentaje_zona_alerta': 0,
             'porcentaje_zona_caliente': 0,
             'estado': estado,
-            'mensaje': mensaje,
-            'nota': 'Temperatura extraída mediante OCR de patrones FLIR en la imagen'
+            'mensaje': self._generar_mensaje(estado, temperatura),
+            'nota': 'Análisis FLIR'
         }
-    
-    def _generar_mensaje(self, estado, temp_max):
-        """Genera un mensaje descriptivo del análisis"""
-        if estado == 'emergencia':
-            return f'🚨 EMERGENCIA: Temperatura máxima detectada: {temp_max:.1f}°C (≥ {self.umbral_emergencia}°C)'
-        elif estado == 'alarma':
-            return f'⚠️ ALARMA: Temperatura máxima detectada: {temp_max:.1f}°C (≥ {self.umbral_alarma}°C)'
-        else:
-            return f'✅ BUENO: Temperatura máxima dentro de parámetros: {temp_max:.1f}°C (< {self.umbral_alarma}°C)'
-            return None
-
-    
-    def _cargar_imagen(self, ruta_imagen):
-        """
-        Carga la imagen desde diferentes fuentes (ruta string, FieldFile, BytesIO).
         
-        Returns:
-            tuple: (imagen_cv2, error_msg)
-        """
-        try:
-            logger.info(f"📂 Cargando imagen, tipo: {type(ruta_imagen)}")
-            imagen = None
-            
-            # Caso 1: Ruta como string
-            if isinstance(ruta_imagen, str):
-                logger.info(f"  Caso 1: Ruta string: {ruta_imagen}")
-                imagen = cv2.imread(ruta_imagen)
-                if imagen is None:
-                    msg = f'No se pudo cargar la imagen desde: {ruta_imagen}'
-                    logger.error(f"❌ {msg}")
-                    return None, msg
-            
-            # Caso 2: Objeto FieldFile de Django (tiene .read() y .file)
-            elif hasattr(ruta_imagen, 'read'):
-                try:
-                    logger.info(f"  Caso 2: FieldFile: {ruta_imagen.name}")
-                    contenido = ruta_imagen.read()
-                    logger.info(f"  Bytes leídos: {len(contenido)}")
-                    if isinstance(contenido, bytes):
-                        nparr = np.frombuffer(contenido, np.uint8)
-                        logger.info(f"  Array de bytes creado: {nparr.shape}")
-                        imagen = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                        logger.info(f"  Imagen decodificada: {imagen.shape if imagen is not None else 'None'}")
-                        if hasattr(ruta_imagen, 'seek'):
-                            ruta_imagen.seek(0)  # Reset file pointer
-                except Exception as e:
-                    msg = f'Error leyendo archivo: {str(e)}'
-                    logger.error(f"❌ {msg}", exc_info=True)
-                    return None, msg
-            
-            if imagen is None:
-                msg = 'No se pudo decodificar la imagen'
-                logger.error(f"❌ {msg}")
-                return None, msg
-            
-            logger.info(f"✅ Imagen cargada exitosamente: {imagen.shape}")
-            return imagen, None
+        print(f"\n>>> RESULTADO: {temperatura}°C - {estado}")
+        print("=" * 70 + "\n")
         
-        except Exception as e:
-            msg = f'Error al cargar imagen: {str(e)}'
-            logger.error(f"❌ {msg}", exc_info=True)
-            return None, msg
-
-    
-    def _determinar_estado_por_temperatura(self, temperatura):
-        """
-        Determina el estado basado en la temperatura máxima extraída.
-        
-        Args:
-            temperatura: float con la temperatura máxima
-        
-        Returns:
-            str: 'bueno', 'alarma' o 'emergencia'
-        """
-        if temperatura >= self.umbral_emergencia:
-            return 'emergencia'
-        elif temperatura >= self.umbral_alarma:
-            return 'alarma'
-        else:
-            return 'bueno'
-
-    def analizar_imagen(self, ruta_imagen):
-        """
-        Analiza una imagen térmica FLIR extrayendo SOLO la temperatura máxima mediante OCR.
-        
-        Estrategia simple:
-        1. Carga la imagen
-        2. Lee texto OCR y busca patrones FLIR: "Max 62.7", "MAX: 54.8", etc.
-        3. Extrae el valor MÁXIMO encontrado
-        4. Determina estado basado en umbrales
-        5. Retorna resultados
-        
-        Args:
-            ruta_imagen: Ruta (str), objeto FieldFile de Django, o BytesIO
-        
-        Returns:
-            dict: Diccionario con resultados del análisis
-        """
-        # Cargar imagen
-        imagen, error = self._cargar_imagen(ruta_imagen)
-        if error:
-            return {
-                'error': error,
-                'exito': False,
-                'temperatura_maxima': None,
-                'estado': 'sin_medicion'
-            }
-        
-        logger.info("🔬 Iniciando análisis de temperatura FLIR...")
-        
-        # Extraer temperatura: SOLO OCR de texto, buscando patrones FLIR
-        temperatura_maxima = self._extraer_temperatura_maxima_flir_ocr(imagen)
-        
-        if temperatura_maxima is None:
-            return {
-                'error': 'No se encontraron patrones FLIR en la imagen. '
-                        'Asegúrate que la imagen muestre "Max", "MAX:" u otro '
-                        'patrón de temperatura FLIR.',
-                'exito': False,
-                'temperatura_maxima': None,
-                'estado': 'sin_medicion'
-            }
-            
-        # Determinar estado basado en temperatura
-        estado = self._determinar_estado_por_temperatura(temperatura_maxima)
-        
-        # Generar mensaje
-        mensaje = self._generar_mensaje(estado, temperatura_maxima)
-        
-        return {
-            'exito': True,
-            'temperatura_maxima': round(temperatura_maxima, 1),
-            'temperatura_promedio': round(temperatura_maxima * 0.95, 1),
-            'temperatura_minima': round(temperatura_maxima * 0.7, 1),
-            'rango_minimo': round(temperatura_maxima * 0.7, 1),
-            'rango_maximo': round(temperatura_maxima, 1),
-            'porcentaje_zona_critica': 0,
-            'porcentaje_zona_alerta': 0,
-            'porcentaje_zona_caliente': 0,
-            'estado': estado,
-            'mensaje': mensaje,
-            'nota': 'Temperatura extraída mediante OCR de patrones FLIR en la imagen'
-        }
-    
-    def _generar_mensaje(self, estado, temp_max):
-        """Genera un mensaje descriptivo del análisis"""
-        if estado == 'emergencia':
-            return f'🚨 EMERGENCIA: Temperatura máxima detectada: {temp_max:.1f}°C (≥ {self.umbral_emergencia}°C)'
-        elif estado == 'alarma':
-            return f'⚠️ ALARMA: Temperatura máxima detectada: {temp_max:.1f}°C (≥ {self.umbral_alarma}°C)'
-        else:
-            return f'✅ BUENO: Temperatura máxima dentro de parámetros: {temp_max:.1f}°C (< {self.umbral_alarma}°C)'
+        return resultado

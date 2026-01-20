@@ -208,14 +208,20 @@
 
                         <!-- Botones -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            {% if modulo == 'vibraciones' %}
-                                <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
+                            {% if es_listado_total %}
+                                <a href="{% url 'equipos_totales_vibraciones' cliente.id sucursal.id %}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Cancelar
                                 </a>
                             {% else %}
-                                <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Cancelar
-                                </a>
+                                {% if modulo == 'vibraciones' %}
+                                    <a href="{% url 'activos_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'activos_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                {% endif %}
                             {% endif %}
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Guardar

@@ -44,15 +44,6 @@
         background-size: 200px 100px;
     }
 
-    /* Patrón para Termografías */
-    .content.content-termografias {
-        background-image: 
-            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='%23808080' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='%23808080' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='%23808080' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='%23808080' opacity='0.05'/%3E%3C/svg%3E"),
-            linear-gradient(white, white);
-        background-repeat: repeat;
-        background-size: 150px 150px;
-    }
-
     /* Colores por Área */
     .area-header {
         padding: 20px 30px;
@@ -465,25 +456,13 @@
     <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
-                {% else %}
-                    <a href="{% url 'termografias' %}">Termografías</a>
-                {% endif %}
+                <a href="{% url 'vibraciones' %}">Vibraciones</a>
             </li>
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
-                {% endif %}
+                <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
             </li>
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% endif %}
+                <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
             </li>
             <li class="breadcrumb-item active">{{ area.get_nombre_display }}</li>
         </ol>
@@ -498,26 +477,14 @@
     <!-- Acciones -->
     <div class="row mb-4">
         <div class="col-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% else %}
-                <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% endif %}
+            <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
         </div>
         <div class="col-auto ms-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Equipo
-                </a>
-            {% else %}
-                <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Equipo
-                </a>
-            {% endif %}
+            <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Nuevo Equipo
+            </a>
         </div>
     </div>
 
@@ -600,21 +567,12 @@
                                     <!-- Acciones -->
                                     <td class="col-acciones">
                                         <div class="actions-cell">
-                                            {% if modulo == 'vibraciones' %}
-                                                <a href="{% url 'editar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% else %}
-                                                <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% endif %}
+                                            <a href="{% url 'editar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                            <a href="{% url 'eliminar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -626,11 +584,7 @@
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i> No hay equipos registrados en esta área.
-                    {% if modulo == 'vibraciones' %}
-                        <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
-                    {% else %}
-                        <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
-                    {% endif %}
+                    <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
                 </div>
             {% endif %}
 

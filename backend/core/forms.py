@@ -9,7 +9,7 @@ class ClienteForm(forms.ModelForm):
             'nombre', 'descripcion', 'email', 'telefono',
             'direccion', 'ciudad', 'pais',
             'contacto_nombre', 'contacto_puesto', 'contacto_email', 'contacto_telefono',
-            'ruc_nit', 'industria', 'empleados', 'activo'
+            'ruc_nit', 'industria', 'empleados', 'logo', 'activo'
         ]
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la empresa'}),
@@ -26,6 +26,7 @@ class ClienteForm(forms.ModelForm):
             'ruc_nit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'RUC/NIT'}),
             'industria': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Industria'}),
             'empleados': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Número de empleados'}),
+            'logo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -37,6 +38,7 @@ class SucursalForm(forms.ModelForm):
             'nombre', 'descripcion', 'email', 'telefono',
             'direccion', 'ciudad', 'pais',
             'contacto_nombre', 'contacto_puesto', 'contacto_email', 'contacto_telefono',
+            'plano_planta',
             'activo'
         ]
         widgets = {
@@ -51,6 +53,7 @@ class SucursalForm(forms.ModelForm):
             'contacto_puesto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Puesto'}),
             'contacto_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email contacto'}),
             'contacto_telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono contacto'}),
+            'plano_planta': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

@@ -4,12 +4,17 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Cliente, Sucursal, Area, Equipo, Activo
+from .models import Cliente, Sucursal, Area, Equipo, Activo, MuestreoActivo, TermografiaAnalisis, VibracionesAnalisis
 from .forms import ClienteForm, SucursalForm, AreaForm, EquipoForm, ActivoForm, ExcelUploadForm
 from .excel_parser import ExcelEquiposParser
 import tempfile
+import json
+import csv
+from decimal import Decimal
+from django.http import HttpResponse
 
 
 # Orden estándar de áreas
@@ -248,7 +253,7 @@ def editar_sucursal_vibraciones(request, cliente_id, sucursal_id):
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     
     if request.method == 'POST':
-        form = SucursalForm(request.POST, instance=sucursal)
+        form = SucursalForm(request.POST, request.FILES, instance=sucursal)
         if form.is_valid():
             form.save()
             return redirect('sucursales_vibraciones', cliente_id=cliente_id)
@@ -322,7 +327,7 @@ def editar_sucursal_termografias(request, cliente_id, sucursal_id):
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     
     if request.method == 'POST':
-        form = SucursalForm(request.POST, instance=sucursal)
+        form = SucursalForm(request.POST, request.FILES, instance=sucursal)
         if form.is_valid():
             form.save()
             return redirect('sucursales_termografias', cliente_id=cliente_id)
@@ -366,6 +371,52 @@ def areas_vibraciones(request, cliente_id, sucursal_id):
         'descripcion': 'Gestiona las áreas de monitoreo en esta sucursal'
     }
     return render(request, 'core/areas.html', context)
+
+
+@login_required(login_url='login')
+def equipos_totales_vibraciones(request, cliente_id, sucursal_id):
+    """Página de TODOS los equipos de una sucursal (sin filtro de área)"""
+    from django.db.models import Case, When
+    
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener todos los equipos de la sucursal (a través de áreas)
+    # Ordenar por el orden definido en AREA_CHOICES: aserradero, elaborado, caldera
+    equipos = Equipo.objects.filter(
+        area__sucursal=sucursal,
+        activo=True
+    ).select_related(
+        'area'
+    ).annotate(
+        area_orden=Case(
+            When(area__nombre='aserradero', then=0),
+            When(area__nombre='elaborado', then=1),
+            When(area__nombre='caldera', then=2),
+            default=3,
+            output_field=models.IntegerField()
+        )
+    ).order_by('area_orden', 'nombre')
+    
+    # Calcular estadísticas
+    areas = Area.objects.filter(sucursal=sucursal).distinct().count()
+    equipos_count = equipos.count()
+    activos_count = Activo.objects.filter(equipo__area__sucursal=sucursal, activo=True).count()
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'equipos': equipos,
+        'modulo': 'vibraciones',
+        'titulo': f'Todos los Equipos - {sucursal.nombre}',
+        'descripcion': 'Listado total de todos los equipos monitoreados en esta planta',
+        'es_listado_total': True,  # Bandera para indicar que es un listado total
+        'total_areas': areas,
+        'total_equipos': equipos_count,
+        'total_activos': activos_count
+    }
+    return render(request, 'core/vibraciones/equipos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -427,18 +478,33 @@ def areas_termografias(request, cliente_id, sucursal_id):
 @login_required(login_url='login')
 def activos_totales_termografias(request, cliente_id, sucursal_id):
     """Página de TODOS los activos de una sucursal (sin filtro de área)"""
+    from django.db.models import Case, When
+    
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     
     # Obtener todos los activos de la sucursal (a través de equipos)
+    # Ordenar por el orden definido en AREA_CHOICES: aserradero, elaborado, caldera
     activos = Activo.objects.filter(
         equipo__area__sucursal=sucursal,
         activo=True
     ).select_related(
         'equipo',
-        'equipo__area',
-        'analisis_termico'
-    ).order_by('equipo__area__nombre', 'equipo__nombre', 'nombre')
+        'equipo__area'
+    ).annotate(
+        area_orden=Case(
+            When(equipo__area__nombre='aserradero', then=0),
+            When(equipo__area__nombre='elaborado', then=1),
+            When(equipo__area__nombre='caldera', then=2),
+            default=3,
+            output_field=models.IntegerField()
+        )
+    ).order_by('area_orden', 'equipo__nombre', 'nombre')
+    
+    # Calcular estadísticas
+    areas = Area.objects.filter(sucursal=sucursal).distinct().count()
+    equipos = Equipo.objects.filter(area__sucursal=sucursal).distinct().count()
+    activos_count = activos.count()
     
     context = {
         'user': request.user,
@@ -447,10 +513,13 @@ def activos_totales_termografias(request, cliente_id, sucursal_id):
         'activos': activos,
         'modulo': 'termografias',
         'titulo': f'Todos los Activos - {sucursal.nombre}',
-        'descripcion': 'Listado total de todos los activos monitorados en esta sucursal',
-        'es_listado_total': True  # Bandera para indicar que es un listado total
+        'descripcion': 'Listado total de todos los activos monitorados en esta planta',
+        'es_listado_total': True,  # Bandera para indicar que es un listado total
+        'total_areas': areas,
+        'total_equipos': equipos,
+        'total_activos': activos_count
     }
-    return render(request, 'core/activos_totales.html', context)
+    return render(request, 'core/termografias/activos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -513,7 +582,7 @@ def equipos_vibraciones(request, cliente_id, sucursal_id, area_id):
         'titulo': f'Equipos - {area.get_nombre_display()}',
         'descripcion': 'Gestiona los equipos y máquinas del área'
     }
-    return render(request, 'core/equipos.html', context)
+    return render(request, 'core/vibraciones/equipos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -604,7 +673,7 @@ def activos_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
         'titulo': f'Activos - {equipo.nombre}',
         'descripcion': 'Gestiona los componentes y motores del equipo'
     }
-    return render(request, 'core/activos.html', context)
+    return render(request, 'core/vibraciones/activos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -646,11 +715,18 @@ def editar_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_
     equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
     activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
     
+    # Verificar si viene del listado total
+    es_listado_total = request.GET.get('listado_total') == '1'
+    
     if request.method == 'POST':
         form = ActivoForm(request.POST, instance=activo)
         if form.is_valid():
             form.save()
-            return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+            # Redirigir al listado total si viene de allí, sino a activos por área
+            if es_listado_total:
+                return redirect('equipos_totales_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
+            else:
+                return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
     else:
         form = ActivoForm(instance=activo)
     
@@ -662,7 +738,8 @@ def editar_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_
         'equipo': equipo,
         'activo': activo,
         'modulo': 'vibraciones',
-        'titulo': f'Editar {activo.nombre}'
+        'titulo': f'Editar {activo.nombre}',
+        'es_listado_total': es_listado_total
     }
     return render(request, 'core/activo_form.html', context)
 
@@ -675,8 +752,17 @@ def eliminar_activo_vibraciones(request, cliente_id, sucursal_id, area_id, equip
     area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
     equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
     activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
+    
+    # Verificar si viene del listado total
+    es_listado_total = request.GET.get('listado_total') == '1'
+    
     activo.delete()
-    return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+    
+    # Redirigir al listado total si viene de allí, sino a activos por área
+    if es_listado_total:
+        return redirect('equipos_totales_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
+    else:
+        return redirect('activos_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
 
 
 # UPLOAD EXCEL - VIBRACIONES
@@ -799,23 +885,28 @@ def confirmar_upload_equipos_vibraciones(request, cliente_id, sucursal_id):
 # EQUIPOS - TERMOGRAFÍAS
 @login_required(login_url='login')
 def equipos_termografias(request, cliente_id, sucursal_id, area_id):
-    """Página de equipos para una área en termografías"""
+    """Página de activos para un área en termografías"""
     cliente = get_object_or_404(Cliente, id=cliente_id)
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
-    equipos = area.equipos.filter(activo=True).order_by('nombre')
+    
+    # Obtener todos los activos del área (a través de equipos del área)
+    activos = Activo.objects.filter(
+        equipo__area=area,
+        activo=True
+    ).select_related('equipo', 'equipo__area').order_by('equipo__nombre', 'nombre')
     
     context = {
         'user': request.user,
         'cliente': cliente,
         'sucursal': sucursal,
         'area': area,
-        'equipos': equipos,
+        'activos': activos,
         'modulo': 'termografias',
-        'titulo': f'Equipos - {area.get_nombre_display()}',
-        'descripcion': 'Gestiona los equipos y máquinas del área'
+        'titulo': f'Todos los Activos - {area.get_nombre_display()}',
+        'descripcion': 'Listado de todos los activos del área'
     }
-    return render(request, 'core/equipos.html', context)
+    return render(request, 'core/termografias/activos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -893,7 +984,7 @@ def activos_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
     sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
     area = get_object_or_404(Area, id=area_id, sucursal=sucursal)
     equipo = get_object_or_404(Equipo, id=equipo_id, area=area)
-    activos = equipo.activos.filter(activo=True).select_related('analisis_termico').order_by('nombre')
+    activos = equipo.activos.filter(activo=True).order_by('nombre')
     
     context = {
         'user': request.user,
@@ -906,7 +997,7 @@ def activos_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
         'titulo': f'Activos - {equipo.nombre}',
         'descripcion': 'Gestiona los componentes y motores del equipo'
     }
-    return render(request, 'core/activos.html', context)
+    return render(request, 'core/termografias/activos_totales.html', context)
 
 
 @login_required(login_url='login')
@@ -979,6 +1070,80 @@ def eliminar_activo_termografias(request, cliente_id, sucursal_id, area_id, equi
     activo = get_object_or_404(Activo, id=activo_id, equipo=equipo)
     activo.delete()
     return redirect('activos_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id, area_id=area_id, equipo_id=equipo_id)
+
+
+# EDITAR/ELIMINAR ACTIVOS DESDE LISTADO TOTAL - TERMOGRAFÍAS
+@login_required(login_url='login')
+def editar_activo_total_termografias(request, cliente_id, sucursal_id, activo_id):
+    """Editar activo desde listado total de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    activo = get_object_or_404(Activo, id=activo_id, equipo__area__sucursal=sucursal)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST, instance=activo)
+        if form.is_valid():
+            form.save()
+            return redirect('activos_totales_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id)
+    else:
+        form = ActivoForm(instance=activo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'activo': activo,
+        'modulo': 'termografias',
+        'titulo': f'Editar {activo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_activo_total_termografias(request, cliente_id, sucursal_id, activo_id):
+    """Eliminar activo desde listado total de termografías"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    activo = get_object_or_404(Activo, id=activo_id, equipo__area__sucursal=sucursal)
+    activo.delete()
+    return redirect('activos_totales_termografias', cliente_id=cliente_id, sucursal_id=sucursal_id)
+
+
+# EDITAR/ELIMINAR ACTIVOS DESDE LISTADO TOTAL - VIBRACIONES
+@login_required(login_url='login')
+def editar_activo_total_vibraciones(request, cliente_id, sucursal_id, activo_id):
+    """Editar activo desde listado total de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    activo = get_object_or_404(Activo, id=activo_id, equipo__area__sucursal=sucursal)
+    
+    if request.method == 'POST':
+        form = ActivoForm(request.POST, instance=activo)
+        if form.is_valid():
+            form.save()
+            return redirect('equipos_totales_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
+    else:
+        form = ActivoForm(instance=activo)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'activo': activo,
+        'modulo': 'vibraciones',
+        'titulo': f'Editar {activo.nombre}'
+    }
+    return render(request, 'core/activo_form.html', context)
+
+
+@login_required(login_url='login')
+def eliminar_activo_total_vibraciones(request, cliente_id, sucursal_id, activo_id):
+    """Eliminar activo desde listado total de vibraciones"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    activo = get_object_or_404(Activo, id=activo_id, equipo__area__sucursal=sucursal)
+    activo.delete()
+    return redirect('equipos_totales_vibraciones', cliente_id=cliente_id, sucursal_id=sucursal_id)
 
 
 # UPLOAD EXCEL - TERMOGRAFÍAS
@@ -1176,6 +1341,126 @@ def actualizar_observacion_activo(request, activo_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+def actualizar_descripcion_activo(request, activo_id):
+    """Actualiza la descripción de un activo via AJAX"""
+    try:
+        activo = get_object_or_404(Activo, id=activo_id)
+        descripcion = request.POST.get('descripcion', '')
+        
+        activo.descripcion = descripcion
+        activo.save()
+        return JsonResponse({
+            'success': True,
+            'descripcion': activo.descripcion
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required
+def agregar_muestra_vibracion(request, activo_id):
+    """Agrega o actualiza una muestra de vibraciones para un activo"""
+    try:
+        from datetime import datetime
+        
+        activo = get_object_or_404(Activo, id=activo_id)
+        
+        # Obtener parámetros
+        fecha_str = request.POST.get('fecha', '')
+        velocidad_rms = request.POST.get('velocidad_rms', 0)
+        aceleracion = request.POST.get('aceleracion', 0)
+        resultado = request.POST.get('resultado', 'sin_medicion')
+        observaciones = request.POST.get('observaciones', '')
+        descripcion = request.POST.get('descripcion', '')
+        
+        if not fecha_str:
+            return JsonResponse({'success': False, 'error': 'Fecha requerida'}, status=400)
+        
+        # Validar resultado
+        resultado_choices = dict(VibracionesAnalisis.RESULTADO_CHOICES)
+        if resultado not in resultado_choices:
+            resultado = 'sin_medicion'
+        
+        # Convertir fecha
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        # Actualizar descripción del activo si se proporcionó
+        if descripcion:
+            activo.descripcion = descripcion
+            activo.save()
+        
+        # Crear o actualizar muestra (en caso de que ya exista para esa fecha)
+        muestra, created = VibracionesAnalisis.objects.update_or_create(
+            activo=activo,
+            fecha_muestreo=fecha,
+            defaults={
+                'velocidad_rms': float(velocidad_rms) if velocidad_rms else 0,
+                'aceleracion': float(aceleracion) if aceleracion else 0,
+                'resultado': resultado,
+                'observaciones': observaciones
+            }
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'muestra_id': muestra.id,
+            'fecha': muestra.fecha_muestreo.strftime('%Y-%m-%d'),
+            'mensaje': 'Muestra de vibraciones guardada exitosamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def guardar_fecha_muestreo(request, activo_id):
+    """Guarda o actualiza la fecha de muestreo de un activo via AJAX"""
+    try:
+        activo = get_object_or_404(Activo, id=activo_id)
+        fecha_str = request.POST.get('fecha', '')
+        
+        if not fecha_str:
+            return JsonResponse({'success': False, 'error': 'Fecha requerida'}, status=400)
+        
+        from datetime import datetime
+        # Convertir string de fecha a objeto date
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        # Crear o actualizar el registro de muestreo
+        muestreo, created = MuestreoActivo.objects.get_or_create(
+            activo=activo,
+            fecha_muestreo=fecha
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'fecha': muestreo.fecha_muestreo.strftime('%Y-%m-%d'),
+            'mensaje': 'Muestreo registrado exitosamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def obtener_ultima_fecha_muestreo(request, activo_id):
+    """Obtiene la última fecha de muestreo de un activo"""
+    try:
+        activo = get_object_or_404(Activo, id=activo_id)
+        muestreo = activo.muestreos.first()  # El primero porque ordering es -fecha_muestreo
+        
+        if muestreo:
+            return JsonResponse({
+                'success': True,
+                'fecha': muestreo.fecha_muestreo.strftime('%Y-%m-%d')
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'fecha': None,
+                'mensaje': 'Sin muestreos registrados'
+            })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 @require_http_methods(["POST"])
 @login_required(login_url='login')
 def subir_foto_termica(request, activo_id):
@@ -1192,6 +1477,10 @@ def subir_foto_termica(request, activo_id):
         if 'foto' not in request.FILES:
             return JsonResponse({'success': False, 'error': 'No se proporcionó archivo'}, status=400)
         
+        # Verificar si es una nueva muestra (para histórico)
+        es_nueva_muestra = request.POST.get('nueva_muestra', 'false').lower() == 'true'
+        logger.info(f"Subida de foto - Nueva muestra: {es_nueva_muestra}")
+        
         archivo = request.FILES['foto']
         logger.info(f"Archivo recibido: {archivo.name}, tipo: {archivo.content_type}, tamaño: {archivo.size}")
         
@@ -1199,7 +1488,16 @@ def subir_foto_termica(request, activo_id):
         if not archivo.content_type.startswith('image/'):
             return JsonResponse({'success': False, 'error': 'El archivo debe ser una imagen'}, status=400)
         
-        # Eliminar foto anterior si existe
+        # Si es nueva muestra, guardar análisis anterior
+        analisis_anterior = None
+        if es_nueva_muestra:
+            try:
+                analisis_anterior = AnalisisTermico.objects.get(activo=activo)
+                logger.info(f"✅ Análisis anterior preservado en histórico")
+            except AnalisisTermico.DoesNotExist:
+                logger.info(f"ℹ️ No hay análisis anterior para preservar")
+        
+        # Eliminar foto anterior si existe (pero preservar análisis si es nueva muestra)
         if activo.foto_termica:
             activo.foto_termica.delete()
         
@@ -1212,11 +1510,13 @@ def subir_foto_termica(request, activo_id):
         resultado_analisis = None
         try:
             analizador = AnalizadorTermico()
-            logger.info(f"🔬 Iniciando análisis OCR...")
+            logger.info(f">>> LLAMANDO analizar_imagen({activo.foto_termica})")
             resultado_analisis = analizador.analizar_imagen(activo.foto_termica)
-            logger.info(f"📊 Resultado análisis: {resultado_analisis}")
+            logger.info(f">>> RESULTADO COMPLETO: {resultado_analisis}")
+            print(f">>> RESULTADO COMPLETO (PRINT): {resultado_analisis}")
         except Exception as ocr_error:
-            logger.warning(f"⚠️ OCR no disponible: {str(ocr_error)}")
+            logger.error(f">>> EXCEPCION EN OCR: {str(ocr_error)}", exc_info=True)
+            print(f">>> EXCEPCION EN OCR (PRINT): {str(ocr_error)}")
             # Sin OCR, devolver valores por defecto
             resultado_analisis = None
         
@@ -1231,22 +1531,23 @@ def subir_foto_termica(request, activo_id):
                 'analisis': None
             })
         
-        # Guardar o actualizar análisis
-        analisis, creado = AnalisisTermico.objects.update_or_create(
+        # 🔄 IMPORTANTE: Ahora usamos ForeignKey en lugar de OneToOne
+        # Esto permite crear MÚLTIPLES AnalisisTermico por Activo (histórico)
+        # Siempre creamos un nuevo registro en lugar de actualizar
+        analisis = AnalisisTermico.objects.create(
             activo=activo,
-            defaults={
-                'temperatura_promedio': resultado_analisis['temperatura_promedio'],
-                'temperatura_maxima': resultado_analisis['temperatura_maxima'],
-                'temperatura_minima': resultado_analisis['temperatura_minima'],
-                'rango_minimo': resultado_analisis['rango_minimo'],
-                'rango_maximo': resultado_analisis['rango_maximo'],
-                'porcentaje_zona_critica': resultado_analisis['porcentaje_zona_critica'],
-                'porcentaje_zona_alerta': resultado_analisis['porcentaje_zona_alerta'],
-                'porcentaje_zona_caliente': resultado_analisis['porcentaje_zona_caliente'],
-                'estado': resultado_analisis['estado'],
-            }
+            temperatura_promedio=resultado_analisis['temperatura_promedio'],
+            temperatura_maxima=resultado_analisis['temperatura_maxima'],
+            temperatura_minima=resultado_analisis['temperatura_minima'],
+            rango_minimo=resultado_analisis['rango_minimo'],
+            rango_maximo=resultado_analisis['rango_maximo'],
+            porcentaje_zona_critica=resultado_analisis['porcentaje_zona_critica'],
+            porcentaje_zona_alerta=resultado_analisis['porcentaje_zona_alerta'],
+            porcentaje_zona_caliente=resultado_analisis['porcentaje_zona_caliente'],
+            estado=resultado_analisis['estado'],
         )
-        logger.info(f"✅ Análisis {'creado' if creado else 'actualizado'} para activo {activo_id}")
+        creado = True
+        logger.info(f"✅ Nuevo AnalisisTermico creado (ID: {analisis.id}) para activo {activo_id}")
         logger.info(f"   Temperatura máxima: {resultado_analisis['temperatura_maxima']}°C")
         logger.info(f"   Estado: {resultado_analisis['estado']}")
         
@@ -1277,6 +1578,8 @@ def subir_foto_termica(request, activo_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+@require_http_methods(["POST"])
+@login_required(login_url='login')
 @require_http_methods(["POST"])
 @login_required(login_url='login')
 def eliminar_foto_termica(request, activo_id):
@@ -1322,7 +1625,7 @@ def eliminar_foto_termica(request, activo_id):
 @require_http_methods(["GET"])
 @login_required(login_url='/login/')
 def obtener_analisis_termico(request, activo_id):
-    """Obtiene el análisis térmico guardado para un activo"""
+    """Obtiene el análisis térmico más reciente para un activo"""
     try:
         from .models import AnalisisTermico
         import logging
@@ -1331,15 +1634,10 @@ def obtener_analisis_termico(request, activo_id):
         
         activo = get_object_or_404(Activo, id=activo_id)
         
-        # Intentar obtener el análisis guardado usando el related_name correcto
-        if not hasattr(activo, 'analisis_termico') or activo.analisis_termico is None:
-            logger.warning(f"No existe análisis para activo {activo_id}")
-            return JsonResponse({
-                'success': False,
-                'error': 'No hay análisis disponible para este activo'
-            }, status=404)
+        # Obtener el análisis más reciente (el último creado)
+        analisis = activo.analisis_termicos.latest('creado')
         
-        analisis = activo.analisis_termico
+        logger.info(f"✅ Análisis obtenido para activo {activo_id} (ID: {analisis.id})")
         
         # Construir respuesta con valores convertidos a float para evitar errores de serialización
         foto_url = ''
@@ -1368,6 +1666,12 @@ def obtener_analisis_termico(request, activo_id):
                 'zona_emergencia_max': float(analisis.zona_emergencia_max)
             }
         })
+    except AnalisisTermico.DoesNotExist:
+        logger.warning(f"❌ No existe análisis para activo {activo_id}")
+        return JsonResponse({
+            'success': False,
+            'error': 'No hay análisis disponible para este activo'
+        }, status=404)
     except Exception as e:
         logger.error(f"Error obteniendo análisis térmico: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': f'Error del servidor: {str(e)}'}, status=500)
@@ -1544,7 +1848,665 @@ def save_config(request):
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 
+@login_required(login_url='login')
+def subir_logo_cliente(request, cliente_id):
+    """API para subir el logo del cliente"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    
+    try:
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        
+        if 'logo' not in request.FILES:
+            return JsonResponse({'success': False, 'error': 'No se proporcionó archivo'}, status=400)
+        
+        archivo = request.FILES['logo']
+        
+        # Validar que sea una imagen
+        if not archivo.content_type.startswith('image/'):
+            return JsonResponse({'success': False, 'error': 'El archivo debe ser una imagen'}, status=400)
+        
+        # Validar tamaño máximo (2MB)
+        if archivo.size > 2 * 1024 * 1024:
+            return JsonResponse({'success': False, 'error': 'El archivo es demasiado grande (máximo 2MB)'}, status=400)
+        
+        # Eliminar archivo anterior si existe
+        if cliente.logo:
+            cliente.logo.delete()
+        
+        # Guardar nuevo archivo
+        cliente.logo = archivo
+        cliente.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Logo subido exitosamente',
+            'image_url': cliente.logo.url
+        })
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required(login_url='login')
+def subir_plano_planta(request, sucursal_id):
+    """API para subir el plano de la planta"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    
+    try:
+        sucursal = get_object_or_404(Sucursal, id=sucursal_id)
+        
+        if 'plano_planta' not in request.FILES:
+            return JsonResponse({'success': False, 'error': 'No se proporcionó archivo'}, status=400)
+        
+        archivo = request.FILES['plano_planta']
+        
+        # Validar que sea una imagen
+        if not archivo.content_type.startswith('image/'):
+            return JsonResponse({'success': False, 'error': 'El archivo debe ser una imagen'}, status=400)
+        
+        # Validar tamaño máximo (5MB)
+        if archivo.size > 5 * 1024 * 1024:
+            return JsonResponse({'success': False, 'error': 'El archivo es demasiado grande (máximo 5MB)'}, status=400)
+        
+        # Eliminar archivo anterior si existe
+        if sucursal.plano_planta:
+            sucursal.plano_planta.delete()
+        
+        # Guardar nuevo archivo
+        sucursal.plano_planta = archivo
+        sucursal.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Plano de planta subido exitosamente',
+            'image_url': sucursal.plano_planta.url
+        })
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@login_required(login_url='login')
+def guardar_fecha_muestreo_equipo(request, equipo_id):
+    """Guarda o actualiza la fecha de muestreo de un equipo via AJAX"""
+    try:
+        equipo = get_object_or_404(Equipo, id=equipo_id)
+        fecha_str = request.POST.get('fecha', '')
+        
+        if not fecha_str:
+            return JsonResponse({'success': False, 'error': 'Fecha requerida'}, status=400)
+        
+        from datetime import datetime
+        # Convertir string de fecha a objeto date
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        # Crear o actualizar el registro de muestreo
+        muestreo, created = MuestreoEquipo.objects.get_or_create(
+            equipo=equipo,
+            fecha_muestreo=fecha
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'fecha': muestreo.fecha_muestreo.strftime('%Y-%m-%d'),
+            'mensaje': 'Muestreo registrado exitosamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+@login_required(login_url='login')
+def obtener_ultima_fecha_muestreo_equipo(request, equipo_id):
+    """Obtiene la última fecha de muestreo de un equipo"""
+    try:
+        equipo = get_object_or_404(Equipo, id=equipo_id)
+        muestreo = equipo.muestreos.first()  # El primero porque ordering es -fecha_muestreo
+        
+        if muestreo:
+            return JsonResponse({
+                'success': True,
+                'fecha': muestreo.fecha_muestreo.strftime('%Y-%m-%d')
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'fecha': None,
+                'mensaje': 'Sin muestreos registrados'
+            })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 @api_view(["GET"])
 def health(request):
     return Response({"status": "ok", "service": "vyc-predictivo-cloud"})
+
+
+# ============================================================================
+# VISTAS PARA HISTÓRICO DE ANÁLISIS - VIBRACIONES
+# ============================================================================
+
+@login_required(login_url='login')
+def historico_vibraciones(request, cliente_id, sucursal_id):
+    """Vista del histórico de análisis de vibraciones - último análisis por activo"""
+    from django.db.models import Case, When
+    
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener todos los activos de la sucursal con su último análisis
+    # Ordenar por área (aserradero, elaborado, caldera), luego equipo, luego activo
+    activos = Activo.objects.filter(
+        equipo__area__sucursal=sucursal,
+        activo=True
+    ).select_related(
+        'equipo',
+        'equipo__area'
+    ).annotate(
+        area_orden=Case(
+            When(equipo__area__nombre='aserradero', then=0),
+            When(equipo__area__nombre='elaborado', then=1),
+            When(equipo__area__nombre='caldera', then=2),
+            default=3,
+            output_field=models.IntegerField()
+        )
+    ).order_by('area_orden', 'equipo__nombre', 'nombre')
+    
+    # Construir lista de activos con su último análisis
+    datos_historico = []
+    ultima_fecha = None
+    
+    for activo in activos:
+        # Obtener el último análisis de vibraciones de este activo
+        ultimo_analisis = VibracionesAnalisis.objects.filter(
+            activo=activo
+        ).order_by('-fecha_muestreo').first()
+        
+        fila = {
+            'numero': len(datos_historico) + 1,
+            'area': activo.equipo.area,
+            'equipo': activo.equipo,
+            'activo': activo,
+            'ultimo_analisis': ultimo_analisis
+        }
+        
+        # Guardar la fecha más reciente para mostrar en el encabezado
+        if ultimo_analisis and (ultima_fecha is None or ultimo_analisis.fecha_muestreo > ultima_fecha):
+            ultima_fecha = ultimo_analisis.fecha_muestreo
+        
+        datos_historico.append(fila)
+    
+    # Calcular estadísticas
+    equipos_count = Equipo.objects.filter(area__sucursal=sucursal, activo=True).distinct().count()
+    activos_count = len(datos_historico)
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'modulo': 'vibraciones',
+        'titulo': f'Histórico de Vibraciones - {sucursal.nombre}',
+        'descripcion': 'Visualiza el historial de análisis de todos los activos',
+        'datos_historico': datos_historico,
+        'ultima_fecha': ultima_fecha,
+        'total_equipos': equipos_count,
+        'total_activos': activos_count,
+    }
+    return render(request, 'core/vibraciones/historico.html', context)
+
+
+# ============================================================================
+# VISTAS PARA HISTÓRICO DE ANÁLISIS - TERMOGRAFÍAS
+# ============================================================================
+
+@login_required(login_url='login')
+def historico_termografias(request, cliente_id, sucursal_id):
+    """Vista del histórico de análisis de termografías con tabla de fechas"""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener todos los activos de la sucursal
+    activos = Activo.objects.filter(
+        equipo__area__sucursal=sucursal,
+        activo=True
+    ).select_related(
+        'equipo',
+        'equipo__area'
+    ).order_by('equipo__area__nombre', 'equipo__nombre', 'nombre')
+    
+    # Obtener todas las fechas de análisis únicos de todos los activos
+    fechas = TermografiaAnalisis.objects.filter(
+        activo__equipo__area__sucursal=sucursal
+    ).values_list('fecha_muestreo', flat=True).distinct().order_by('-fecha_muestreo')
+    
+    # Construir matriz: activo -> fecha -> análisis
+    datos_historico = []
+    for activo in activos:
+        fila = {
+            'activo': activo,
+            'area': activo.equipo.area,
+            'equipo': activo.equipo,
+            'analisis_por_fecha': {}
+        }
+        
+        # Para cada fecha, obtener el análisis de este activo
+        for fecha in fechas:
+            try:
+                analisis = TermografiaAnalisis.objects.get(
+                    activo=activo,
+                    fecha_muestreo=fecha
+                )
+                fila['analisis_por_fecha'][fecha] = analisis
+            except TermografiaAnalisis.DoesNotExist:
+                fila['analisis_por_fecha'][fecha] = None
+        
+        datos_historico.append(fila)
+    
+    # Serializar datos para JSON (para Chart.js)
+    import json
+    from decimal import Decimal
+    
+    fechas_list = [str(f) for f in fechas]
+    
+    # Convertir datos_historico a estructura serializable
+    datos_json = []
+    for item in datos_historico:
+        analisis_json = {}
+        for fecha, analisis in item['analisis_por_fecha'].items():
+            if analisis:
+                analisis_json[str(fecha)] = {
+                    'temperatura_maxima': float(analisis.temperatura_maxima) if analisis.temperatura_maxima else 0,
+                    'temperatura_minima': float(analisis.temperatura_minima) if analisis.temperatura_minima else 0,
+                    'resultado': analisis.resultado,
+                }
+            else:
+                analisis_json[str(fecha)] = None
+        
+        datos_json.append({
+            'activo': {
+                'id': item['activo'].id,
+                'nombre': item['activo'].nombre,
+            },
+            'equipo': {
+                'id': item['equipo'].id,
+                'nombre': item['equipo'].nombre,
+            },
+            'area': {
+                'id': item['area'].id,
+                'nombre': item['area'].nombre,
+            },
+            'analisis_por_fecha': analisis_json
+        })
+    
+    context = {
+        'user': request.user,
+        'cliente': cliente,
+        'sucursal': sucursal,
+        'modulo': 'termografias',
+        'titulo': f'Histórico de Termografías - {sucursal.nombre}',
+        'descripcion': 'Visualiza el historial de todos los análisis de termografías',
+        'datos_historico': datos_historico,
+        'fechas': fechas,
+        'datos_historico_json': json.dumps(datos_json),
+        'fechas_json': json.dumps(fechas_list),
+    }
+    return render(request, 'core/termografias/historico.html', context)
+
+
+# ============================================================================
+# VISTAS PARA EXPORTAR HISTÓRICO - CSV/PDF
+# ============================================================================
+
+@login_required(login_url='login')
+def exportar_historico_vibraciones_csv(request, cliente_id, sucursal_id):
+    """Exportar histórico de vibraciones a CSV"""
+    import csv
+    from django.http import HttpResponse
+    
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener datos
+    activos = Activo.objects.filter(
+        equipo__area__sucursal=sucursal,
+        activo=True
+    ).select_related('equipo', 'equipo__area').order_by(
+        'equipo__area__nombre', 'equipo__nombre', 'nombre'
+    )
+    
+    fechas = VibracionesAnalisis.objects.filter(
+        activo__equipo__area__sucursal=sucursal
+    ).values_list('fecha_muestreo', flat=True).distinct().order_by('-fecha_muestreo')
+    
+    # Crear respuesta CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="historico_vibraciones_{sucursal.id}_{cliente.id}.csv"'
+    
+    writer = csv.writer(response, delimiter=',', quoting=csv.QUOTE_ALL)
+    
+    # Encabezado
+    header = ['#', 'Área', 'Equipo', 'Activo']
+    for fecha in fechas:
+        header.append(f"{fecha.strftime('%d/%m/%Y')}")
+    writer.writerow(header)
+    
+    # Datos
+    contador = 1
+    for activo in activos:
+        fila = [
+            contador,
+            activo.equipo.area.get_nombre_display(),
+            activo.equipo.nombre,
+            activo.nombre
+        ]
+        
+        for fecha in fechas:
+            try:
+                analisis = VibracionesAnalisis.objects.get(
+                    activo=activo,
+                    fecha_muestreo=fecha
+                )
+                valor = f"{analisis.get_resultado_display()} ({analisis.velocidad_rms} mm/s)"
+                fila.append(valor)
+            except VibracionesAnalisis.DoesNotExist:
+                fila.append("—")
+        
+        writer.writerow(fila)
+        contador += 1
+    
+    return response
+
+
+@login_required(login_url='login')
+def exportar_historico_termografias_csv(request, cliente_id, sucursal_id):
+    """Exportar histórico de termografías a CSV"""
+    import csv
+    from django.http import HttpResponse
+    
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+    
+    # Obtener datos
+    activos = Activo.objects.filter(
+        equipo__area__sucursal=sucursal,
+        activo=True
+    ).select_related('equipo', 'equipo__area').order_by(
+        'equipo__area__nombre', 'equipo__nombre', 'nombre'
+    )
+    
+    fechas = TermografiaAnalisis.objects.filter(
+        activo__equipo__area__sucursal=sucursal
+    ).values_list('fecha_muestreo', flat=True).distinct().order_by('-fecha_muestreo')
+    
+    # Crear respuesta CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="historico_termografias_{sucursal.id}_{cliente.id}.csv"'
+    
+    writer = csv.writer(response, delimiter=',', quoting=csv.QUOTE_ALL)
+    
+    # Encabezado
+    header = ['#', 'Área', 'Equipo', 'Activo']
+    for fecha in fechas:
+        header.append(f"{fecha.strftime('%d/%m/%Y')}")
+    writer.writerow(header)
+    
+    # Datos
+    contador = 1
+    for activo in activos:
+        fila = [
+            contador,
+            activo.equipo.area.get_nombre_display(),
+            activo.equipo.nombre,
+            activo.nombre
+        ]
+        
+        for fecha in fechas:
+            try:
+                analisis = TermografiaAnalisis.objects.get(
+                    activo=activo,
+                    fecha_muestreo=fecha
+                )
+                valor = f"{analisis.get_resultado_display()} ({analisis.temperatura_maxima}°C)"
+                fila.append(valor)
+            except TermografiaAnalisis.DoesNotExist:
+                fila.append("—")
+        
+        writer.writerow(fila)
+        contador += 1
+    
+    return response
+
+
+@login_required(login_url='login')
+def exportar_historico_vibraciones_pdf(request, cliente_id, sucursal_id):
+    """Exportar histórico de vibraciones a PDF"""
+    try:
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib import colors
+        from io import BytesIO
+        from datetime import datetime
+        
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+        
+        # Obtener datos
+        activos = Activo.objects.filter(
+            equipo__area__sucursal=sucursal,
+            activo=True
+        ).select_related('equipo', 'equipo__area').order_by(
+            'equipo__area__nombre', 'equipo__nombre', 'nombre'
+        )
+        
+        fechas = VibracionesAnalisis.objects.filter(
+            activo__equipo__area__sucursal=sucursal
+        ).values_list('fecha_muestreo', flat=True).distinct().order_by('-fecha_muestreo')
+        
+        # Crear PDF en memoria
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), topMargin=20, bottomMargin=20)
+        
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#1e5a8e'),
+            spaceAfter=12,
+            alignment=1
+        )
+        
+        # Contenido
+        elements = []
+        
+        # Título
+        title = Paragraph(f"Histórico de Vibraciones - {sucursal.nombre}", title_style)
+        elements.append(title)
+        
+        # Metadata
+        metadata = Paragraph(
+            f"<b>Cliente:</b> {cliente.nombre} | <b>Generado:</b> {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+            styles['Normal']
+        )
+        elements.append(metadata)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Datos tabla
+        data = [['#', 'Área', 'Equipo', 'Activo']]
+        for fecha in fechas:
+            data[0].append(fecha.strftime('%d/%m/%Y'))
+        
+        contador = 1
+        for activo in activos:
+            fila = [str(contador), 
+                   activo.equipo.area.get_nombre_display(),
+                   activo.equipo.nombre,
+                   activo.nombre]
+            
+            for fecha in fechas:
+                try:
+                    analisis = VibracionesAnalisis.objects.get(
+                        activo=activo,
+                        fecha_muestreo=fecha
+                    )
+                    valor = f"{analisis.get_resultado_display()}\n{analisis.velocidad_rms} mm/s"
+                    fila.append(valor)
+                except VibracionesAnalisis.DoesNotExist:
+                    fila.append("—")
+            
+            data.append(fila)
+            contador += 1
+        
+        # Crear tabla
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e5a8e')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f0f0')]),
+        ]))
+        
+        elements.append(table)
+        
+        # Generar PDF
+        doc.build(elements)
+        
+        # Respuesta
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="historico_vibraciones_{sucursal.id}.pdf"'
+        return response
+        
+    except ImportError:
+        return JsonResponse({
+            'error': 'ReportLab no está instalado. Usa CSV en su lugar.'
+        }, status=400)
+
+
+@login_required(login_url='login')
+def exportar_historico_termografias_pdf(request, cliente_id, sucursal_id):
+    """Exportar histórico de termografías a PDF"""
+    try:
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib import colors
+        from io import BytesIO
+        from datetime import datetime
+        
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        sucursal = get_object_or_404(Sucursal, id=sucursal_id, cliente=cliente)
+        
+        # Obtener datos
+        activos = Activo.objects.filter(
+            equipo__area__sucursal=sucursal,
+            activo=True
+        ).select_related('equipo', 'equipo__area').order_by(
+            'equipo__area__nombre', 'equipo__nombre', 'nombre'
+        )
+        
+        fechas = TermografiaAnalisis.objects.filter(
+            activo__equipo__area__sucursal=sucursal
+        ).values_list('fecha_muestreo', flat=True).distinct().order_by('-fecha_muestreo')
+        
+        # Crear PDF en memoria
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), topMargin=20, bottomMargin=20)
+        
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#c4491e'),
+            spaceAfter=12,
+            alignment=1
+        )
+        
+        # Contenido
+        elements = []
+        
+        # Título
+        title = Paragraph(f"Histórico de Termografías - {sucursal.nombre}", title_style)
+        elements.append(title)
+        
+        # Metadata
+        metadata = Paragraph(
+            f"<b>Cliente:</b> {cliente.nombre} | <b>Generado:</b> {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+            styles['Normal']
+        )
+        elements.append(metadata)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Datos tabla
+        data = [['#', 'Área', 'Equipo', 'Activo']]
+        for fecha in fechas:
+            data[0].append(fecha.strftime('%d/%m/%Y'))
+        
+        contador = 1
+        for activo in activos:
+            fila = [str(contador), 
+                   activo.equipo.area.get_nombre_display(),
+                   activo.equipo.nombre,
+                   activo.nombre]
+            
+            for fecha in fechas:
+                try:
+                    analisis = TermografiaAnalisis.objects.get(
+                        activo=activo,
+                        fecha_muestreo=fecha
+                    )
+                    valor = f"{analisis.get_resultado_display()}\n{analisis.temperatura_maxima}°C"
+                    fila.append(valor)
+                except TermografiaAnalisis.DoesNotExist:
+                    fila.append("—")
+            
+            data.append(fila)
+            contador += 1
+        
+        # Crear tabla
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#c4491e')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f0f0')]),
+        ]))
+        
+        elements.append(table)
+        
+        # Generar PDF
+        doc.build(elements)
+        
+        # Respuesta
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="historico_termografias_{sucursal.id}.pdf"'
+        return response
+        
+    except ImportError:
+        return JsonResponse({
+            'error': 'ReportLab no está instalado. Usa CSV en su lugar.'
+        }, status=400)
 

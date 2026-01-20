@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+"""
+Script para crear favicon.ico basado en el logo VYC
+Convierte la imagen SVG/logo a ICO usando PIL
+"""
+from PIL import Image, ImageDraw, ImageFont
+import os
+
+# Crear imagen base (256x256 para mejor calidad)
+img = Image.new('RGB', (256, 256), color='white')
+draw = ImageDraw.Draw(img)
+
+# Dibujar círculo exterior azul oscuro
+draw.ellipse([(2, 2), (254, 254)], outline='#000033', width=3)
+
+# Crear fuente (usar tamaño grande)
+try:
+    # Intentar usar una fuente disponible del sistema
+    font = ImageFont.truetype("arial.ttf", 180)
+except:
+    # Fallback a fuente por defecto
+    font = ImageFont.load_default()
+
+# Dibujar letras
+# V (azul)
+draw.text((20, 40), "V", fill='#000099', font=font)
+# Y (rojo)
+draw.text((90, 40), "Y", fill='#FF0000', font=font)
+# C (azul)
+draw.text((160, 40), "C", fill='#000099', font=font)
+
+# Guardar en diferentes tamaños para ICO
+favicon_path = 'backend/core/static/img/favicon.ico'
+
+# Crear versión de 256x256 y guardar como ICO
+img.save(favicon_path, format='ICO', sizes=[(256, 256)])
+
+print(f'✅ favicon.ico creado exitosamente en: {favicon_path}')
+print(f'   Tamaño: 256x256 píxeles')
+print(f'   Ruta relativa: /static/img/favicon.ico')

@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+"""
+Script para probar la nueva vista activos_totales_termografias
+"""
+import os
+import sys
+import django
+
+# Agregar el directorio backend al path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+
+from core.models import Cliente, Sucursal, Equipo, Activo, Area
+from django.test import Client
+from django.urls import reverse
+
+def test_activos_totales_view():
+    """Test que la vista activos_totales_termografias funciona"""
+    
+    print("=" * 60)
+    print("TEST: Vista activos_totales_termografias")
+    print("=" * 60)
+    
+    # Obtener cliente y sucursal
+    cliente = Cliente.objects.first()
+    sucursal = Sucursal.objects.filter(cliente=cliente).first()
+    
+    if not cliente or not sucursal:
+        print("❌ No hay cliente o sucursal en la base de datos")
+        return False
+    
+    print(f"\n✓ Cliente: {cliente.nombre}")
+    print(f"✓ Sucursal: {sucursal.nombre}")
+    
+    # Obtener activos
+    activos = Activo.objects.filter(equipo__area__sucursal=sucursal)
+    print(f"✓ Activos en sucursal: {activos.count()}")
+    
+    # Test de la URL
+    client = Client()
+    
+    # Crear un usuario para autenticación
+    from django.contrib.auth.models import User
+    user, _ = User.objects.get_or_create(username='testuser')
+    client.force_login(user)
+    
+    url = f'/termografias/cliente/{cliente.id}/sucursal/{sucursal.id}/activos-totales/'
+    
+    print(f"\n📍 URL: {url}")
+    
+    response = client.get(url, HTTP_HOST='localhost:8000')
+    print(f"📌 Status Code: {response.status_code}")
+    
+    if response.status_code == 200:
+        print("✅ Vista cargada exitosamente")
+        
+        # Verificar contenido
+        content = response.content.decode('utf-8')
+        
+        checks = [
+            ('Tabla de activos', 'tbody'),
+            ('Modal de foto', 'modal-foto'),
+            ('Función fnl', 'function fnl'),
+            ('Función verFotoTermica', 'verFotoTermica'),
+            ('Función eliminarFotoTermica', 'eliminarFotoTermica'),
+        ]
+        
+        print("\n📋 Verificación de componentes:")
+        for name, check in checks:
+            if check in content:
+                print(f"  ✓ {name}")
+            else:
+                print(f"  ❌ {name}")
+        
+        return True
+    else:
+        print(f"❌ Error: {response.status_code}")
+        print(response.content.decode('utf-8')[:500])
+        return False
+
+if __name__ == '__main__':
+    test_activos_totales_view()

@@ -17,7 +17,7 @@
     }
 
     .breadcrumb-item a {
-        color: #667eea;
+        color: #c4491e;
         text-decoration: none;
     }
 
@@ -33,15 +33,6 @@
         border-radius: 12px;
         padding: 25px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Patrón para Vibraciones */
-    .content.content-vibraciones {
-        background-image: 
-            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Cpath d='M0,50 Q50,30 100,50 T200,50' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,60 Q50,40 100,60 T200,60' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,40 Q50,20 100,40 T200,40' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,70 Q50,50 100,70 T200,70' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Ccircle cx='100' cy='50' r='8' fill='%23667eea' opacity='0.08'/%3E%3C/svg%3E"),
-            linear-gradient(white, white);
-        background-repeat: repeat;
-        background-size: 200px 100px;
     }
 
     /* Patrón para Termografías */
@@ -95,12 +86,12 @@
     }
 
     .btn-action.btn-view {
-        background-color: #667eea;
+        background-color: #c4491e;
         color: white;
     }
 
     .btn-action.btn-view:hover {
-        background-color: #5568d3;
+        background-color: #a23815;
         color: white;
     }
 
@@ -200,7 +191,7 @@
     }
 
     .equipo-nombre:hover {
-        color: #667eea;
+        color: #c4491e;
         text-decoration: underline;
     }
 
@@ -215,13 +206,13 @@
     }
 
     .estado-select:hover {
-        border-color: #667eea;
+        border-color: #c4491e;
     }
 
     .estado-select:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #c4491e;
+        box-shadow: 0 0 0 3px rgba(196, 73, 30, 0.1);
     }
 
     .estado-select.bueno {
@@ -268,12 +259,12 @@
 
     .obs-text:hover {
         background-color: #f0f0f0;
-        color: #667eea;
+        color: #c4491e;
     }
 
     .obs-input {
         padding: 8px 10px;
-        border: 2px solid #667eea;
+        border: 2px solid #c4491e;
         border-radius: 4px;
         font-size: 0.9em;
         width: 300px;
@@ -373,17 +364,12 @@
         text-align: center;
     }
 
-    .col-velocidad {
+    .col-temperatura {
         width: 340px;
         text-align: center;
     }
 
-    .col-aceleracion {
-        width: 340px;
-        text-align: center;
-    }
-
-    .col-energia {
+    .col-humedad {
         width: 340px;
         text-align: center;
     }
@@ -465,25 +451,13 @@
     <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
-                {% else %}
-                    <a href="{% url 'termografias' %}">Termografías</a>
-                {% endif %}
+                <a href="{% url 'termografias' %}">Termografías</a>
             </li>
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
-                {% endif %}
+                <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
             </li>
             <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% endif %}
+                <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
             </li>
             <li class="breadcrumb-item active">{{ area.get_nombre_display }}</li>
         </ol>
@@ -498,26 +472,14 @@
     <!-- Acciones -->
     <div class="row mb-4">
         <div class="col-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% else %}
-                <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% endif %}
+            <a href="{% url 'areas_termografias' cliente.id sucursal.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
         </div>
         <div class="col-auto ms-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Equipo
-                </a>
-            {% else %}
-                <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Equipo
-                </a>
-            {% endif %}
+            <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Nuevo Equipo
+            </a>
         </div>
     </div>
 
@@ -534,9 +496,8 @@
                                 <th class="col-activo text-center">Activo</th>
                                 <th class="col-descripcion text-center">ID/Descripción</th>
                                 <th class="col-fecha text-center">Fecha Muestreo</th>
-                                <th class="col-velocidad text-center">mm/seg RMS</th>
-                                <th class="col-aceleracion text-center">G</th>
-                                <th class="col-energia text-center">eG</th>
+                                <th class="col-temperatura text-center">T°Máxima (°C)</th>
+                                <th class="col-temperatura text-center">T°Mínima (°C)</th>
                                 <th class="col-estado text-center">Estado</th>
                                 <th class="col-observaciones text-center">Observaciones</th>
                                 <th class="col-acciones text-center">Acciones</th>
@@ -547,7 +508,7 @@
                                 {% for activo in equipo.activos.all %}
                                 <tr data-activo-id="{{ activo.id }}">
                                     <!-- Numeración Global -->
-                                    <td class="col-numero" style="font-weight: 600; color: #667eea;">
+                                    <td class="col-numero" style="font-weight: 600; color: #c4491e;">
                                         <span class="activo-numero" data-equipo-index="{{ forloop.parentloop.counter0 }}" data-activo-index="{{ forloop.counter0 }}"></span>
                                     </td>
 
@@ -572,18 +533,13 @@
                                         <small class="fecha-muestreo-display" data-activo-id="{{ activo.id }}" style="display: block; margin-top: 4px; color: #666;"></small>
                                     </td>
 
-                                    <!-- mm/seg RMS -->
-                                    <td class="col-velocidad text-center">
+                                    <!-- T°Máxima -->
+                                    <td class="col-temperatura text-center">
                                         <input type="text" class="form-control form-control-sm" placeholder="—" style="font-size: 0.85em; text-align: center;">
                                     </td>
 
-                                    <!-- G -->
-                                    <td class="col-aceleracion text-center">
-                                        <input type="text" class="form-control form-control-sm" placeholder="—" style="font-size: 0.85em; text-align: center;">
-                                    </td>
-
-                                    <!-- eG -->
-                                    <td class="col-energia text-center">
+                                    <!-- T°Mínima -->
+                                    <td class="col-temperatura text-center">
                                         <input type="text" class="form-control form-control-sm" placeholder="—" style="font-size: 0.85em; text-align: center;">
                                     </td>
 
@@ -600,21 +556,12 @@
                                     <!-- Acciones -->
                                     <td class="col-acciones">
                                         <div class="actions-cell">
-                                            {% if modulo == 'vibraciones' %}
-                                                <a href="{% url 'editar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_vibraciones' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% else %}
-                                                <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% endif %}
+                                            <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                            <a href="{% url 'eliminar_activo_termografias' cliente.id sucursal.id equipo.area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro que desea eliminar este activo?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -626,11 +573,7 @@
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i> No hay equipos registrados en esta área.
-                    {% if modulo == 'vibraciones' %}
-                        <a href="{% url 'crear_equipo_vibraciones' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
-                    {% else %}
-                        <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
-                    {% endif %}
+                    <a href="{% url 'crear_equipo_termografias' cliente.id sucursal.id area.id %}" class="alert-link">Crear el primero</a>
                 </div>
             {% endif %}
 

@@ -262,6 +262,59 @@
             font-size: 0.85em;
         }
 
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead th {
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: 600;
+            border-right: 1px solid #d1d5db;
+            padding: 12px;
+            text-align: center;
+        }
+
+        table thead th:last-child {
+            border-right: none;
+        }
+
+        table tbody td {
+            border-right: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tbody td:last-child {
+            border-right: none;
+        }
+
+        table tbody td:first-child {
+            text-align: left;
+        }
+
+        .sucursal-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .sucursal-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3), 0 0 12px rgba(102, 126, 234, 0.15);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0;
@@ -299,27 +352,17 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
         <section class="content {% if modulo %}content-{{ modulo }}{% endif %}">
-            <!-- Breadcrumb y Botón -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <nav aria-label="breadcrumb" class="breadcrumb-container">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}">
-                                {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">{{ cliente.nombre }}</li>
-                    </ol>
-                </nav>
-                <div style="display: flex; gap: 10px;">
-                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="btn-back">
-                        ← Volver a clientes
-                    </a>
-                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
-                        ➕ Nueva Sucursal
-                    </a>
-                </div>
-            </div>
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="breadcrumb-container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}">
+                            {% if modulo == 'vibraciones' %}Vibraciones{% else %}Termografías{% endif %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ cliente.nombre }}</li>
+                </ol>
+            </nav>
 
             <h1 style="color: #667eea; margin-bottom: 30px;">{{ titulo }}</h1>
             
@@ -339,6 +382,15 @@
             <div class="table-container">
                 <h3 style="color: #667eea; margin-bottom: 15px;">Sucursales Activas</h3>
                 
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/{% else %}/termografias/{% endif %}" class="btn-back">
+                        ← Volver a clientes
+                    </a>
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/crear/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/crear/{% endif %}" class="btn-primary">
+                        ➕ Nueva Sucursal
+                    </a>
+                </div>
+                
                 {% if sucursales %}
                     <table>
                         <thead>
@@ -356,7 +408,7 @@
                             {% for sucursal in sucursales %}
                                 <tr>
                                     <td>
-                                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/areas/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/areas/{% endif %}" style="color: #667eea; text-decoration: none; font-weight: bold; cursor: pointer;">
+                                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/areas/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/areas/{% endif %}" class="sucursal-badge">
                                             {{ sucursal.nombre }}
                                         </a>
                                     </td>

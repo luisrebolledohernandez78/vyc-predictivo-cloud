@@ -125,12 +125,23 @@
     .format-table th {
         padding: 8px;
         font-weight: 600;
-        text-align: left;
+        text-align: center;
+        border-right: 1px solid #0a4a5a;
+    }
+
+    .format-table th:last-child {
+        border-right: none;
     }
 
     .format-table td {
         padding: 6px 8px;
         border-bottom: 1px solid #e9ecef;
+        border-right: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+    .format-table td:last-child {
+        border-right: none;
     }
 
     .format-table tbody tr:last-child td {

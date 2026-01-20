@@ -104,6 +104,59 @@
 
         .cliente-card-header {
             margin-bottom: 15px;
+            position: relative;
+        }
+
+        .cliente-logo-container {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #d1fae5;
+        }
+
+        .cliente-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cliente-logo-placeholder {
+            font-size: 2em;
+            color: #cbd5e1;
+        }
+
+        .cliente-logo-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 0 8px 0 8px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            transition: all 0.2s ease;
+        }
+
+        .cliente-logo-upload-btn:hover {
+            background: #1e8449;
+        }
+
+        .cliente-logo-input {
+            display: none;
         }
 
         .cliente-card-nombre {
@@ -308,6 +361,17 @@
                         {% for cliente in clientes %}
                             <div class="cliente-card" onclick="window.location='/termografias/cliente/{{ cliente.id }}/sucursales/';" style="cursor: pointer;">
                                 <div class="cliente-card-header">
+                                    <div class="cliente-logo-container" onclick="event.stopPropagation();">
+                                        {% if cliente.logo %}
+                                            <img src="{{ cliente.logo.url }}" alt="{{ cliente.nombre }}" class="cliente-logo">
+                                        {% else %}
+                                            <span class="cliente-logo-placeholder">🏢</span>
+                                        {% endif %}
+                                        <button class="cliente-logo-upload-btn" onclick="document.getElementById('logo-input-{{ cliente.id }}').click();" title="Subir logo">
+                                            ➕
+                                        </button>
+                                        <input type="file" id="logo-input-{{ cliente.id }}" class="cliente-logo-input" accept="image/*" data-cliente-id="{{ cliente.id }}">
+                                    </div>
                                     <a href="/termografias/cliente/{{ cliente.id }}/sucursales/" class="cliente-card-nombre" onclick="event.stopPropagation();">
                                         {{ cliente.nombre }}
                                     </a>
@@ -347,5 +411,59 @@
             </div>
         </section>
     </main>
-</body>
-</html>
+
+    <script>
+        // Manejo de subida de logo para clientes
+        document.querySelectorAll('.cliente-logo-input').forEach(input => {
+            input.addEventListener('change', function(e) {
+                const clienteId = this.getAttribute('data-cliente-id');
+                const file = this.files[0];
+                
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('logo', file);
+                
+                fetch(`/api/cliente/${clienteId}/subir-logo/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar la imagen
+                        const logoContainer = this.closest('.cliente-logo-container');
+                        logoContainer.innerHTML = `<img src="${data.image_url}" alt="Logo" class="cliente-logo">
+                            <button class="cliente-logo-upload-btn" onclick="document.getElementById('logo-input-${clienteId}').click();" title="Subir logo">
+                                ➕
+                            </button>`;
+                        this.remove();
+                    } else {
+                        alert('Error: ' + (data.error || 'No se pudo subir el logo'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al subir el logo');
+                });
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>

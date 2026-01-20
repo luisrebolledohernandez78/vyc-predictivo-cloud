@@ -118,34 +118,199 @@
             font-size: 0.8em;
         }
 
-        .areas-grid {
+        .areas-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
             margin-top: 20px;
+            align-items: start;
+        }
+
+        .areas-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .areas-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 75%;
+            margin: 0 auto;
         }
 
         .area-card {
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 0;
             border-left: 4px solid #667eea;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            display: flex;
+            align-items: stretch;
         }
 
         .area-card-link {
-            display: block;
-            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 12px 14px;
             text-decoration: none;
             color: inherit;
             cursor: pointer;
+            justify-content: center;
         }
 
         .area-card:hover {
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 15px rgba(102, 126, 234, 0.15);
-            transform: translateY(-4px);
+            transform: translateY(-2px);
+        }
+
+        .listado-total-card {
+            background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+            border-left: none;
+        }
+
+        .listado-total-card .area-card-link {
+            color: white;
+        }
+
+        .listado-total-card .area-card-link h3 {
+            color: white;
+            font-weight: 600;
+        }
+
+        .listado-total-card:hover {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5), 0 0 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .plant-image-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .plant-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .plant-placeholder {
+            text-align: center;
+            color: #999;
+        }
+
+        .plant-placeholder i {
+            font-size: 5em;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .plant-placeholder p {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .plant-upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .plant-upload-form h4 {
+            color: #333;
+            font-size: 0.95em;
+            margin: 0;
+            grid-column: 1 / -1;
+        }
+
+        .plant-upload-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .plant-upload-form label {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .plant-upload-form label span {
+            color: #555;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .plant-upload-form input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .plant-upload-form input[type="file"]:hover {
+            background: #ecf0ff;
+            border-color: #5568d3;
+        }
+
+        .plant-upload-form button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .plant-upload-form button:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .plant-upload-form button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .upload-status {
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .upload-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .upload-status.error {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .area-card.aserradero {
@@ -165,17 +330,19 @@
 
         .area-card h3 {
             color: #333;
-            margin-bottom: 8px;
-            font-size: 1.05em;
+            margin-bottom: 2px;
+            font-size: 1.3em;
+            margin-top: 0;
+            font-weight: 600;
         }
 
         .area-card .area-name {
             display: inline-block;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
 
         .area-card.aserradero .area-name {
@@ -195,33 +362,39 @@
 
         .area-card p {
             color: #666;
-            margin: 10px 0;
-            line-height: 1.6;
+            margin: 4px 0;
+            line-height: 1.3;
+            font-size: 0.75em;
         }
 
         .area-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 0;
+            padding: 8px;
+            border-top: none;
+            border-left: 1px solid #e0e0e0;
+            min-width: 70px;
         }
 
         .btn-sm {
-            padding: 8px 14px;
+            padding: 6px 8px;
             border: none;
-            border-radius: 5px;
-            font-size: 0.9em;
+            border-radius: 4px;
+            font-size: 0.75em;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s ease;
-            flex: 1;
+            width: 100%;
             text-align: center;
+            white-space: nowrap;
         }
 
         .btn-edit {
             background: #667eea;
             color: white;
+            font-size: 0.7em !important;
         }
 
         .btn-edit:hover {
@@ -231,6 +404,7 @@
         .btn-delete {
             background: #e74c3c;
             color: white;
+            font-size: 0.7em !important;
         }
 
         .btn-delete:hover {
@@ -239,11 +413,11 @@
 
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7em;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 4px;
         }
 
         .status-active {
@@ -272,7 +446,7 @@
         }
 
         .btn-back {
-            background: #95a5a6;
+            background: #667eea;
             color: white;
             padding: 12px 24px;
             border: none;
@@ -283,12 +457,18 @@
             text-decoration: none;
             transition: all 0.3s ease;
             display: inline-block;
-            margin-top: 30px;
         }
 
         .btn-back:hover {
-            background: #7f8c8d;
-            box-shadow: 0 6px 15px rgba(127, 140, 141, 0.3), 0 0 10px rgba(127, 140, 141, 0.15);
+            background: #5568d3;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3), 0 0 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .areas-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         @media (max-width: 768px) {
@@ -311,8 +491,21 @@
                 padding: 20px;
             }
 
-            .areas-grid {
+            .areas-container {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .plant-image-container {
+                min-height: 300px;
+            }
+
+            .area-card {
+                padding: 10px;
+            }
+
+            .area-card-link {
+                padding: 10px 12px;
             }
 
             .area-actions {
@@ -320,7 +513,20 @@
             }
 
             .btn-sm {
+                padding: 8px 12px;
+            }
+
+            .plant-upload-form {
+                padding: 15px;
+            }
+
+            .areas-buttons {
+                flex-direction: column;
+            }
+
+            .areas-buttons .btn-back {
                 width: 100%;
+                text-align: center;
             }
         }
     </style>
@@ -365,36 +571,72 @@
                 </div>
             </div>
 
-            <p class="description">
-                {{ descripcion }}
-            </p>
-
             {% if areas %}
-                <div class="areas-grid">
-                    {% for area in areas %}
-                        <div class="area-card {{ area.nombre }}">
-                            <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% endif %}" class="area-card-link">
-                                <span class="area-name">{{ area.get_nombre_display }}</span>
-                                
-                                <h3>{{ area.get_nombre_display }}</h3>
-                                
-                                {% if area.descripcion %}
-                                    <p>{{ area.descripcion }}</p>
-                                {% endif %}
-                                
-                                <span class="status-badge status-active">Activa</span>
-                            </a>
-                            
-                            <div class="area-actions">
-                                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% endif %}" class="btn-sm btn-edit">
-                                    ✏️ Editar
-                                </a>
-                                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/eliminar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/eliminar/{% endif %}" class="btn-sm btn-delete" onclick="return confirm('¿Estás seguro? Esto eliminará toda la información asociada a esta área.')">
-                                    🗑️ Eliminar
-                                </a>
-                            </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: space-between; align-items: center;">
+                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" class="btn-back">
+                        <i class="fas fa-arrow-left"></i> Volver a sucursales
+                    </a>
+                    <a href="{% if modulo == 'termografias' %}{% url 'activos_totales_termografias' cliente.id sucursal.id %}{% else %}{% url 'equipos_totales_vibraciones' cliente.id sucursal.id %}{% endif %}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-list"></i> {% if modulo == 'termografias' %}Ver listado total de activos{% else %}Ver listado total de equipos{% endif %}
+                    </a>
+                </div>
+
+                <div class="areas-container">
+                    <!-- Columna Izquierda: Tarjetas de Áreas y Botones -->
+                    <div class="areas-wrapper">
+                        <p class="description">
+                            {{ descripcion }}
+                        </p>
+                        
+                        <div class="areas-grid">
+                            {% for area in areas %}
+                                <div class="area-card {{ area.nombre }}">
+                                    <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/equipos/{% endif %}" class="area-card-link">
+                                        <h3>Área de {{ area.get_nombre_display }}</h3>
+                                        
+                                        <span class="status-badge status-active">Activa</span>
+                                    </a>
+                                    
+                                    <div class="area-actions">
+                                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/editar/{% endif %}" class="btn-sm btn-edit">
+                                            ✏️ Editar
+                                        </a>
+                                        <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/eliminar/{% else %}/termografias/cliente/{{ cliente.id }}/sucursal/{{ sucursal.id }}/area/{{ area.id }}/eliminar/{% endif %}" class="btn-sm btn-delete" onclick="return confirm('¿Estás seguro? Esto eliminará toda la información asociada a esta área.')">
+                                            🗑️ Eliminar
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    </div>
+
+                    <!-- Columna Derecha: Imagen de Planta y Subida -->
+                    <div>
+                        <div class="plant-image-container">
+                            {% if sucursal.plano_planta %}
+                                <img src="{{ sucursal.plano_planta.url }}" alt="Plano de la planta - {{ sucursal.nombre }}">
+                            {% else %}
+                                <div class="plant-placeholder">
+                                    <i class="fas fa-industry"></i>
+                                    <p>Sin imagen de planta</p>
+                                    <p style="font-size: 0.8em; margin-top: 10px;">Sube un plano o imagen de la planta abajo</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <form id="plant-upload-form" class="plant-upload-form" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <h4>📸 Subir Plano de Planta</h4>
+                            <div class="plant-upload-inputs">
+                                <label>
+                                    <span>Seleccionar imagen</span>
+                                    <input type="file" name="plano_planta" accept="image/*" id="plant-file-input">
+                                </label>
+                                <button type="submit" id="plant-submit-btn">Subir Imagen</button>
+                            </div>
+                            <div id="upload-status-msg"></div>
+                        </form>
+                    </div>
                 </div>
             {% else %}
                 <div class="empty-state">
@@ -403,19 +645,65 @@
                     <p>Las áreas se crean automáticamente cuando se crea una sucursal</p>
                 </div>
             {% endif %}
-
-            <div style="margin-top: 40px; display: flex; gap: 10px; align-items: center;">
-                {% if modulo == 'termografias' %}
-                    <a href="{% url 'activos_totales_termografias' cliente.id sucursal.id %}" class="btn-back" style="background-color: #667eea;">
-                        📋 Ver listado total de activos
-                    </a>
-                {% endif %}
-                <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" class="btn-back">
-                    ← Volver a sucursales
-                </a>
-            </div>
             {% endblock %}
         </section>
     </main>
-</body>
-</html>
+
+    <script>
+        // Manejo de la subida del plano de la planta
+        document.getElementById('plant-upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('plant-file-input');
+            const statusMsg = document.getElementById('upload-status-msg');
+            const submitBtn = document.getElementById('plant-submit-btn');
+            
+            if (!fileInput.files.length) {
+                statusMsg.className = 'upload-status error';
+                statusMsg.textContent = '⚠️ Selecciona un archivo primero';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('plano_planta', fileInput.files[0]);
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Subiendo...';
+            statusMsg.innerHTML = '';
+            
+            fetch('/api/sucursal/{{ sucursal.id }}/subir-plano/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusMsg.className = 'upload-status success';
+                    statusMsg.textContent = '✅ ' + data.message;
+                    fileInput.value = '';
+                    
+                    // Actualizar la imagen mostrada
+                    const imageContainer = document.querySelector('.plant-image-container');
+                    imageContainer.innerHTML = '<img src="' + data.image_url + '" alt="Plano de la planta - {{ sucursal.nombre }}">';
+                    
+                    setTimeout(() => {
+                        statusMsg.innerHTML = '';
+                    }, 3000);
+                } else {
+                    statusMsg.className = 'upload-status error';
+                    statusMsg.textContent = '❌ ' + (data.error || 'Error al subir el archivo');
+                }
+            })
+            .catch(error => {
+                statusMsg.className = 'upload-status error';
+                statusMsg.textContent = '❌ Error: ' + error.message;
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Subir Imagen';
+            });
+        });
+    </script>
