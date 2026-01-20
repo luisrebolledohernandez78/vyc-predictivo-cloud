@@ -814,9 +814,15 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'termografias' %}">Termografías</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a></li>
+            {% if modulo == 'termografias' %}
+                <li class="breadcrumb-item"><a href="{% url 'termografias' %}">Termografías</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a></li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="{% url 'vibraciones' %}">Vibraciones</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a></li>
+            {% endif %}
             <li class="breadcrumb-item active">Todos los Activos</li>
         </ol>
     </nav>
@@ -849,12 +855,21 @@
         </div>
         
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id %}" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-            <a href="{% url 'historico_vibraciones' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
-                <i class="fas fa-history"></i> Ver Histórico
-            </a>
+            {% if modulo == 'termografias' %}
+                <a href="{% url 'equipos_termografias' cliente.id sucursal.id area.id %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <a href="{% url 'historico_termografias' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-history"></i> Ver Histórico
+                </a>
+            {% else %}
+                <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id area.id %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <a href="{% url 'historico_vibraciones' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-history"></i> Ver Histórico
+                </a>
+            {% endif %}
         </div>
     </div>
 
