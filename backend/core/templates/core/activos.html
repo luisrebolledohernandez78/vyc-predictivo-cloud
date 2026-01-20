@@ -1,9 +1,31 @@
-{% extends 'core/equipos.html' %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - VYC Predictivo Cloud</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+    <style>
+    :root {
+        {% if modulo == 'termografias' %}
+        --color-primary: #c4491e;
+        --color-svg: %23c4491e;
+        {% else %}
+        --color-primary: #667eea;
+        --color-svg: %23667eea;
+        {% endif %}
+    }
+    
+    .main-content {
+        flex: 1;
+        padding: 25px;
+    }
 
-{% block titulo %}{{ titulo }}{% endblock %}
-
-{% block contenido %}
-<style>
     .breadcrumb-container {
         margin-bottom: 15px;
         padding: 0;
@@ -17,7 +39,7 @@
     }
 
     .breadcrumb-item a {
-        color: #667eea;
+        color: var(--color-primary);
         text-decoration: none;
     }
 
@@ -33,45 +55,15 @@
         border-radius: 12px;
         padding: 25px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        background-color: white;
     }
 
-    /* Patrón para Vibraciones */
-    .content.content-vibraciones {
-        background-image: 
-            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Cpath d='M0,50 Q50,30 100,50 T200,50' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,60 Q50,40 100,60 T200,60' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,40 Q50,20 100,40 T200,40' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Cpath d='M0,70 Q50,50 100,70 T200,70' stroke='%23667eea' stroke-width='1' fill='none' opacity='0.1'/%3E%3Ccircle cx='100' cy='50' r='8' fill='%23667eea' opacity='0.08'/%3E%3C/svg%3E"),
-            linear-gradient(white, white);
-        background-repeat: repeat;
-        background-size: 200px 100px;
-    }
-
-    /* Patrón para Termografías */
     .content.content-termografias {
         background-image: 
-            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='%23808080' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='%23808080' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='%23808080' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='%23808080' opacity='0.05'/%3E%3C/svg%3E"),
+            url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpolygon points='75,10 140,50 140,130 75,170 10,130 10,50' fill='var(--color-svg)' opacity='0.08'/%3E%3Cpolygon points='75,30 120,60 120,120 75,150 30,120 30,60' fill='var(--color-svg)' opacity='0.06'/%3E%3Ccircle cx='75' cy='75' r='25' fill='var(--color-svg)' opacity='0.08'/%3E%3Ccircle cx='75' cy='75' r='15' fill='var(--color-svg)' opacity='0.05'/%3E%3C/svg%3E"),
             linear-gradient(white, white);
         background-repeat: repeat;
         background-size: 150px 150px;
-    }
-
-    /* Colores por Área */
-    .area-header {
-        padding: 20px 30px;
-        border-radius: 8px 8px 0 0;
-        color: white;
-        margin-bottom: 20px;
-    }
-    
-    .area-header.aserradero {
-        background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
-    }
-    
-    .area-header.elaborado {
-        background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-        color: #333;
-    }
-    
-    .area-header.caldera {
-        background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
     }
 
     /* Action Buttons */
@@ -101,7 +93,6 @@
 
     .btn-action.btn-edit:hover {
         background-color: #d97706;
-        color: white;
     }
 
     .btn-action.btn-delete {
@@ -111,11 +102,297 @@
 
     .btn-action.btn-delete:hover {
         background-color: #dc2626;
-        color: white;
     }
 
     .btn-action i {
+        font-size: 0.9em;
+    }
+
+    .btn-action.btn-secondary {
+        background-color: #d1d5db;
+        color: #666;
+    }
+
+    .btn-action.btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+
+    .btn-action.btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-action.btn-success:hover {
+        background-color: #059669;
+    }
+
+    .btn-action.btn-info {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-action.btn-info:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-action.btn-warning {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-action.btn-warning:hover {
+        background-color: #d97706;
+    }
+
+    .btn-action.btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-action.btn-danger:hover {
+        background-color: #dc2626;
+    }
+
+    .btn-action:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+        border-right: 1px solid #d1d5db;
+        padding: 10px 10px;
+        font-size: 0.9em;
+    }
+
+    .table thead th:last-child {
+        border-right: none;
+    }
+
+    .table tbody td {
+        border-right: 1px solid #e5e7eb;
+        padding: 10px 10px;
+        vertical-align: middle;
+    }
+
+    .table tbody td:last-child {
+        border-right: none;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    /* Ancho de columnas */
+    .col-numero {
+        width: 30px;
+        text-align: center;
+    }
+
+    .col-maquinaria {
+        width: 100px;
+        text-align: center;
+    }
+
+    .col-activo {
+        width: 120px;
+    }
+
+    .col-descripcion {
+        width: 180px;
+    }
+
+    .col-estado {
+        width: 80px;
+        text-align: center;
+    }
+
+    .col-acciones {
+        width: 130px;
+        text-align: center;
+    }
+
+    .area-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        color: white;
+    }
+
+    .area-badge.aserradero {
+        background-color: #27ae60;
+    }
+
+    .area-badge.elaborado {
+        background-color: #d4af37;
+        color: #333;
+    }
+
+    .area-badge.caldera {
+        background-color: #e53935;
+    }
+
+    .estado-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .estado-badge.bueno {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .estado-badge.alarma {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .estado-badge.emergencia {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .estado-badge.sin_medicion {
+        background-color: #e5e7eb;
+        color: #374151;
+    }
+
+    .estado-badge.observacion {
+        background-color: #fef3c7;
+        color: #78350f;
+    }
+
+    .estado-badge.falla {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Header Section */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        color: #111;
+        font-size: 1.4em;
+        font-weight: 700;
+    }
+
+    .section-header p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.95em;
+    }
+
+    .section-title {
+        flex: 1;
+    }
+
+    /* Estadísticas */
+    .section-stats {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 20px;
+    }
+
+    .stats-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #f0f1f5 100%);
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 0.95em;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .stat-item i {
         font-size: 1.1em;
+        margin-right: 2px;
+    }
+
+    .stat-separator {
+        color: #d1d5db;
+        font-weight: 300;
+    }
+
+    .btn-new {
+        padding: 10px 20px;
+        background-color: #10b981;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+    }
+
+    .btn-new:hover {
+        background-color: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-back {
+        background: var(--color-primary);
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-back:hover {
+        background: {% if modulo == 'termografias' %}#a83a17{% else %}#5568d3{% endif %};
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        color: white;
     }
 
     .actions-cell {
@@ -123,130 +400,10 @@
         align-items: center;
         justify-content: center;
         gap: 4px;
+        flex-wrap: wrap;
     }
 
-    .btn-back {
-        background: #667eea;
-        color: white;
-        padding: 10px 16px;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.95em;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .btn-back:hover {
-        background: #5568d3;
-        color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    /* Estado Badges */
-    .badge-estado {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85em;
-    }
-
-    .badge-estado.bueno {
-        background-color: #27ae60;
-        color: white;
-    }
-
-    .badge-estado.observacion {
-        background-color: #f1c40f;
-        color: #333;
-    }
-
-    .badge-estado.alarma {
-        background-color: #f39c12;
-        color: white;
-    }
-
-    .badge-estado.falla {
-        background-color: #e74c3c;
-        color: white;
-    }
-
-    .badge-estado.sin_medicion {
-        background-color: #d3d3d3;
-        color: #333;
-    }
-
-    .estado-select {
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 2px solid #e0e0e0;
-        font-weight: 600;
-        font-size: 0.9em;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .estado-select:hover {
-        border-color: #667eea;
-    }
-
-    .estado-select:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .estado-select.bueno {
-        background-color: #27ae60;
-        color: white;
-        border-color: #1e8449;
-    }
-
-    .estado-select.observacion {
-        background-color: #f1c40f;
-        color: #333;
-        border-color: #e6b800;
-    }
-
-    .estado-select.alarma {
-        background-color: #f39c12;
-        color: white;
-        border-color: #d68910;
-    }
-
-    .estado-select.falla {
-        background-color: #e74c3c;
-        color: white;
-        border-color: #c0392b;
-    }
-
-    .estado-select.sin_medicion {
-        background-color: #d3d3d3;
-        color: #333;
-        border-color: #bfbfbf;
-    }
-
-    /* Estados para Termografías */
-    .estado-select.emergencia {
-        background-color: #c92a2a;
-        color: white;
-        border-color: #a61e4d;
-    }
-
-    /* Rango de temperatura */
-    .rango-temp {
-        font-weight: 600;
-        color: #667eea;
-        padding: 6px 10px;
-        border-radius: 6px;
-        background-color: #f0f5ff;
-    }
-
+    /* Edición Inline */
     .obs-text {
         cursor: pointer;
         padding: 6px 10px;
@@ -296,67 +453,93 @@
         color: #e74c3c;
     }
 
-    .btn-action.btn-secondary {
-        background-color: #95a5a6;
-        color: white;
+    .obs-edit-container {
+        display: none;
     }
 
-    .btn-action.btn-secondary:hover {
-        background-color: #7f8c8d;
-        color: white;
+    .desc-text {
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s, color 0.2s;
+        display: inline-block;
+        max-width: 95%;
+        word-wrap: break-word;
     }
 
-    .btn-action.btn-success {
-        background-color: #27ae60;
-        color: white;
+    .desc-text:hover {
+        background-color: #f0f0f0;
+        color: #667eea;
     }
 
-    .btn-action.btn-success:hover {
-        background-color: #1e8449;
-        color: white;
+    .desc-input {
+        padding: 8px 10px;
+        border: 2px solid #667eea;
+        border-radius: 4px;
+        font-size: 0.875em;
+        width: 95%;
+        max-width: 400px;
+        font-family: inherit;
+        resize: vertical;
     }
 
-    .btn-action.btn-info {
-        background-color: #3498db;
-        color: white;
+    .desc-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
     }
 
-    .btn-action.btn-info:hover {
-        background-color: #2980b9;
-        color: white;
+    .desc-counter {
+        font-size: 0.75em;
+        color: #999;
+        margin-top: 4px;
+        display: none;
     }
 
-    .btn-action:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
+    .desc-counter.show {
+        display: block;
     }
 
-    .opacity-50 {
-        opacity: 0.5;
+    .desc-counter.warning {
+        color: #f39c12;
     }
 
-    /* Table Styles */
-    .table thead th {
-        border-right: 1px solid #d1d5db;
+    .desc-counter.danger {
+        color: #e74c3c;
     }
 
-    .table thead th:last-child {
-        border-right: none;
+    .desc-edit-container {
+        display: none;
     }
 
-    .table tbody td {
-        border-right: 1px solid #e5e7eb;
-        text-align: center;
+    .fecha-muestreo-input {
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875em;
+        width: 140px;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .table tbody td:last-child {
-        border-right: none;
+    .fecha-muestreo-input:hover {
+        border-color: #667eea;
+        box-shadow: 0 0 4px rgba(102, 126, 234, 0.2);
     }
 
-    .table tbody td:first-child {
-        text-align: left;
+    .fecha-muestreo-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
     }
 
+    .fecha-muestreo-display {
+        font-size: 0.75em;
+        color: #999;
+        margin-top: 4px;
+    }
+
+    /* Modal Styles */
     .modal-foto {
         display: none;
         position: fixed;
@@ -417,13 +600,14 @@
         background: none;
         border: none;
         padding: 0;
+        transition: color 0.3s ease;
     }
 
     .close-modal:hover {
         color: #333;
     }
 
-    /* Modal de análisis térmico */
+    /* Modal de Análisis Térmico */
     .modal-analisis {
         display: none;
         position: fixed;
@@ -491,147 +675,8 @@
         color: #333;
     }
 
-    .modal-analisis-header .text-muted {
-        margin: 0;
-        font-size: 0.9em;
-    }
-
-    .analisis-resultado {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .resultado-item {
-        background: #f8f9fa;
-        padding: 12px;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
-    }
-
-    .resultado-item label {
-        display: block;
-        font-size: 0.85em;
-        color: #666;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-
-    .resultado-item .valor {
-        font-size: 1.8em;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .estado-badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: bold;
-        text-align: center;
-        width: 100%;
-        font-size: 1.1em;
-    }
-
-    /* Nuevos estados para Termografías */
-    .estado-badge.bueno {
-        background-color: #27ae60;
-        color: white;
-    }
-
-    .estado-badge.alarma {
-        background-color: #f39c12;
-        color: white;
-    }
-
-    .estado-badge.emergencia {
-        background-color: #e74c3c;
-        color: white;
-    }
-
-    .estado-badge.sin_medicion {
-        background-color: #95a5a6;
-        color: white;
-    }
-
-    /* Estados antiguos (compatibilidad) */
-    .estado-badge.normal {
-        background-color: #27ae60;
-        color: white;
-    }
-
-    .estado-badge.alerta {
-        background-color: #f39c12;
-        color: white;
-    }
-
-    .estado-badge.critico {
-        background-color: #e74c3c;
-        color: white;
-    }
-
-    .analisis-barras .barra-item {
-        margin-bottom: 15px;
-    }
-
-    .analisis-barras label {
-        display: block;
-        font-size: 0.9em;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-    }
-
-    .barra-contenedor {
-        height: 25px;
-        background-color: #e0e0e0;
-        border-radius: 12px;
-        overflow: hidden;
-        display: inline-block;
-        width: calc(100% - 50px);
-        margin-right: 10px;
-    }
-
-    .barra {
-        height: 100%;
-        border-radius: 12px;
-        transition: width 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 0.8em;
-    }
-
-    .barra.rojo {
-        background-color: #e74c3c;
-    }
-
-    .barra.naranja {
-        background-color: #f39c12;
-    }
-
-    .barra.amarillo {
-        background-color: #f1c40f;
-    }
-
-    .analisis-barras span {
-        display: inline-block;
-        width: 50px;
-        text-align: right;
-        font-weight: bold;
-    }
-
-    .mensaje-analisis {
-        background-color: #f0f8ff;
-        border-left: 4px solid #3498db;
-        padding: 12px;
-        border-radius: 4px;
-        color: #333;
-        font-size: 0.95em;
-        line-height: 1.6;
+    .modal-analisis-body {
+        margin: 20px 0;
     }
 
     .modal-analisis-footer {
@@ -670,136 +715,29 @@
         background-color: #1e8449;
     }
 
-    /* Estilos para ajuster de temperatura */
-    .temp-adjuster {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0 6px;
+    /* Estilos para inputs de temperatura en el modal */
+    .temp-display {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
     }
 
-    .btn-temp-adjust {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border: 2px solid #3498db;
-        background-color: #ecf0f1;
-        color: #2c3e50;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 18px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        padding: 0;
-    }
-
-    .btn-temp-adjust:hover {
-        background-color: #3498db;
-        color: white;
-        transform: scale(1.1);
-    }
-
-    .btn-temp-adjust:active {
-        transform: scale(0.95);
-    }
-
-    .btn-temp-minus:hover {
-        background-color: #e74c3c;
-        border-color: #c0392b;
-    }
-
-    .btn-temp-plus:hover {
-        background-color: #27ae60;
-        border-color: #1e8449;
-    }
-
-    .temp-value {
-        display: inline-block;
-        min-width: 50px;
-        text-align: center;
-        font-weight: bold;
-        color: #e74c3c;
-        font-size: 1.1em;
-    }
-
-    .temp-input {
-        display: inline-block;
-        width: 70px;
-        padding: 6px 8px;
-        margin: 0 4px;
-        border: 2px solid #3498db;
-        border-radius: 4px;
-        font-size: 0.95em;
-        font-weight: bold;
-        text-align: center;
-        color: #2c3e50;
-        transition: all 0.2s ease;
-    }
-
-    .temp-input:focus {
-        outline: none;
-        border-color: #2980b9;
-        box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
-        background-color: #ecf0f1;
-    }
-
-    .temp-input::placeholder {
-        color: #95a5a6;
-    }
-
-    /* Estilos para inputs de temperatura grandes en modal */
     .temp-input-large {
-        display: inline-block;
-        width: 85px;
-        padding: 10px 8px;
-        margin: 0 4px;
-        border: 2px solid #3498db;
+        font-size: 1.2em;
+        padding: 8px 12px;
+        border: 2px solid #ddd;
         border-radius: 6px;
-        font-size: 1.05em;
+        width: 100px;
         font-weight: bold;
-        text-align: center;
-        color: #2c3e50;
-        transition: all 0.2s ease;
     }
 
     .temp-input-large:focus {
         outline: none;
-        border-color: #2980b9;
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
-        background-color: #ecf0f1;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    .temp-input-large::placeholder {
-        color: #95a5a6;
-    }
-
-    .temp-separator {
-        font-weight: bold;
-        color: #2c3e50;
-        font-size: 1.1em;
-    }
-
-    /* Estilos para mostrar temperaturas en tabla */
-    .temp-info-table {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        text-align: center;
-    }
-
-    .temp-info-table small {
-        font-size: 0.85em;
-        line-height: 1.4;
-    }
-
-    .temp-info-table strong {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    /* Estilos para zonas térmicas editables */
     .thermal-zones {
         display: flex;
         flex-direction: column;
@@ -807,310 +745,291 @@
     }
 
     .zone-box {
-        padding: 12px 14px;
+        padding: 12px;
         border-radius: 8px;
         border-left: 4px solid;
-        background-color: rgba(255,255,255,0.9);
-        transition: all 0.2s ease;
     }
 
     .zone-box.zone-bueno {
+        background-color: #e8f5e9;
         border-left-color: #27ae60;
-        background-color: rgba(39, 174, 96, 0.05);
     }
 
     .zone-box.zone-alarma {
+        background-color: #fff3e0;
         border-left-color: #f39c12;
-        background-color: rgba(243, 156, 18, 0.05);
     }
 
     .zone-box.zone-emergencia {
+        background-color: #ffebee;
         border-left-color: #e74c3c;
-        background-color: rgba(231, 76, 60, 0.05);
     }
 
     .zone-title {
         font-weight: 600;
         font-size: 0.95em;
         margin-bottom: 8px;
-        color: #2c3e50;
-    }
-
-    .zone-box.zone-bueno .zone-title {
-        color: #27ae60;
-    }
-
-    .zone-box.zone-alarma .zone-title {
-        color: #f39c12;
-    }
-
-    .zone-box.zone-emergencia .zone-title {
-        color: #e74c3c;
+        color: #333;
     }
 
     .zone-inputs {
         display: flex;
         align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .temp-zone-input {
-        width: 75px;
-        padding: 8px 6px;
-        border: 2px solid #bdc3c7;
-        border-radius: 5px;
-        font-size: 0.95em;
-        font-weight: 600;
-        text-align: center;
-        color: #2c3e50;
-        transition: all 0.2s ease;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 70px;
+        font-size: 0.9em;
     }
 
     .temp-zone-input:focus {
         outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
-        background-color: #ecf0f1;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     }
 
     .zone-separator {
-        font-weight: bold;
-        color: #7f8c8d;
-        font-size: 0.95em;
+        color: #999;
+        margin: 0 2px;
     }
 
     .zone-unit {
+        color: #666;
         font-size: 0.9em;
-        color: #7f8c8d;
-        font-weight: 500;
     }
 </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    {% include 'core/sidebar.html' %}
 
-<!-- Breadcrumb -->
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <section class="content {% if modulo %}content-{{ modulo }}{% endif %}">
+<div style="display: none;"></div><!-- Placeholder -->
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="breadcrumb-container">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'vibraciones' %}">Vibraciones</a>
-                {% else %}
-                    <a href="{% url 'termografias' %}">Termografías</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'sucursales_vibraciones' cliente.id %}">{{ cliente.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'areas_vibraciones' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% else %}
-                    <a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item">
-                {% if modulo == 'vibraciones' %}
-                    <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
-                {% else %}
-                    <a href="{% url 'equipos_termografias' cliente.id sucursal.id area.id %}">{{ area.get_nombre_display }}</a>
-                {% endif %}
-            </li>
-            <li class="breadcrumb-item active">{{ equipo.nombre }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'termografias' %}">Termografías</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'sucursales_termografias' cliente.id %}">{{ cliente.nombre }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'areas_termografias' cliente.id sucursal.id %}">{{ sucursal.nombre }}</a></li>
+            <li class="breadcrumb-item active">Todos los Activos</li>
         </ol>
     </nav>
 
-    <!-- Header con Color de Área -->
-    <div class="area-header {{ area.nombre }}">
-        <h1 class="h3 mb-2">{{ titulo }}</h1>
-        <p class="mb-0">{{ descripcion }}</p>
+    <!-- Header Section -->
+    <div class="section-header">
+        <div class="section-title">
+            <h2>{{ titulo }}</h2>
+            <p>{{ descripcion }}</p>
+        </div>
+        
+        <!-- Estadísticas centradas -->
+        <div class="section-stats">
+            <div class="stats-container">
+                <span class="stat-item">
+                    <i class="fas fa-project-diagram" style="color: #667eea;"></i>
+                    <strong>Áreas:</strong> {{ total_areas }}
+                </span>
+                <span class="stat-separator">—</span>
+                <span class="stat-item">
+                    <i class="fas fa-cogs" style="color: #f59e0b;"></i>
+                    <strong>Maquinaria:</strong> {{ total_equipos }}
+                </span>
+                <span class="stat-separator">—</span>
+                <span class="stat-item">
+                    <i class="fas fa-cube" style="color: #10b981;"></i>
+                    <strong>Activos:</strong> {{ total_activos }}
+                </span>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'historico_vibraciones' cliente.id sucursal.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-history"></i> Ver Histórico
+            </a>
+        </div>
     </div>
 
-    <!-- Acciones -->
-    <div class="row mb-4">
-        <div class="col-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'equipos_vibraciones' cliente.id sucursal.id area.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% else %}
-                <a href="{% url 'equipos_termografias' cliente.id sucursal.id area.id %}" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-            {% endif %}
-        </div>
-        <div class="col-auto ms-auto">
-            {% if modulo == 'vibraciones' %}
-                <a href="{% url 'crear_activo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Activo
-                </a>
-            {% else %}
-                <a href="{% url 'crear_activo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nuevo Activo
-                </a>
-            {% endif %}
-        </div>
-    </div>
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-numero">#</th>
+                    <th class="text-center">Área</th>
+                    <th class="col-maquinaria text-center">Maquinaria</th>
+                    <th class="col-activo text-center">Activo</th>
+                    <th class="col-descripcion text-center">ID/Descripción</th>
+                    <th class="text-center">Fecha Muestreo</th>
+                    <th class="text-center">Imagen FLIR</th>
+                    <th class="text-center">Temperaturas (°C)</th>
+                    <th class="col-estado text-center">Estado</th>
+                    <th class="text-center">Observaciones</th>
+                    <th class="col-acciones text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activo in activos %}
+                <tr data-activo-id="{{ activo.id }}">
+                    <!-- Numeración -->
+                    <td class="col-numero" style="font-weight: 600; color: #667eea;">
+                        {{ forloop.counter }}
+                    </td>
 
-    <!-- Tabla de Activos -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            {% if activos %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-center">Nombre</th>
-                                <th class="text-center">ID/Descripción</th>
-                                <th class="text-center">Fecha Muestreo</th>
-                                {% if modulo == 'termografias' %}
-                                    <th class="text-center">Imagen FLIR</th>
-                                    <th class="text-center">Temperaturas (°C)</th>
-                                    <th class="text-center">Estado</th>
+                    <!-- Área -->
+                    <td class="text-center">
+                        <span class="area-badge {{ activo.equipo.area.nombre|lower }}">
+                            {{ activo.equipo.area.get_nombre_display }}
+                        </span>
+                    </td>
+
+                    <!-- Maquinaria -->
+                    <td class="col-maquinaria text-center">
+                        <strong>{{ activo.equipo.nombre }}</strong>
+                    </td>
+
+                    <!-- Activo -->
+                    <td class="col-activo text-center">
+                        <strong>{{ activo.nombre }}</strong>
+                    </td>
+
+                    <!-- Descripción -->
+                    <td class="col-descripcion text-center">
+                        <small>
+                            <span class="desc-text" data-activo-id="{{ activo.id }}" onclick="editarDescripcion(this)">{{ activo.descripcion|default:"Sin descripción" }}</span>
+                            <div class="desc-edit-container" data-activo-id="{{ activo.id }}" style="display: none;">
+                                <textarea class="desc-input" data-activo-id="{{ activo.id }}" maxlength="300" rows="3">{{ activo.descripcion }}</textarea>
+                                <div class="desc-counter" data-activo-id="{{ activo.id }}">
+                                    <span class="desc-count">{{ activo.descripcion|length }}</span>/300
+                                </div>
+                                <div style="margin-top: 8px; display: flex; gap: 6px;">
+                                    <button type="button" class="btn btn-sm btn-success" onclick="guardarDescripcion(document.querySelector('.desc-input[data-activo-id={{ activo.id }}]'))">Guardar</button>
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarDescripcion({{ activo.id }})">Cancelar</button>
+                                </div>
+                            </div>
+                        </small>
+                    </td>
+
+                    <!-- Fecha de Muestreo -->
+                    <td class="text-center">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <button type="button" class="btn btn-sm btn-outline-primary" title="Agregar nueva muestra" data-bs-toggle="tooltip" onclick="prepararNuevaMuestra({{ activo.id }})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <input type="date" class="fecha-muestreo-input" data-activo-id="{{ activo.id }}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.875em; width: 120px;" onchange="guardarFechaMuestreo(this)">
+                        </div>
+                        <small class="fecha-muestreo-display" data-activo-id="{{ activo.id }}" style="display: block; margin-top: 4px; color: #666;"></small>
+                    </td>
+
+                    <!-- Imagen FLIR -->
+                    <td class="text-center">
+                        {% if modulo == 'termografias' %}
+                            <div class="actions-cell" style="justify-content: center; gap: 6px;">
+                                <!-- Botón Subir/Cambiar foto -->
+                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
+                                    <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
+                                </button>
+                                
+                                <!-- Botón Ver foto -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" onclick="verFotoTermica('{{ activo.foto_termica.url|escapejs }}', '{{ activo.nombre|escapejs }}', {{ activo.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                 {% else %}
-                                    <th class="text-center">Estado</th>
+                                    <button type="button" class="btn btn-action btn-secondary" title="Ver foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                 {% endif %}
-                                <th class="text-center">Observaciones</th>
-                                <th class="text-center" style="width: 120px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for activo in activos %}
-                                <!-- Contenedor dinámico para análisis de este activo -->
-                                <div id="resultado-analisis-{{ activo.id }}" style="display:none;"></div>
-                                <tr>
-                                    <!-- Nombre -->
-                                    <td>
-                                        <strong>{{ activo.nombre }}</strong>
-                                    </td>
-                                    <!-- Descripción -->
-                                    <td class="text-muted small">{{ activo.descripcion|truncatewords:8 }}</td>
-                                    
-                                    <!-- Fecha de Muestreo -->
-                                    <td class="text-center">
-                                        <input type="date" class="fecha-muestreo-input" data-activo-id="{{ activo.id }}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.875em; width: 130px;" onchange="guardarFechaMuestreo(this)">
-                                    </td>
-                                    
-                                    {% if modulo == 'termografias' %}
-                                        <!-- TERMOGRAFÍAS: Imagen FLIR -->
-                                        <td class="text-center">
-                                            <div class="actions-cell" style="justify-content: center; gap: 6px;">
-                                                <!-- Botón Subir/Cambiar foto -->
-                                                <button type="button" class="btn btn-action {% if activo.foto_termica %}btn-success{% else %}btn-secondary{% endif %}" title="{% if activo.foto_termica %}Cambiar foto térmica{% else %}Subir foto térmica{% endif %}" data-bs-toggle="tooltip" data-activo-id="{{ activo.id }}" onclick="abrirCargadorFoto({{ activo.id }}, this)">
-                                                    <i class="fas {% if activo.foto_termica %}fa-camera{% else %}fa-image{% endif %}"></i>
-                                                </button>
-                                                
-                                                <!-- Botón Ver foto -->
-                                                {% if activo.foto_termica %}
-                                                    <button type="button" class="btn btn-action btn-info" title="Ver foto térmica" data-bs-toggle="tooltip" onclick="verFotoTermica('{{ activo.foto_termica.url|escapejs }}', '{{ activo.nombre|escapejs }}', {{ activo.id }})">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                {% else %}
-                                                    <button type="button" class="btn btn-action btn-secondary" title="Ver foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                {% endif %}
-                                                
-                                                <!-- Botón Ver análisis -->
-                                                {% if activo.foto_termica %}
-                                                    <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
-                                                        <i class="fas fa-chart-bar"></i>
-                                                    </button>
-                                                {% else %}
-                                                    <button type="button" class="btn btn-action btn-secondary" title="Ver análisis térmico" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
-                                                        <i class="fas fa-chart-bar"></i>
-                                                    </button>
-                                                {% endif %}
-                                                
-                                                <!-- Botón Eliminar foto -->
-                                                {% if activo.foto_termica %}
-                                                    <button type="button" class="btn btn-action btn-danger" title="Eliminar foto térmica" data-bs-toggle="tooltip" onclick="eliminarFotoTermica({{ activo.id }}, this)">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                {% else %}
-                                                    <button type="button" class="btn btn-action btn-secondary" title="Eliminar foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <!-- TERMOGRAFÍAS: Temperaturas -->
-                                        <td class="text-center">
-                                            {% if activo.analisis_termico %}
-                                                <div class="temp-info-table">
-                                                    <small>T° Detectada: <strong>{{ activo.analisis_termico.temperatura_promedio|floatformat:1 }}</strong>°C</small>
-                                                    <small>Rango correcto: <strong>{{ activo.analisis_termico.temperatura_minima|floatformat:1 }}° – {{ activo.analisis_termico.temperatura_maxima|floatformat:1 }}</strong>°C</small>
-                                                </div>
-                                            {% else %}
-                                                <span style="color: #999; font-size: 0.9em;">Sin análisis</span>
-                                            {% endif %}
-                                        </td>
-                                        <!-- TERMOGRAFÍAS: Estado Badge -->
-                                        <td class="text-center">
-                                            <span class="badge" style="background-color: {% if activo.estado == 'bueno' %}#27ae60{% elif activo.estado == 'alarma' %}#f39c12{% elif activo.estado == 'emergencia' %}#e74c3c{% else %}#95a5a6{% endif %}; padding: 8px 12px; font-size: 0.85em;">
-                                                {{ activo.get_estado_display }}
-                                            </span>
-                                        </td>
-                                    {% else %}
-                                        <!-- VIBRACIONES: Estado Selector -->
-                                        <td class="text-center">
-                                            <select class="estado-select {{ activo.estado }}" data-activo-id="{{ activo.id }}" onchange="actualizarEstadoActivo(this)">
-                                                <option value="bueno" {% if activo.estado == 'bueno' %}selected{% endif %}>Bueno</option>
-                                                <option value="observacion" {% if activo.estado == 'observacion' %}selected{% endif %}>Observación</option>
-                                                <option value="alarma" {% if activo.estado == 'alarma' %}selected{% endif %}>Alarma</option>
-                                                <option value="emergencia" {% if activo.estado == 'emergencia' %}selected{% endif %}>Emergencia</option>
-                                                <option value="falla" {% if activo.estado == 'falla' %}selected{% endif %}>Falla</option>
-                                                <option value="sin_medicion" {% if activo.estado == 'sin_medicion' %}selected{% endif %}>Sin Medición</option>
-                                            </select>
-                                        </td>
-                                    {% endif %}
-                                    
-                                    <!-- Observaciones (ambos módulos) -->
-                                    <td class="text-center">
-                                        <span class="obs-text" data-activo-id="{{ activo.id }}" onclick="editarObservacion(this)">{{ activo.observaciones|default:"Sin Observaciones" }}</span>
-                                        <div style="display:none;" class="obs-edit-container" data-activo-id="{{ activo.id }}">
-                                            <textarea class="obs-input" data-activo-id="{{ activo.id }}" maxlength="500" onblur="guardarObservacion(this)" onkeypress="if(event.key==='Enter' && event.ctrlKey) guardarObservacion(this); actualizarContador(this)" oninput="actualizarContador(this)" placeholder="Ingresa observaciones (Ctrl+Enter para guardar)">{{ activo.observaciones|default:'' }}</textarea>
-                                            <div class="obs-counter" data-activo-id="{{ activo.id }}"><span class="current">0</span>/500</div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Acciones (ambos módulos) -->
-                                    <td class="text-center">
-                                        <div class="actions-cell">
-                                            {% if modulo == 'vibraciones' %}
-                                                <a href="{% url 'editar_activo_vibraciones' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_vibraciones' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% else %}
-                                                <a href="{% url 'editar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-edit" title="Editar" data-bs-toggle="tooltip">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{% url 'eliminar_activo_termografias' cliente.id sucursal.id area.id equipo.id activo.id %}" class="btn btn-action btn-delete" title="Eliminar" data-bs-toggle="tooltip" onclick="return confirm('¿Está seguro?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-info-circle"></i> No hay activos registrados en este equipo.
-                    {% if modulo == 'vibraciones' %}
-                        <a href="{% url 'crear_activo_vibraciones' cliente.id sucursal.id area.id equipo.id %}" class="alert-link">Crear el primero</a>
-                    {% else %}
-                        <a href="{% url 'crear_activo_termografias' cliente.id sucursal.id area.id equipo.id %}" class="alert-link">Crear el primero</a>
-                    {% endif %}
-                </div>
-            {% endif %}
+                                
+                                <!-- Botón Ver análisis -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-warning" title="Ver análisis térmico" data-bs-toggle="tooltip" onclick="verAnalisisTermico({{ activo.id }})">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-action btn-secondary" title="Ver análisis térmico" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <!-- Botón Eliminar foto -->
+                                {% if activo.foto_termica %}
+                                    <button type="button" class="btn btn-action btn-danger" title="Eliminar foto térmica" data-bs-toggle="tooltip" onclick="eliminarFotoTermica({{ activo.id }}, this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-action btn-secondary" title="Eliminar foto térmica" data-bs-toggle="tooltip" disabled style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </td>
+
+                    <!-- Temperaturas -->
+                    <td class="text-center">
+                        {% if activo.analisis_termicos.all %}
+                            {% with ultimo=activo.analisis_termicos.all|first %}
+                                T° Detectada: <strong>{{ ultimo.temperatura_promedio|floatformat:1 }}°C</strong><br>
+                                <small>Rango correcto: {{ ultimo.rango_minimo|floatformat:1 }} – {{ ultimo.rango_maximo|floatformat:1 }}°C</small>
+                            {% endwith %}
+                        {% else %}
+                            <small style="color: #999;">Sin análisis</small>
+                        {% endif %}
+                    </td>
+
+                    <!-- Estado -->
+                    <td class="col-estado text-center">
+                        <span class="estado-badge {{ activo.estado }}">{{ activo.get_estado_display }}</span>
+                    </td>
+
+                    <!-- Observaciones -->
+                    <td class="text-center">
+                        <span class="obs-text" data-activo-id="{{ activo.id }}" onclick="editarObservacion(this)">{{ activo.observaciones|default:"Sin Observaciones" }}</span>
+                        <div class="obs-edit-container" data-activo-id="{{ activo.id }}" style="display: none;">
+                            <textarea class="obs-input" data-activo-id="{{ activo.id }}" maxlength="500">{{ activo.observaciones }}</textarea>
+                            <div class="obs-counter" data-activo-id="{{ activo.id }}">
+                                <span class="obs-count">{{ activo.observaciones|length }}</span>/500
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 6px;">
+                                <button type="button" class="btn btn-sm btn-success" onclick="guardarObservacion(document.querySelector('.obs-input[data-activo-id={{ activo.id }}]'))">Guardar</button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarObservacion({{ activo.id }})">Cancelar</button>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Acciones -->
+                    <td class="col-acciones">
+                        <div class="actions-cell">
+                            <button type="button" class="btn btn-action btn-edit" title="Editar activo" data-bs-toggle="tooltip">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-action btn-delete" title="Eliminar activo" data-bs-toggle="tooltip">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <p style="color: #999; font-size: 1.1em;">No hay activos registrados en esta sucursal</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 
 <!-- Modal para ver foto térmica -->
 <div id="modal-foto" class="modal-foto">
@@ -1123,284 +1042,54 @@
     </div>
 </div>
 
-<!-- Nota: El modal de análisis se crea dinámicamente en JavaScript por cada activo -->
+        </section>
+    </main>
+
 <!-- Input file oculto para subir fotos -->
 <input type="file" id="foto-input" style="display:none;" accept="image/*" onchange="procesarSubidaFoto(this)">
 
+<!-- Token CSRF para formularios y AJAX -->
+{% csrf_token %}
+
 <script>
-function actualizarContador(textarea) {
-    const activoId = textarea.getAttribute('data-activo-id');
-    const contador = document.querySelector(`.obs-counter[data-activo-id="${activoId}"]`);
-    const current = contador.querySelector('.current');
-    const length = textarea.value.length;
-    
-    current.textContent = length;
-    contador.classList.add('show');
-    
-    if (length > 450) {
-        contador.classList.add('danger');
-        contador.classList.remove('warning');
-    } else if (length > 400) {
-        contador.classList.add('warning');
-        contador.classList.remove('danger');
-    } else {
-        contador.classList.remove('warning', 'danger');
-    }
-}
-
-function editarObservacion(element) {
-    const activoId = element.getAttribute('data-activo-id');
-    const container = document.querySelector(`.obs-edit-container[data-activo-id="${activoId}"]`);
-    const textarea = container.querySelector(`.obs-input[data-activo-id="${activoId}"]`);
-    
-    element.style.display = 'none';
-    container.style.display = 'block';
-    textarea.focus();
-    actualizarContador(textarea);
-}
-
-function guardarObservacion(input) {
-    const activoId = input.getAttribute('data-activo-id');
-    const observacion = input.value.trim() || 'Sin Observaciones';
-    const texto = document.querySelector(`.obs-text[data-activo-id="${activoId}"]`);
-    const container = document.querySelector(`.obs-edit-container[data-activo-id="${activoId}"]`);
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
-    
-    fetch(`/api/activo/${activoId}/actualizar-observacion/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken,
-        },
-        body: `observacion=${encodeURIComponent(observacion)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            texto.textContent = observacion;
-            container.style.display = 'none';
-            texto.style.display = 'inline-block';
-        } else {
-            alert('Error al guardar la observación');
-            container.style.display = 'none';
-            texto.style.display = 'inline-block';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al guardar la observación');
-        container.style.display = 'none';
-        texto.style.display = 'inline-block';
-    });
-}
-
-function actualizarEstadoActivo(selectElement) {
-    const activoId = selectElement.getAttribute('data-activo-id');
-    const nuevoEstado = selectElement.value;
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
-    
-    // Cambiar la opacidad del select mientras se envía
-    selectElement.style.opacity = '0.6';
-    
-    fetch(`/api/activo/${activoId}/actualizar-estado/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken,
-        },
-        body: `estado=${nuevoEstado}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            selectElement.style.opacity = '1';
-            
-            // Remover todas las clases de estado
-            selectElement.classList.remove('bueno', 'observacion', 'alarma', 'falla', 'emergencia', 'sin_medicion');
-            
-            // Agregar la clase del nuevo estado
-            selectElement.classList.add(nuevoEstado);
-            
-            // Mostrar feedback visual
-            setTimeout(() => {
-                selectElement.style.filter = 'brightness(1.1)';
-                setTimeout(() => {
-                    selectElement.style.filter = '';
-                }, 300);
-            }, 100);
-        } else {
-            selectElement.style.opacity = '1';
-            alert('Error al actualizar el estado');
-        }
-    })
-    .catch(error => {
-        selectElement.style.opacity = '1';
-        console.error('Error:', error);
-        alert('Error al actualizar el estado');
-    });
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function getCSRFToken() {
-    // Método 1: Buscar en input del formulario
-    let token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-    if (token) {
-        console.log('CSRF token obtenido del formulario');
-        return token;
-    }
-    
-    // Método 2: Buscar en cookies
-    token = getCookie('csrftoken');
-    if (token) {
-        console.log('CSRF token obtenido de cookies (csrftoken)');
-        return token;
-    }
-    
-    // Método 3: Buscar en meta tags
-    token = document.querySelector('meta[name="csrf-token"]')?.content;
-    if (token) {
-        console.log('CSRF token obtenido de meta tag');
-        return token;
-    }
-    
-    console.warn('No se pudo obtener CSRF token');
-    return '';
-}
+// Funciones FLIR reutilizadas de activos.html
+// Variables globales para mantener referencia
+let activoIdActual = null;
+let botonElementoActual = null;
 
 function abrirCargadorFoto(activoId, botonElement) {
-    // Guardar el ID globalmente para que procesarSubidaFoto lo pueda usar
-    window.activoIdActual = activoId;
-    window.botonElementoActual = botonElement;
-    console.log('📸 Abriendo cargador para activo:', activoId);
     const input = document.getElementById('foto-input');
+    activoIdActual = activoId;
+    botonElementoActual = botonElement;
+    input.setAttribute('data-activo-id', activoId);
     input.click();
 }
 
-function verFotoTermica(fotoUrl, activoNombre, activoId) {
-    if (!fotoUrl) {
-        alert('⚠️ No hay foto térmica disponible para este activo.\n\nSube una foto haciendo clic en el botón de cámara.');
-        return;
-    }
-    
-    const modal = document.getElementById('modal-foto');
-    const img = document.getElementById('modal-foto-img');
-    const titulo = document.getElementById('modal-foto-titulo');
-    
-    img.src = fotoUrl;
-    titulo.textContent = 'Foto térmica - ' + activoNombre;
-    modal.classList.add('show');
-}
-
-function eliminarFotoTermica(activoId, botonElement) {
-    if (!confirm('⚠️ ¿Estás seguro de que deseas eliminar la foto térmica?\n\nEsto también eliminará el análisis y resetará la medición del activo.')) {
-        return;
-    }
-    
-    console.log('🗑️ Eliminando foto térmica del activo:', activoId);
-    
-    const csrftoken = getCSRFToken();
-    
-    fetch(`/api/activo/${activoId}/eliminar-foto-termica/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken,
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('❌ Error: ' + (data.error || 'Error desconocido'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ Error al eliminar la foto: ' + error.message);
-    });
-}
-
-function cerrarModalFoto() {
-    const modal = document.getElementById('modal-foto');
-    modal.classList.remove('show');
-}
-
-// Cerrar modales al hacer clic fuera del contenido
-document.addEventListener('DOMContentLoaded', function() {
-    const modalFoto = document.getElementById('modal-foto');
-    if (modalFoto) {
-        modalFoto.addEventListener('click', function(event) {
-            if (event.target === modalFoto) {
-                cerrarModalFoto();
-            }
-        });
-    }
-    
-    const modalAnalisis = document.getElementById('modal-analisis');
-    if (modalAnalisis) {
-        modalAnalisis.addEventListener('click', function(event) {
-            if (event.target === modalAnalisis) {
-                cerrarModalAnalisis();
-            }
-        });
-    }
-});
-
-
 function procesarSubidaFoto(input) {
-    // Usar la variable global que se guardó en abrirCargadorFoto
-    const activoId = window.activoIdActual;
-    const boton = window.botonElementoActual;
-    
-    if (!activoId) {
-        console.error('❌ No hay activoId guardado');
-        alert('Error: No se pudo identificar el activo');
-        return;
-    }
-    
     const archivo = input.files[0];
+    if (!archivo) return;
     
-    if (!archivo) {
-        console.log('⚠️ No se seleccionó archivo');
-        return;
-    }
+    const activoId = activoIdActual;
+    const botonElement = botonElementoActual;
     
-    console.log('📤 Subiendo archivo:', archivo.name, 'para activo:', activoId);
+    console.log('Subiendo archivo:', archivo.name);
     
-    // Ya tenemos el botón guardado en window.botonElementoActual
     const formData = new FormData();
     formData.append('foto', archivo);
     
+    // Agregar flag si es nueva muestra
+    if (window.nuevosMuestreos && window.nuevosMuestreos[activoId]) {
+        formData.append('nueva_muestra', 'true');
+        console.log('🆕 Marcada como NUEVA muestra');
+    }
+    
     const csrftoken = getCSRFToken();
     
-    // Cambiar icono del botón a "cargando"
-    if (boton) {
-        const iconoOriginal = boton.innerHTML;
-        boton.setAttribute('data-icono-original', iconoOriginal);
-        boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        boton.disabled = true;
-        console.log('✋ Botón deshabilitado, mostrando spinner');
+    if (botonElement) {
+        const iconoOriginal = botonElement.innerHTML;
+        botonElement.setAttribute('data-icono-original', iconoOriginal);
+        botonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        botonElement.disabled = true;
     }
     
     fetch(`/api/activo/${activoId}/subir-foto-termica/`, {
@@ -1411,68 +1100,84 @@ function procesarSubidaFoto(input) {
         body: formData
     })
     .then(response => {
-        console.log('Response status:', response.status, response.statusText);
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`HTTP ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
-            if (boton) {
-                // Cambiar el icono a verde y mostrar cámara
-                boton.className = 'btn btn-action btn-success';
-                boton.innerHTML = '<i class="fas fa-camera"></i>';
-                boton.setAttribute('title', 'Cambiar foto térmica');
-            }
-            
-            // Guardar el ID del activo actual para usar en el modal
-            window.activoActualId = activoId;
-            
-            // Buscar el nombre del activo en la tabla
-            let nombreActivo = 'Activo';
-            const filaBoton = boton ? boton.closest('tr') : null;
-            if (filaBoton) {
-                nombreActivo = filaBoton.querySelector('td:first-child strong').textContent.trim();
-                console.log('Nombre del activo encontrado:', nombreActivo);
-            }
-            
-            // SIEMPRE mostrar modal (con o sin análisis)
-            console.log('Abriendo modal de análisis...');
-            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, data.mensaje, data.error_analisis);
-        } else {
-            alert('Error al subir la foto: ' + (data.error || 'Error desconocido'));
-            if (boton) {
-                const iconoOriginal = boton.getAttribute('data-icono-original');
+        // SIEMPRE re-habilitar el botón
+        if (botonElement) {
+            botonElement.disabled = false;
+            // Restaurar icono original si no fue exitoso
+            if (!data.success) {
+                const iconoOriginal = botonElement.getAttribute('data-icono-original');
                 if (iconoOriginal) {
-                    boton.innerHTML = iconoOriginal;
+                    botonElement.innerHTML = iconoOriginal;
                 }
             }
         }
-        if (boton) {
-            boton.disabled = false;
+        
+        if (data.success) {
+            // Cambiar el icono a verde y mostrar cámara
+            if (botonElement) {
+                botonElement.className = 'btn btn-action btn-success';
+                botonElement.innerHTML = '<i class="fas fa-camera"></i>';
+                botonElement.setAttribute('title', 'Cambiar foto térmica');
+            }
+            
+            // Buscar el nombre del activo en la tabla
+            let nombreActivo = 'Activo';
+            const filaBoton = botonElement ? botonElement.closest('tr') : null;
+            if (filaBoton) {
+                // Encontrar el activo en la fila (generalmente en la 3ª columna de datos)
+                const celdaActivo = filaBoton.querySelectorAll('td')[2]; // Índice 2: #, Área, Maquinaria, Activo
+                if (celdaActivo) {
+                    nombreActivo = celdaActivo.querySelector('strong')?.textContent.trim() || celdaActivo.textContent.trim();
+                }
+            }
+            
+            // Limpiar el flag de nueva muestra después de procesarla
+            if (window.nuevosMuestreos) {
+                delete window.nuevosMuestreos[activoId];
+                console.log('Flag de nueva muestra limpiado');
+            }
+            
+            // Mostrar modal con análisis completo (igual que en activos.html)
+            try {
+                mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, data.mensaje, data.error_analisis);
+            } catch (error) {
+                console.error('Error al mostrar modal:', error);
+                alert('Error al mostrar análisis: ' + error.message);
+            }
+        } else {
+            alert('Error: ' + (data.error || 'Error desconocido'));
         }
-        input.value = '';
     })
     .catch(error => {
-        console.error('Upload error:', error);
+        console.error('Error:', error);
         alert('Error al subir la foto: ' + error.message);
-        if (boton) {
-            const iconoOriginal = boton.getAttribute('data-icono-original');
-            if (iconoOriginal) {
-                boton.innerHTML = iconoOriginal;
-            }
-            boton.disabled = false;
+        if (botonElement) {
+            botonElement.disabled = false;
         }
-        input.value = '';
     });
+    
+    input.value = '';
 }
 
-// Helper: Failsafe Number Literal - evita errores con undefined/null
-function fnl(v, fallback = 0) {
-    const n = Number(v);
-    return !isNaN(n) ? n : fallback;
+function verFotoTermica(fotoUrl, activoNombre, activoId) {
+    const modal = document.getElementById('modal-foto');
+    const img = document.getElementById('modal-foto-img');
+    const titulo = document.getElementById('modal-foto-titulo');
+    
+    img.src = fotoUrl;
+    titulo.textContent = 'Foto térmica - ' + activoNombre;
+    modal.classList.add('show');
+}
+
+function cerrarModalFoto() {
+    const modal = document.getElementById('modal-foto');
+    modal.classList.remove('show');
 }
 
 function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre, mensajeGeneral, errorAnalisis) {
@@ -1547,13 +1252,10 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre, mensa
                         <small id="estado-mensaje-${activoId}">Estado: <strong>${analisis.estado.toUpperCase()}</strong></small>
                     </div>
                 </div>
-                
-
             </div>
         `;
     } else {
         // SIN ANÁLISIS OCR: mostrar formulario con valores por defecto
-        // El mensaje de error va debajo de la foto (lado izquierdo)
         contenidoAnalisis = `
             <div class="col-md-6">
                 <div class="mb-3">
@@ -1712,7 +1414,69 @@ function mostrarAnalisisTermico(activoId, analisis, fotoUrl, activoNombre, mensa
     };
 }
 
+function eliminarFotoTermica(activoId, botonElement) {
+    if (!confirm('¿Estás seguro de que deseas eliminar la foto térmica?')) {
+        return;
+    }
+    
+    const csrftoken = getCSRFToken();
+    
+    fetch(`/api/activo/${activoId}/eliminar-foto-termica/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
 
+function fnl(v, fallback = 0) {
+    const n = Number(v);
+    return !isNaN(n) ? n : fallback;
+}
+
+function verAnalisisTermico(activoId) {
+    // Obtener el análisis desde el backend
+    fetch(`/api/activo/${activoId}/obtener-analisis/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.analisis) {
+            // Obtener información del activo desde la tabla
+            let nombreActivo = 'Activo';
+            const filaBoton = document.querySelector(`button[onclick*="verAnalisisTermico(${activoId})"]`)?.closest('tr');
+            if (filaBoton) {
+                const celdaActivo = filaBoton.querySelectorAll('td')[3]; // Índice para "Activo"
+                if (celdaActivo) {
+                    nombreActivo = celdaActivo.querySelector('strong')?.textContent.trim() || celdaActivo.textContent.trim();
+                }
+            }
+            
+            // Mostrar el modal con los datos del análisis (igual que al subir foto)
+            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, data.mensaje, data.error_analisis);
+        } else {
+            alert('No hay análisis disponible para este activo');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al obtener el análisis: ' + error.message);
+    });
+}
 
 
 // Cancelar modal SIN guardar nada (solo cierra)
@@ -1759,6 +1523,7 @@ function cancelarModalAnalisis(activoId) {
     }
 }
 
+// Cerrar modal SIN recargar (solo para uso interno)
 function cerrarModalAnalisisYRecargar(activoId) {
     const modalId = `modal-analisis-${activoId}`;
     const modal = document.getElementById(modalId);
@@ -1780,6 +1545,135 @@ function cerrarModalAnalisisYRecargar(activoId) {
     }
 }
 
+function confirmarAnalisisYRecargar(activoId) {
+    console.log('confirmarAnalisisYRecargar() called for activoId:', activoId);
+    
+    // Obtener los valores actuales del modal
+    const tempDetectada = parseFloat(document.getElementById(`temp-detectada-${activoId}`)?.value || 0);
+    const zonaBuenoMin = parseFloat(document.getElementById(`zona-bueno-min-${activoId}`)?.value || 20);
+    const zonaBuenoMax = parseFloat(document.getElementById(`zona-bueno-max-${activoId}`)?.value || 50);
+    const zonaAlarmaMin = parseFloat(document.getElementById(`zona-alarma-min-${activoId}`)?.value || 50);
+    const zonaAlarmaMax = parseFloat(document.getElementById(`zona-alarma-max-${activoId}`)?.value || 65);
+    const zonaEmergenciaMin = parseFloat(document.getElementById(`zona-emergencia-min-${activoId}`)?.value || 65);
+    const zonaEmergenciaMax = parseFloat(document.getElementById(`zona-emergencia-max-${activoId}`)?.value || 100);
+    
+    console.log('Valores capturados:', {
+        tempDetectada,
+        zonaBuenoMin, zonaBuenoMax,
+        zonaAlarmaMin, zonaAlarmaMax,
+        zonaEmergenciaMin, zonaEmergenciaMax
+    });
+    
+    // Preparar datos para enviar al backend
+    const datosTemperatura = {
+        temperatura_promedio: tempDetectada,
+        temperatura_minima: tempDetectada,  // Para simplificar, usamos la detectada
+        temperatura_maxima: tempDetectada,  // Para simplificar, usamos la detectada
+        zona_bueno_min: zonaBuenoMin,
+        zona_bueno_max: zonaBuenoMax,
+        zona_alarma_min: zonaAlarmaMin,
+        zona_alarma_max: zonaAlarmaMax,
+        zona_emergencia_min: zonaEmergenciaMin,
+        zona_emergencia_max: zonaEmergenciaMax
+    };
+    
+    const csrftoken = getCSRFToken();
+    
+    // Enviar datos al backend
+    fetch(`/api/activo/${activoId}/guardar-temperaturas/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify(datosTemperatura)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+        
+        if (data.success) {
+            console.log('✅ Temperaturas guardadas exitosamente');
+            // Cerrar modal y recargar la tabla
+            cerrarModalAnalisisYRecargar(activoId);
+            
+            // Actualizar la fila de la tabla con el nuevo estado
+            actualizarFilaActivo(activoId, data.analisis);
+        } else {
+            console.error('❌ Error al guardar:', data.error);
+            alert('Error al guardar las temperaturas: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error en la petición:', error);
+        alert('Error al guardar las temperaturas: ' + error.message);
+    });
+}
+
+function actualizarFilaActivo(activoId, datosAnalisis) {
+    console.log('actualizarFilaActivo():', {activoId, datosAnalisis});
+    
+    try {
+        // Encontrar TODOS los elementos con referencia al activoId
+        const todosElementosActivo = document.querySelectorAll(`[data-activo-id="${activoId}"]`);
+        console.log(`Encontrados ${todosElementosActivo.length} elementos con data-activo-id=${activoId}`);
+        
+        // Encontrar la fila TR más cercana
+        let filaActivo = null;
+        for (let elem of todosElementosActivo) {
+            const tr = elem.closest('tr');
+            if (tr) {
+                filaActivo = tr;
+                console.log('Fila TR encontrada:', tr);
+                break;
+            }
+        }
+        
+        if (!filaActivo) {
+            console.warn('No se encontró la fila TR del activo');
+            return;
+        }
+        
+        // Actualizar el badge de estado
+        const badgeEstado = filaActivo.querySelector('.estado-badge');
+        if (badgeEstado && datosAnalisis && datosAnalisis.estado) {
+            console.log('Actualizando badge de estado a:', datosAnalisis.estado);
+            
+            // Remover todas las clases de estado anteriores
+            badgeEstado.classList.remove('bueno', 'alarma', 'emergencia', 'sin_medicion', 'observacion', 'falla');
+            
+            // Agregar la nueva clase
+            badgeEstado.classList.add(datosAnalisis.estado);
+            
+            // Actualizar el texto del badge
+            const estadoDisplay = datosAnalisis.estado
+                .split('_')
+                .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+                .join(' ');
+            badgeEstado.textContent = estadoDisplay;
+            
+            console.log(`✅ Badge actualizado: ${datosAnalisis.estado}`);
+        } else {
+            console.warn('No se encontró badgeEstado o sin datosAnalisis');
+        }
+        
+        // Actualizar la columna de temperaturas si es visible
+        if (datosAnalisis && datosAnalisis.temperatura_promedio) {
+            const celdas = filaActivo.querySelectorAll('td');
+            for (let celda of celdas) {
+                if (celda.textContent.includes('°C') || celda.textContent.includes('Detectada') || celda.textContent.includes('Sin analisis')) {
+                    const tempDisplay = `T° Detectada: ${datosAnalisis.temperatura_promedio.toFixed(1)}°C<br>Rango correcto: ${datosAnalisis.temperatura_maxima.toFixed(1)} – ${datosAnalisis.temperatura_maxima.toFixed(1)}°C`;
+                    celda.innerHTML = tempDisplay;
+                    console.log('✅ Temperaturas actualizadas en tabla');
+                    break;
+                }
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error actualizando fila:', error);
+    }
+}
 
 // Función para recalcular dinámicamente el estado
 function recalcularEstadoDinamico(activoId) {
@@ -1799,181 +1693,214 @@ function recalcularEstadoDinamico(activoId) {
         estado = 'alarma';
     } else if (zonaBuenoMin <= tempDetectada && tempDetectada <= zonaBuenoMax) {
         estado = 'bueno';
-    } else {
-        // Si está fuera de todos los rangos
-        if (tempDetectada < zonaBuenoMin || tempDetectada > zonaEmergenciaMax) {
-            estado = 'emergencia';
-        } else {
-            estado = 'alarma';
-        }
     }
     
-    // Actualizar el badge de estado
+    // Actualizar mensaje dinámico
     const mensajeElement = document.getElementById(`estado-mensaje-${activoId}`);
     if (mensajeElement) {
-        let estadoTexto = estado.toUpperCase();
-        let colorClass = '';
-        if (estado === 'bueno') colorClass = 'text-success';
-        else if (estado === 'alarma') colorClass = 'text-warning';
-        else if (estado === 'emergencia') colorClass = 'text-danger';
+        mensajeElement.textContent = `Estado: ${estado.toUpperCase()}`;
         
-        mensajeElement.innerHTML = `Estado: <strong class="${colorClass}">${estadoTexto}</strong>`;
+        // Cambiar color del badge según estado
+        const estadoBadge = mensajeElement.closest('.alert');
+        if (estadoBadge) {
+            estadoBadge.classList.remove('alert-info', 'alert-success', 'alert-warning', 'alert-danger');
+            
+            if (estado === 'bueno') {
+                estadoBadge.classList.add('alert-success');
+            } else if (estado === 'alarma') {
+                estadoBadge.classList.add('alert-warning');
+            } else if (estado === 'emergencia') {
+                estadoBadge.classList.add('alert-danger');
+            } else {
+                estadoBadge.classList.add('alert-info');
+            }
+        }
     }
 }
 
-function confirmarAnalisisYRecargar(activoId) {
-    console.log('Análisis confirmado para activo:', activoId);
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+
+// Funciones de edición inline
+function editarObservacion(element) {
+    const activoId = element.getAttribute('data-activo-id');
+    const container = document.querySelector(`.obs-edit-container[data-activo-id="${activoId}"]`);
+    const textarea = container.querySelector(`.obs-input[data-activo-id="${activoId}"]`);
     
-    // Obtener los valores editados de temperatura detectada
-    const tempDetectada = parseFloat(document.getElementById(`temp-detectada-${activoId}`)?.value || 0);
-    
-    // Obtener los valores de las 3 zonas
-    const zonaBuenoMin = parseFloat(document.getElementById(`zona-bueno-min-${activoId}`)?.value || 20);
-    const zonaBuenoMax = parseFloat(document.getElementById(`zona-bueno-max-${activoId}`)?.value || 50);
-    const zonaAlarmaMin = parseFloat(document.getElementById(`zona-alarma-min-${activoId}`)?.value || 50);
-    const zonaAlarmaMax = parseFloat(document.getElementById(`zona-alarma-max-${activoId}`)?.value || 65);
-    const zonaEmergenciaMin = parseFloat(document.getElementById(`zona-emergencia-min-${activoId}`)?.value || 65);
-    const zonaEmergenciaMax = parseFloat(document.getElementById(`zona-emergencia-max-${activoId}`)?.value || 100);
-    
-    console.log('Temperaturas y zonas a guardar:', { 
-        tempDetectada, 
-        zonaBuenoMin, zonaBuenoMax,
-        zonaAlarmaMin, zonaAlarmaMax,
-        zonaEmergenciaMin, zonaEmergenciaMax
-    });
-    
-    // Obtener CSRF token
+    element.style.display = 'none';
+    container.style.display = 'block';
+    textarea.focus();
+    actualizarContadorObservacion(textarea);
+}
+
+function guardarObservacion(input) {
+    const activoId = input.getAttribute('data-activo-id');
+    const observacion = input.value.trim() || 'Sin Observaciones';
+    const texto = document.querySelector(`.obs-text[data-activo-id="${activoId}"]`);
+    const container = document.querySelector(`.obs-edit-container[data-activo-id="${activoId}"]`);
     const csrftoken = getCSRFToken();
     
-    // Enviar al servidor para guardar
-    fetch(`/api/activo/${activoId}/guardar-temperaturas/`, {
+    fetch(`/api/activo/${activoId}/actualizar-observacion/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken,
         },
-        body: JSON.stringify({
-            temperatura_promedio: tempDetectada,
-            temperatura_minima: tempDetectada - 5,  // Valores compatibles
-            temperatura_maxima: tempDetectada + 5,
-            zona_bueno_min: zonaBuenoMin,
-            zona_bueno_max: zonaBuenoMax,
-            zona_alarma_min: zonaAlarmaMin,
-            zona_alarma_max: zonaAlarmaMax,
-            zona_emergencia_min: zonaEmergenciaMin,
-            zona_emergencia_max: zonaEmergenciaMax
-        })
+        body: `observacion=${encodeURIComponent(observacion)}`
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Respuesta de guardado:', data);
         if (data.success) {
-            console.log('✅ Temperaturas y zonas guardadas exitosamente');
-            
-            // Actualizar el estado en la tabla ANTES de cerrar
-            if (data.analisis) {
-                const estadoNuevo = data.analisis.estado.toUpperCase();
-                console.log(`🔄 Actualizando estado en tabla a: ${estadoNuevo}`);
-                
-                // Buscar el botón con data-activo-id="${activoId}" para encontrar la fila
-                const botonActivo = document.querySelector(`button[data-activo-id="${activoId}"][onclick*="abrirCargadorFoto"]`);
-                if (botonActivo) {
-                    // Navegar hacia arriba para encontrar la fila <tr>
-                    const fila = botonActivo.closest('tr');
-                    if (fila) {
-                        // Dentro de la fila, encontrar el badge de estado (en termografías)
-                        const badgeEstado = fila.querySelector('span[style*="background-color"]');
-                        if (badgeEstado) {
-                            // Determinar color según estado
-                            let color = '#95a5a6'; // gris por defecto
-                            if (estadoNuevo === 'BUENO') color = '#27ae60'; // verde
-                            if (estadoNuevo === 'ALARMA') color = '#f39c12'; // naranja
-                            if (estadoNuevo === 'EMERGENCIA') color = '#e74c3c'; // rojo
-                            
-                            // Actualizar el badge
-                            badgeEstado.style.backgroundColor = color;
-                            badgeEstado.textContent = estadoNuevo;
-                            console.log('✅ Estado actualizado en tabla');
-                        }
-                    }
-                }
-            }
-            
-            // Cerrar y recargar
-            cerrarModalAnalisisYRecargar(activoId);
+            texto.textContent = observacion;
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
         } else {
-            alert('Error al guardar las temperaturas: ' + (data.error || 'Error desconocido'));
+            alert('Error al guardar la observación');
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
         }
     })
     .catch(error => {
-        console.error('Error guardando temperaturas:', error);
-        alert('Error al guardar: ' + error.message);
+        console.error('Error:', error);
+        alert('Error al guardar la observación');
+        container.style.display = 'none';
+        texto.style.display = 'inline-block';
     });
 }
 
-// Mantener la versión antigua para compatibilidad pero que recargue
-function confirmarAnalisis(activoId) {
-    confirmarAnalisisYRecargar(activoId);
-}
-
-function cerrarModalAnalisis(activoId) {
-    cerrarModalAnalisisYRecargar(activoId);
-}
-
-function verAnalisisTermico(activoId) {
-    console.log('Obteniendo análisis para activo:', activoId);
+function cancelarObservacion(activoId) {
+    const texto = document.querySelector(`.obs-text[data-activo-id="${activoId}"]`);
+    const container = document.querySelector(`.obs-edit-container[data-activo-id="${activoId}"]`);
     
-    // Obtener el CSRF token
+    container.style.display = 'none';
+    texto.style.display = 'inline-block';
+}
+
+function actualizarContadorObservacion(textarea) {
+    const activoId = textarea.getAttribute('data-activo-id');
+    const contador = document.querySelector(`.obs-counter[data-activo-id="${activoId}"]`);
+    const count = document.querySelector(`.obs-count`);
+    
+    if (contador) {
+        contador.classList.add('show');
+        count.textContent = textarea.value.length;
+        
+        if (textarea.value.length >= 400) {
+            contador.classList.add('warning');
+            contador.classList.remove('danger');
+        } else if (textarea.value.length >= 480) {
+            contador.classList.add('danger');
+            contador.classList.remove('warning');
+        } else {
+            contador.classList.remove('warning', 'danger');
+        }
+    }
+    
+    textarea.addEventListener('input', function() {
+        count.textContent = this.value.length;
+        if (this.value.length >= 400) {
+            contador.classList.add('warning');
+            contador.classList.remove('danger');
+        } else if (this.value.length >= 480) {
+            contador.classList.add('danger');
+            contador.classList.remove('warning');
+        } else {
+            contador.classList.remove('warning', 'danger');
+        }
+    });
+}
+
+// Funciones de edición inline para Descripción
+function editarDescripcion(element) {
+    const activoId = element.getAttribute('data-activo-id');
+    const container = document.querySelector(`.desc-edit-container[data-activo-id="${activoId}"]`);
+    const textarea = container.querySelector(`.desc-input[data-activo-id="${activoId}"]`);
+    
+    element.style.display = 'none';
+    container.style.display = 'block';
+    textarea.focus();
+    actualizarContadorDescripcion(textarea);
+}
+
+function guardarDescripcion(input) {
+    const activoId = input.getAttribute('data-activo-id');
+    const descripcion = input.value.trim() || 'Sin descripción';
+    const texto = document.querySelector(`.desc-text[data-activo-id="${activoId}"]`);
+    const container = document.querySelector(`.desc-edit-container[data-activo-id="${activoId}"]`);
     const csrftoken = getCSRFToken();
     
-    // Fetch al endpoint de obtener análisis
-    fetch(`/api/activo/${activoId}/obtener-analisis/`, {
-        method: 'GET',
+    fetch(`/api/activo/${activoId}/actualizar-descripcion/`, {
+        method: 'POST',
         headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json'
-        }
+        },
+        body: `descripcion=${encodeURIComponent(descripcion)}`
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Análisis obtenido:', data);
-        if (data.success && data.analisis) {
-            // Obtener nombre del activo de la tabla
-            let nombreActivo = 'Activo';
-            const filas = document.querySelectorAll('tr');
-            for (let fila of filas) {
-                const contenedorAnalisis = document.getElementById(`resultado-analisis-${activoId}`);
-                if (contenedorAnalisis && contenedorAnalisis.closest('tr') === fila) {
-                    nombreActivo = fila.querySelector('td:first-child strong').textContent.trim();
-                    break;
-                }
-            }
-            
-            // Mostrar el modal del análisis
-            mostrarAnalisisTermico(activoId, data.analisis, data.foto_url, nombreActivo, null, null);
+        if (data.success) {
+            texto.textContent = descripcion;
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
         } else {
-            alert('⚠️ Sin análisis disponible\n\nPor favor, sube una foto térmica primero.');
+            alert('Error al guardar la descripción');
+            container.style.display = 'none';
+            texto.style.display = 'inline-block';
         }
     })
     .catch(error => {
-        console.error('Error obteniendo análisis:', error);
-        alert('Error al obtener el análisis: ' + error.message);
+        console.error('Error:', error);
+        alert('Error al guardar la descripción');
+        container.style.display = 'none';
+        texto.style.display = 'inline-block';
     });
 }
 
-// Funciones para manejo de fechas de muestreo (reutilizadas desde activos_totales.html)
+function cancelarDescripcion(activoId) {
+    const texto = document.querySelector(`.desc-text[data-activo-id="${activoId}"]`);
+    const container = document.querySelector(`.desc-edit-container[data-activo-id="${activoId}"]`);
+    
+    container.style.display = 'none';
+    texto.style.display = 'inline-block';
+}
+
+function actualizarContadorDescripcion(textarea) {
+    const activoId = textarea.getAttribute('data-activo-id');
+    const contador = document.querySelector(`.desc-counter[data-activo-id="${activoId}"]`);
+    const count = contador.querySelector('.desc-count');
+    
+    if (contador) {
+        contador.classList.add('show');
+        count.textContent = textarea.value.length;
+        
+        if (textarea.value.length >= 200) {
+            contador.classList.add('warning');
+            contador.classList.remove('danger');
+        } else if (textarea.value.length >= 280) {
+            contador.classList.add('danger');
+            contador.classList.remove('warning');
+        } else {
+            contador.classList.remove('warning', 'danger');
+        }
+    }
+    
+    textarea.addEventListener('input', function() {
+        count.textContent = this.value.length;
+        if (this.value.length >= 200) {
+            contador.classList.add('warning');
+            contador.classList.remove('danger');
+        } else if (this.value.length >= 280) {
+            contador.classList.add('danger');
+            contador.classList.remove('warning');
+        } else {
+            contador.classList.remove('warning', 'danger');
+        }
+    });
+}
+
+// Funciones para manejo de fechas de muestreo
 function guardarFechaMuestreo(inputElement) {
     const activoId = inputElement.getAttribute('data-activo-id');
     const fecha = inputElement.value;
@@ -1997,6 +1924,15 @@ function guardarFechaMuestreo(inputElement) {
     .then(data => {
         if (data.success) {
             console.log('Fecha guardada:', data.fecha);
+            // Mostrar mensaje de éxito
+            const display = document.querySelector(`.fecha-muestreo-display[data-activo-id="${activoId}"]`);
+            if (display) {
+                display.textContent = '✓ Guardado';
+                display.style.color = '#10b981';
+                setTimeout(() => {
+                    display.textContent = '';
+                }, 2000);
+            }
         } else {
             alert('Error al guardar la fecha: ' + (data.error || 'Error desconocido'));
             inputElement.value = '';
@@ -2032,6 +1968,133 @@ function cargarFechaMuestreo(activoId) {
     });
 }
 
+// Preparar para agregar una nueva muestra
+function prepararNuevaMuestra(activoId) {
+    console.log('=== prepararNuevaMuestra() called for activoId:', activoId, '===');
+    
+    // Obtener la fila completa del activo
+    const fila = document.querySelector(`tr[data-activo-id="${activoId}"]`);
+    if (!fila) {
+        console.error(`❌ No se encontró la fila para activo ${activoId}`);
+        return;
+    }
+    console.log('✅ Fila encontrada:', fila);
+    
+    // 1. Limpiar el input de fecha
+    const inputFecha = fila.querySelector(`.fecha-muestreo-input[data-activo-id="${activoId}"]`);
+    if (inputFecha) {
+        inputFecha.value = '';
+        console.log('✅ Fecha limpiada');
+    }
+    
+    // 2. Limpiar FOTO - resetear el botón de foto
+    const botonFoto = fila.querySelector('button[onclick*="abrirCargadorFoto"]');
+    if (botonFoto) {
+        botonFoto.className = 'btn btn-action btn-secondary';
+        botonFoto.innerHTML = '<i class="fas fa-image"></i>';
+        botonFoto.setAttribute('title', 'Subir foto térmica');
+        console.log('✅ Botón de foto reseteado');
+    }
+    
+    // 3. Limpiar TEMPERATURAS - obtener todas las celdas TD y buscar por contenido
+    const celdas = fila.querySelectorAll('td');
+    console.log(`Total de celdas en la fila: ${celdas.length}`);
+    
+    // La celda de temperaturas debería ser la que contiene "Detectada" o "Sin análisis"
+    let celdaTemperaturas = null;
+    celdas.forEach((celda, index) => {
+        if (celda.textContent.includes('Detectada') || celda.textContent.includes('Sin análisis')) {
+            celdaTemperaturas = celda;
+            console.log(`✅ Celda de temperaturas encontrada en índice ${index}`);
+        }
+    });
+    
+    if (celdaTemperaturas) {
+        celdaTemperaturas.innerHTML = '<small style="color: #999;">Sin análisis</small>';
+        console.log('✅ Temperaturas limpiadas');
+    } else {
+        console.warn('⚠️ No se encontró celda de temperaturas');
+    }
+    
+    // 4. Limpiar ESTADO - buscar el badge de estado
+    const celdaEstado = fila.querySelector('td[class*="col-estado"]');
+    if (celdaEstado) {
+        celdaEstado.innerHTML = '<span class="estado-badge sin-medicion">Sin Medición</span>';
+        console.log('✅ Estado limpiado');
+    } else {
+        console.warn('⚠️ No se encontró celda de estado');
+    }
+    
+    // 5. Limpiar OBSERVACIONES - buscar la celda y limpiar
+    let celdaObservaciones = null;
+    celdas.forEach((celda, index) => {
+        if (celda.textContent.includes('Observaciones') || celda.textContent.includes('Sin Observaciones')) {
+            celdaObservaciones = celda;
+            console.log(`✅ Celda de observaciones encontrada en índice ${index}`);
+        }
+    });
+    
+    if (celdaObservaciones) {
+        // Buscar el contenedor de observaciones editable
+        const spanEditableObs = celdaObservaciones.querySelector('span[data-field="observaciones"]');
+        if (spanEditableObs) {
+            spanEditableObs.textContent = 'Sin Observaciones';
+            spanEditableObs.style.color = '#999';
+        } else {
+            // Si no hay span editable, limpiar directamente
+            celdaObservaciones.textContent = 'Sin Observaciones';
+        }
+        console.log('✅ Observaciones limpiadas');
+    } else {
+        console.warn('⚠️ No se encontró celda de observaciones');
+    }
+    
+    // 6. Limpiar botones de acciones (foto y eliminar)
+    const botonesAcciones = fila.querySelectorAll('button[onclick*="verFotoTermica"], button[onclick*="eliminarFotoTermica"], button[onclick*="verAnalisisTermico"]');
+    botonesAcciones.forEach(btn => {
+        // Hacer los botones de "Ver" e "Eliminar" deshabilitados (grises)
+        if (btn.getAttribute('onclick')?.includes('verFotoTermica') || btn.getAttribute('onclick')?.includes('eliminarFotoTermica') || btn.getAttribute('onclick')?.includes('verAnalisisTermico')) {
+            btn.className = 'btn btn-action btn-secondary';
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.6';
+        }
+    });
+    console.log('✅ Botones de acciones deshabilitados');
+    
+    // 7. Remover modal si existe
+    const modalAnalisisAnterior = document.querySelector(`#modal-analisis-${activoId}`);
+    if (modalAnalisisAnterior) {
+        modalAnalisisAnterior.remove();
+        console.log('✅ Modal anterior removido');
+    }
+    
+    // 8. Resetear estado de análisis guardado
+    if (window.analisisActual && window.analisisActual.activo_id === activoId) {
+        window.analisisActual = null;
+    }
+    
+    // 9. Marcar que estamos en modo "nueva muestra"
+    if (!window.nuevosMuestreos) {
+        window.nuevosMuestreos = {};
+    }
+    window.nuevosMuestreos[activoId] = true;
+    console.log('✅ Flag de nueva muestra establecido');
+    
+    // 10. Mostrar feedback visual
+    const display = document.querySelector(`.fecha-muestreo-display[data-activo-id="${activoId}"]`);
+    if (display) {
+        display.textContent = '📝 Nueva muestra en preparación...';
+        display.style.color = '#3498db';
+        setTimeout(() => {
+            display.textContent = '';
+        }, 3000);
+        console.log('✅ Feedback visual mostrado');
+    }
+    
+    console.log('=== ✅ prepararNuevaMuestra() completado para activo:', activoId, '===');
+}
+
 // Cargar fechas al inicializar la página
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = document.querySelectorAll('.fecha-muestreo-input');
@@ -2039,6 +2102,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const activoId = input.getAttribute('data-activo-id');
         cargarFechaMuestreo(activoId);
     });
+    
+    // Agregar manejadores para botones de Editar y Eliminar
+    document.querySelectorAll('.btn-action.btn-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const fila = this.closest('tr');
+            const activoId = fila.getAttribute('data-activo-id');
+            
+            // Obtener los parámetros de la URL actual
+            const urlParts = window.location.pathname.split('/');
+            const clienteId = urlParts[urlParts.indexOf('cliente') + 1];
+            const sucursalId = urlParts[urlParts.indexOf('sucursal') + 1];
+            const modulo = urlParts[1]; // vibraciones o termografias
+            
+            // Construir URL - siempre usa la ruta de listado total
+            const urlEditar = `/${modulo}/cliente/${clienteId}/sucursal/${sucursalId}/activo/${activoId}/editar/`;
+            window.location.href = urlEditar;
+        });
+    });
+    
+    document.querySelectorAll('.btn-action.btn-delete').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que quieres eliminar este activo?')) {
+                const fila = this.closest('tr');
+                const activoId = fila.getAttribute('data-activo-id');
+                
+                // Obtener los parámetros de la URL actual
+                const urlParts = window.location.pathname.split('/');
+                const clienteId = urlParts[urlParts.indexOf('cliente') + 1];
+                const sucursalId = urlParts[urlParts.indexOf('sucursal') + 1];
+                const modulo = urlParts[1]; // vibraciones o termografias
+                
+                // Construir URL - siempre usa la ruta de listado total
+                const urlEliminar = `/${modulo}/cliente/${clienteId}/sucursal/${sucursalId}/activo/${activoId}/eliminar/`;
+                window.location.href = urlEliminar;
+            }
+        });
+    });
 });
 </script>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

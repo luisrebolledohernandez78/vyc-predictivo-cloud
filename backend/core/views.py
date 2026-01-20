@@ -416,7 +416,7 @@ def equipos_totales_vibraciones(request, cliente_id, sucursal_id):
         'total_equipos': equipos_count,
         'total_activos': activos_count
     }
-    return render(request, 'core/vibraciones/equipos_totales.html', context)
+    return render(request, 'core/equipos.html', context)
 
 
 @login_required(login_url='login')
@@ -517,9 +517,10 @@ def activos_totales_termografias(request, cliente_id, sucursal_id):
         'es_listado_total': True,  # Bandera para indicar que es un listado total
         'total_areas': areas,
         'total_equipos': equipos,
-        'total_activos': activos_count
+        'total_activos': activos_count,
+        'modulo': 'termografias'
     }
-    return render(request, 'core/termografias/activos_totales.html', context)
+    return render(request, 'core/activos.html', context)
 
 
 @login_required(login_url='login')
@@ -582,7 +583,7 @@ def equipos_vibraciones(request, cliente_id, sucursal_id, area_id):
         'titulo': f'Equipos - {area.get_nombre_display()}',
         'descripcion': 'Gestiona los equipos y máquinas del área'
     }
-    return render(request, 'core/vibraciones/equipos_totales.html', context)
+    return render(request, 'core/equipos.html', context)
 
 
 @login_required(login_url='login')
@@ -673,7 +674,7 @@ def activos_vibraciones(request, cliente_id, sucursal_id, area_id, equipo_id):
         'titulo': f'Activos - {equipo.nombre}',
         'descripcion': 'Gestiona los componentes y motores del equipo'
     }
-    return render(request, 'core/vibraciones/activos_totales.html', context)
+    return render(request, 'core/activos.html', context)
 
 
 @login_required(login_url='login')
@@ -906,7 +907,7 @@ def equipos_termografias(request, cliente_id, sucursal_id, area_id):
         'titulo': f'Todos los Activos - {area.get_nombre_display()}',
         'descripcion': 'Listado de todos los activos del área'
     }
-    return render(request, 'core/termografias/activos_totales.html', context)
+    return render(request, 'core/activos.html', context)
 
 
 @login_required(login_url='login')
@@ -997,7 +998,7 @@ def activos_termografias(request, cliente_id, sucursal_id, area_id, equipo_id):
         'titulo': f'Activos - {equipo.nombre}',
         'descripcion': 'Gestiona los componentes y motores del equipo'
     }
-    return render(request, 'core/termografias/activos_totales.html', context)
+    return render(request, 'core/activos.html', context)
 
 
 @login_required(login_url='login')
