@@ -576,7 +576,7 @@
                     <a href="{% if modulo == 'vibraciones' %}/vibraciones/cliente/{{ cliente.id }}/sucursales/{% else %}/termografias/cliente/{{ cliente.id }}/sucursales/{% endif %}" class="btn-back">
                         <i class="fas fa-arrow-left"></i> Volver a sucursales
                     </a>
-                    <a href="{% if modulo == 'termografias' %}{% url 'activos_totales_termografias' cliente.id sucursal.id %}{% else %}{% url 'equipos_totales_vibraciones' cliente.id sucursal.id %}{% endif %}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <a href="{% if modulo == 'termografias' %}{% url 'activos_totales_termografias' cliente.id sucursal.id %}{% else %}{% url 'equipos_totales_vibraciones' cliente.id sucursal.id %}{% endif %}" class="btn-back" style="background: #667eea;">
                         <i class="fas fa-list"></i> {% if modulo == 'termografias' %}Ver listado total de activos{% else %}Ver listado total de equipos{% endif %}
                     </a>
                 </div>
